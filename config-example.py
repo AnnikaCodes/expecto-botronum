@@ -3,7 +3,7 @@
 # The URL of the websocket for the Pokemon Showdown server
 url = 'ws://sim.smogon.com:8000/showdown/websocket'
 # The string to be printed when the bot turns on
-initString = "BasicBot starting up..."
+initString = "Expecto Botronu, starting up..."
 # The username to use on PS
 username = 'ACoolBotUsername'
 # The password for said username
