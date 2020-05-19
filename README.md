@@ -1,5 +1,5 @@
 # Expecto Botronum
-Expecto Botronum is a Pokemon Showdown bot for the [Harry Potter room](psim.us/hp).
+Expecto Botronum is a Pokemon Showdown bot for the [Magic & Mayhem room](psim.us/mm).
 
 ## Commands
 | Usage | Required Rank | Description |
