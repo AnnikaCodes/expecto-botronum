@@ -14,7 +14,10 @@ rooms = ['room1', 'room2', 'room3']
 goodUsers = ['yourusernamehere']
 # The rank required to broadcast commands.
 broadcastRank = '+'
+#Pastebin API Key
 pastebinKey = ''
+# Superhero API Key
+superheroAPIKey = ''
 # The auth symbols in order.
 authSymbols = ['+', '%', '@', '*', '#', '★', '&', '~']
 # A list of words for the `~reverse` function

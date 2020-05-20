@@ -138,6 +138,8 @@ def onMessage(ws, message):
 		numTopics(parseMessage(message))
 	if '~listtopics' in message and parseMessage(message)['message'][:11] == '~listtopics':
 		listTopics(parseMessage(message))
+	if '~superhero ' in message and parseMessage(message)['message'][:len('~superhero ')] == '~superhero ':
+			superhero(parseMessage(message))
 #if '~triwizard' in message and parseMessage(message)['message'][:10] == '~triwizard':
 #		showTriwizardLB(parseMessage(message))
 
@@ -330,7 +332,16 @@ def timer(parsed):
 	timer = Timer(duration, ws.send, args = [message])
 	timer.start()
 
-
+def superhero(parsed):
+	id = parsed['message'].split(' ',1)[1].strip()
+	print(f"id: {id}")
+	# TODO: actually support stuff like `~superhero Iron Man`
+	if (not id.isdigit()) or int(id) not in range(1,732): #not a valid id... yet
+		ws.send(parsed['replyPrefix'] + "{id} is not a valid superhero.".format(id=id))
+		return
+	request = requests.get("https://superheroapi.com/api/{key}/{id}".format(key=config.superheroAPIKey, id=id)).content
+	data = json.loads(request)
+	ws.send(parsed['replyPrefix'] + data['name'])
 
 ###################
 ## Fact Handling ##
