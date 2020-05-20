@@ -339,6 +339,7 @@ def timer(parsed):
 ###################
 
 def superhero(parsed):
+	print(str(parsed))
 	argument = parsed['message'].split(' ',1)[1].strip()
 	id = re.sub(r'[^a-zA-Z0-9]', '', argument).lower() # remove non alphanumeric stuff
 	# convert to int
@@ -389,14 +390,16 @@ def superhero(parsed):
 	# To whomever needs to read this code, I'm sorry.
 	html = html.format(name = data['name'], image = data['image']['url'], int = data['powerstats']['intelligence'],
 		str = data['powerstats']['strength'], spe = data['powerstats']['speed'], dur = data['powerstats']['durability'],
-		pow = ata['powerstats']['power'], com = data['powerstats']['combat'], fullname = data['biography']['full-name'],
+		pow = data['powerstats']['power'], com = data['powerstats']['combat'], fullname = data['biography']['full-name'],
 		altergos = data['biography']['alter-egos'], aliases = aliases, birthplace = data['biography']['place-of-birth'],
 		debut = data['biography']['first-appearance'], publisher = data['biography']['publisher'], alignment = data['biography']['alignment'],
 		gender = data['appearance']['gender'], race = data['appearance']['race'], height = data['appearance']['height'][1],
 		weight = data['appearance']['weight'][1], eye = data['appearance']['eye-color'], hair = data['appearance']['hair-color'],
 		occupation = data['work']['occupation'], base = data['work']['base'], group = data['connections']['group-affiliation'], relatives = relatives)
-
-	ws.send(parsed['replyPrefix'] + '/adduhtml superhero,' + html)
+	if parsed['type'] == 'pm':
+		ws.send(parsed['replyPrefix'] + "``~superhero`` currently does not work in PMs.")
+	else:
+		ws.send(parsed['replyPrefix'] + '/adduhtml superhero,' + html)
 
 
 ###################
