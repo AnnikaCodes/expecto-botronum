@@ -14,7 +14,7 @@ rooms = ['room1', 'room2', 'room3']
 goodUsers = ['yourusernamehere']
 # The rank required to broadcast commands.
 broadcastRank = '+'
-#Pastebin API Key
+# Pastebin API Key
 pastebinKey = ''
 # Superhero API Key
 superheroAPIKey = ''
