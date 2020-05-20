@@ -48,7 +48,7 @@ pointsDB = {}
 def onMessage(ws, message):
 	if message[1] + message[2] == 'pm': # It's a pm, so log it.
 		path = "logs/{date}-pm.log".format(date = date.today().strftime("%b-%d-%Y"))
-	else: 
+	else:
                 path = "logs/{date}-chat.log".format(date = date.today().strftime("%b-%d-%Y"))
 	toLog = str(message.encode('utf-8'))[2:-1] # remove b'' part
 	if "\n" in toLog:
@@ -450,223 +450,223 @@ def numTopics(parsed):
 ###########################
 
 
-def loadPoints():
-    file = open('data/points.json', 'r')
-    print("Points loaded.")
-    return json.load(file)
-
-def loadHouses():
-    r = open('data/ravenclaw.json', 'rb')
-    h = open('data/hufflepuff.json', 'rb')
-    s = open('data/slytherin.json', 'rb')
-    g = open('data/gryffindor.json', 'rb')
-    print("Points loaded.")
-    ravenclaw = pickle.load(r)
-    hufflepuff = pickle.load(h)
-    slytherin = pickle.load(s)
-    gryffindor = pickle.load(g)
-    return ravenclaw,hufflepuff,slytherin,gryffindor
-
-def loadHouseLBs():
-    r = open('data/ravenclawLB.json', 'r')
-    h = open('data/hufflepuffLB.json', 'r')
-    s = open('data/slytherinLB.json', 'r')
-    g = open('data/gryffindorLB.json', 'r')
-    print("Points loaded.")
-    ravenclaw = json.load(r)
-    hufflepuff = json.load(h)
-    slytherin = json.load(s)
-    gryffindor = json.load(g)
-
-    print("House Members loaded")
-    return ravenclaw,hufflepuff,slytherin,gryffindor
-
-pointsTracker = loadPoints()
-ravenclaw, hufflepuff, slytherin, gryffindor = loadHouses()
-ravenclawLB, hufflepuffLB, slytherinLB, gryffindorLB = loadHouseLBs()
-
-
-def savePoints():
-    file = open('data/points.json', 'w')
-    json.dump(pointsTracker, file)
-    print("Points saved.")
-
-def saveHouses():
-    r = open('data/ravenclaw.json', 'wb')
-    h = open('data/hufflepuff.json', 'wb')
-    s = open('data/slytherin.json', 'wb')
-    g = open('data/gryffindor.json', 'wb')
-    pickle.dump(ravenclaw, r)
-    pickle.dump(hufflepuff, h)
-    pickle.dump(slytherin, s)
-    pickle.dump(gryffindor, g)
-    print("House Members saved")
-
-def saveHouseLBs():
-    r = open('data/ravenclawLB.json', 'w')
-    h = open('data/hufflepuffLB.json', 'w')
-    s = open('data/slytherinLB.json', 'w')
-    g = open('data/gryffindorLB.json', 'w')
-    json.dump(ravenclawLB, r)
-    json.dump(hufflepuffLB, h)
-    json.dump(slytherinLB, s)
-    json.dump(gryffindorLB, g)
-    print("House Leaderboards saved")
-
-def checkPoints(parsed):
-    key = parsed['message'].split(' ')[1].lower()
-    ws.send(parsed['replyPrefix'] + '{house} has {points} points.'.format(house = parsed['message'].split(' ')[1], points = pointsTracker[key]))
-
-def showHouses(parsed):
-    retString = ''
-    for house in ['Gryffindor', 'Ravenclaw', 'Slytherin', 'Hufflepuff']:
-        key = house.lower()
-        retString += '{house} has {points} points. '.format(house = house, points = pointsTracker[key])
-    ws.send(parsed['replyPrefix'] + retString)
-
-def showTriwizardLB(parsed):
-	'''Shows the Triwizard LB - no auth and no houses.'''
-	allUsersPoints = {}
-	allUsersPoints.update(gryffindorLB)
-	allUsersPoints.update(ravenclawLB)
-	allUsersPoints.update(slytherinLB)
-	allUsersPoints.update(hufflepuffLB)
-	# We've updated allUsersPoints with all the LBs from the houses.
-	output = "**Triwizard Tournament Leaderboard:** "
-	outputTwo = ""
-	# All the users sorted by how many points they have.
-	users = list(reversed(sorted(allUsersPoints, key=allUsersPoints.__getitem__)))
-	AUTH = ['annika0', 'birdy', 'dandaman99', 'profspalding', 'gwynt', 'tonixy', 'imsoapy', 'ravioliqueen', 'tonixy', 'awanderingcaelum','dawnofares', 'madeinsaudi']
-	# This is a magic variable btw
-	for user in [p for p in users if p not in AUTH][:16]: # First sixteen non-auth
-		if len(output) < 260:
-			output += '__{usern}__: {points}, '.format(usern = user, points = allUsersPoints[user])
-		else:
-			outputTwo += '__{usern}__: {points}, '.format(usern = user, points = allUsersPoints[user])
-	ws.send(parsed['replyPrefix'] + output[:-2])
-	ws.send(parsed['replyPrefix'] + outputTwo[:-2])
+# def loadPoints():
+#     file = open('data/points.json', 'r')
+#     print("Points loaded.")
+#     return json.load(file)
+#
+# def loadHouses():
+#     r = open('data/ravenclaw.json', 'rb')
+#     h = open('data/hufflepuff.json', 'rb')
+#     s = open('data/slytherin.json', 'rb')
+#     g = open('data/gryffindor.json', 'rb')
+#     print("Points loaded.")
+#     ravenclaw = pickle.load(r)
+#     hufflepuff = pickle.load(h)
+#     slytherin = pickle.load(s)
+#     gryffindor = pickle.load(g)
+#     return ravenclaw,hufflepuff,slytherin,gryffindor
+#
+# def loadHouseLBs():
+#     r = open('data/ravenclawLB.json', 'r')
+#     h = open('data/hufflepuffLB.json', 'r')
+#     s = open('data/slytherinLB.json', 'r')
+#     g = open('data/gryffindorLB.json', 'r')
+#     print("Points loaded.")
+#     ravenclaw = json.load(r)
+#     hufflepuff = json.load(h)
+#     slytherin = json.load(s)
+#     gryffindor = json.load(g)
+#
+#     print("House Members loaded")
+#     return ravenclaw,hufflepuff,slytherin,gryffindor
+#
+# pointsTracker = loadPoints()
+# ravenclaw, hufflepuff, slytherin, gryffindor = loadHouses()
+# ravenclawLB, hufflepuffLB, slytherinLB, gryffindorLB = loadHouseLBs()
 
 
-
-def lb(parsed):
-    house = parsed['message'].split(' ', 1)[1].split(',')[0].strip()
-    try:
-        n = (-1) * int(parsed['message'].split(' ', 1)[1].split(',')[1])
-    except:
-        n = -5
-    reply = ''
-    if house.lower() == 'gryffindor':
-        for user in reversed(sorted(gryffindorLB, key=gryffindorLB.__getitem__)[n:]):
-            reply += '__{usern}__: {points}, '.format(usern = user, points = gryffindorLB[user])
-    if house.lower() == 'ravenclaw':
-        for user in reversed(sorted(ravenclawLB, key=ravenclawLB.__getitem__)[n:]):
-            reply += '__{usern}__: {points}, '.format(usern = user, points = ravenclawLB[user])
-    if house.lower() == 'slytherin':
-        for user in reversed(sorted(slytherinLB, key=slytherinLB.__getitem__)[n:]):
-            reply += '__{usern}__: {points}, '.format(usern = user, points = slytherinLB[user])
-    if house.lower() == 'hufflepuff':
-        for user in reversed(sorted(hufflepuffLB, key=hufflepuffLB.__getitem__)[n:]):
-            reply += '__{usern}__: {points}, '.format(usern = user, points = hufflepuffLB[user])
-    if reply == '':
-        reply = "{houses} isn't a valid houseaa".format(houses = house)
-    reply = reply[:-2]
-    reply += '.'
-    ws.send(parsed['replyPrefix'] + reply)
-
-def joinHouse(parsed):
-    if 'use the command in PMs for a result.' in parsed['replyPrefix']:
-        ws.send(parsed['replyPrefix'])
-        return
-    house = parsed['message'].split(' ', 1)[1].split(',')[0].strip().lower()
-    print(house)
-    if parsed['user'].lower() not in ravenclaw and parsed['user'].lower() not in hufflepuff and parsed['user'].lower() not in slytherin and parsed['user'].lower() not in gryffindor:
-        if house == 'gryffindor':
-            gryffindor.append(parsed['user'].lower())
-            saveHouses()
-            ws.send(parsed['replyPrefix'] + "You joined Gryffindor!")
-            return
-        if house == 'ravenclaw':
-            ravenclaw.append(parsed['user'].lower())
-            saveHouses()
-            ws.send(parsed['replyPrefix'] + "You joined Ravenclaw!")
-            return
-        if house == 'hufflepuff':
-            hufflepuff.append(parsed['user'].lower())
-            saveHouses()
-            ws.send(parsed['replyPrefix'] + "You joined Hufflepuff!")
-            return
-        if house == 'slytherin':
-            slytherin.append(parsed['user'].lower())
-            saveHouses()
-            ws.send(parsed['replyPrefix'] + "You joined Slytherin!")
-            return
-        else:
-            ws.send(parsed['replyPrefix'] + "{h} isn't a valid house.".format(h = house))
-            return
-    ws.send(parsed['replyPrefix'] + "You're already in a house! Ask Annika0 to change your house.")
-    return
-def checkHouse(parsed):
-    try:
-       	username =  re.sub(r'[^a-zA-Z0-9]', '' ,parsed['message'].split(' ', 1)[1].strip().lower().encode('ascii', 'ignore').decode('utf-8'))
-    except Exception as e:
-        ws.send(parsed['replyPrefix'] + str(e))
-        return
-    if username in gryffindor:
-        ws.send(parsed['replyPrefix'] + 'That user is a Gryffindor.')
-    elif username in slytherin:
-        ws.send(parsed['replyPrefix'] + 'That user is a Slytherin.')
-    elif username in hufflepuff:
-        ws.send(parsed['replyPrefix'] + 'That user is a Hufflepuff.')
-    elif username in ravenclaw:
-        ws.send(parsed['replyPrefix'] + 'That user is a Ravenclaw.')
-    else:
-        ws.send(parsed['replyPrefix'] + "That user isn't in any house.")
-
-def givePoints(parsed):
-    if parsed['numrank'] < numRank('+') and parsed['user'] not in config.goodUsers:
-        ws.send(parsed['replyPrefix'] + "Your rank is not high enough to give points.")
-        return
-    if parsed['type'] == 'pm':
-        ws.send(parsed['replyPrefix'] + "For transparency, please don't give points in PMs.")
-        return
-    loadPoints()
-    args = parsed['message'].split(' ', 1)[1].split(',')
-    house = args[0].lower()
-    user = re.sub(r'[^a-zA-Z0-9]','',args[0].lower().strip().encode("ascii", "ignore").decode("utf-8"))
-    if user in gryffindor:
-        house = 'gryffindor'
-        try:
-            gryffindorLB[user] += int(args[1])
-        except:
-            gryffindorLB[user] = int(args[1])
-    if user in slytherin:
-        house = 'slytherin'
-        try:
-            slytherinLB[user] += int(args[1])
-        except:
-            slytherinLB[user] = int(args[1])
-    if user in hufflepuff:
-        house = 'hufflepuff'
-        try:
-            hufflepuffLB[user] += int(args[1])
-        except:
-            hufflepuffLB[user] = int(args[1])
-    if user in ravenclaw:
-        house = 'ravenclaw'
-        try:
-            ravenclawLB[user] += int(args[1])
-        except:
-            ravenclawLB[user] = int(args[1])
-    if house not in pointsTracker:
-       return
-    try:
-        pointsTracker[house] += int(args[1])
-        saveHouseLBs()
-        savePoints()
-        ws.send("harrypotter|/mn {points} points given to {user} [{hus}] by {giver}".format( points = int(args[1]), user = user, hus=house, giver = parsed['user'])) # * ( len(house) / averageHouse))))
-        ws.send(parsed['replyPrefix'] + '{house} was given {points} points.'.format(house = args[0].encode("ascii","ignore").decode(), points = int(args[1])))
-    except Exception as e:
-        ws.send(parsed['replyPrefix'] + 'There was an error: {msg}. Ask Annika0 for details.'.format(msg=str(e)))
+# def savePoints():
+#     file = open('data/points.json', 'w')
+#     json.dump(pointsTracker, file)
+#     print("Points saved.")
+#
+# def saveHouses():
+#     r = open('data/ravenclaw.json', 'wb')
+#     h = open('data/hufflepuff.json', 'wb')
+#     s = open('data/slytherin.json', 'wb')
+#     g = open('data/gryffindor.json', 'wb')
+#     pickle.dump(ravenclaw, r)
+#     pickle.dump(hufflepuff, h)
+#     pickle.dump(slytherin, s)
+#     pickle.dump(gryffindor, g)
+#     print("House Members saved")
+#
+# def saveHouseLBs():
+#     r = open('data/ravenclawLB.json', 'w')
+#     h = open('data/hufflepuffLB.json', 'w')
+#     s = open('data/slytherinLB.json', 'w')
+#     g = open('data/gryffindorLB.json', 'w')
+#     json.dump(ravenclawLB, r)
+#     json.dump(hufflepuffLB, h)
+#     json.dump(slytherinLB, s)
+#     json.dump(gryffindorLB, g)
+#     print("House Leaderboards saved")
+#
+# def checkPoints(parsed):
+#     key = parsed['message'].split(' ')[1].lower()
+#     ws.send(parsed['replyPrefix'] + '{house} has {points} points.'.format(house = parsed['message'].split(' ')[1], points = pointsTracker[key]))
+#
+# def showHouses(parsed):
+#     retString = ''
+#     for house in ['Gryffindor', 'Ravenclaw', 'Slytherin', 'Hufflepuff']:
+#         key = house.lower()
+#         retString += '{house} has {points} points. '.format(house = house, points = pointsTracker[key])
+#     ws.send(parsed['replyPrefix'] + retString)
+#
+# def showTriwizardLB(parsed):
+# 	'''Shows the Triwizard LB - no auth and no houses.'''
+# 	allUsersPoints = {}
+# 	allUsersPoints.update(gryffindorLB)
+# 	allUsersPoints.update(ravenclawLB)
+# 	allUsersPoints.update(slytherinLB)
+# 	allUsersPoints.update(hufflepuffLB)
+# 	# We've updated allUsersPoints with all the LBs from the houses.
+# 	output = "**Triwizard Tournament Leaderboard:** "
+# 	outputTwo = ""
+# 	# All the users sorted by how many points they have.
+# 	users = list(reversed(sorted(allUsersPoints, key=allUsersPoints.__getitem__)))
+# 	AUTH = ['annika0', 'birdy', 'dandaman99', 'profspalding', 'gwynt', 'tonixy', 'imsoapy', 'ravioliqueen', 'tonixy', 'awanderingcaelum','dawnofares', 'madeinsaudi']
+# 	# This is a magic variable btw
+# 	for user in [p for p in users if p not in AUTH][:16]: # First sixteen non-auth
+# 		if len(output) < 260:
+# 			output += '__{usern}__: {points}, '.format(usern = user, points = allUsersPoints[user])
+# 		else:
+# 			outputTwo += '__{usern}__: {points}, '.format(usern = user, points = allUsersPoints[user])
+# 	ws.send(parsed['replyPrefix'] + output[:-2])
+# 	ws.send(parsed['replyPrefix'] + outputTwo[:-2])
+#
+#
+#
+# def lb(parsed):
+#     house = parsed['message'].split(' ', 1)[1].split(',')[0].strip()
+#     try:
+#         n = (-1) * int(parsed['message'].split(' ', 1)[1].split(',')[1])
+#     except:
+#         n = -5
+#     reply = ''
+#     if house.lower() == 'gryffindor':
+#         for user in reversed(sorted(gryffindorLB, key=gryffindorLB.__getitem__)[n:]):
+#             reply += '__{usern}__: {points}, '.format(usern = user, points = gryffindorLB[user])
+#     if house.lower() == 'ravenclaw':
+#         for user in reversed(sorted(ravenclawLB, key=ravenclawLB.__getitem__)[n:]):
+#             reply += '__{usern}__: {points}, '.format(usern = user, points = ravenclawLB[user])
+#     if house.lower() == 'slytherin':
+#         for user in reversed(sorted(slytherinLB, key=slytherinLB.__getitem__)[n:]):
+#             reply += '__{usern}__: {points}, '.format(usern = user, points = slytherinLB[user])
+#     if house.lower() == 'hufflepuff':
+#         for user in reversed(sorted(hufflepuffLB, key=hufflepuffLB.__getitem__)[n:]):
+#             reply += '__{usern}__: {points}, '.format(usern = user, points = hufflepuffLB[user])
+#     if reply == '':
+#         reply = "{houses} isn't a valid houseaa".format(houses = house)
+#     reply = reply[:-2]
+#     reply += '.'
+#     ws.send(parsed['replyPrefix'] + reply)
+#
+# def joinHouse(parsed):
+#     if 'use the command in PMs for a result.' in parsed['replyPrefix']:
+#         ws.send(parsed['replyPrefix'])
+#         return
+#     house = parsed['message'].split(' ', 1)[1].split(',')[0].strip().lower()
+#     print(house)
+#     if parsed['user'].lower() not in ravenclaw and parsed['user'].lower() not in hufflepuff and parsed['user'].lower() not in slytherin and parsed['user'].lower() not in gryffindor:
+#         if house == 'gryffindor':
+#             gryffindor.append(parsed['user'].lower())
+#             saveHouses()
+#             ws.send(parsed['replyPrefix'] + "You joined Gryffindor!")
+#             return
+#         if house == 'ravenclaw':
+#             ravenclaw.append(parsed['user'].lower())
+#             saveHouses()
+#             ws.send(parsed['replyPrefix'] + "You joined Ravenclaw!")
+#             return
+#         if house == 'hufflepuff':
+#             hufflepuff.append(parsed['user'].lower())
+#             saveHouses()
+#             ws.send(parsed['replyPrefix'] + "You joined Hufflepuff!")
+#             return
+#         if house == 'slytherin':
+#             slytherin.append(parsed['user'].lower())
+#             saveHouses()
+#             ws.send(parsed['replyPrefix'] + "You joined Slytherin!")
+#             return
+#         else:
+#             ws.send(parsed['replyPrefix'] + "{h} isn't a valid house.".format(h = house))
+#             return
+#     ws.send(parsed['replyPrefix'] + "You're already in a house! Ask Annika0 to change your house.")
+#     return
+# def checkHouse(parsed):
+#     try:
+#        	username =  re.sub(r'[^a-zA-Z0-9]', '' ,parsed['message'].split(' ', 1)[1].strip().lower().encode('ascii', 'ignore').decode('utf-8'))
+#     except Exception as e:
+#         ws.send(parsed['replyPrefix'] + str(e))
+#         return
+#     if username in gryffindor:
+#         ws.send(parsed['replyPrefix'] + 'That user is a Gryffindor.')
+#     elif username in slytherin:
+#         ws.send(parsed['replyPrefix'] + 'That user is a Slytherin.')
+#     elif username in hufflepuff:
+#         ws.send(parsed['replyPrefix'] + 'That user is a Hufflepuff.')
+#     elif username in ravenclaw:
+#         ws.send(parsed['replyPrefix'] + 'That user is a Ravenclaw.')
+#     else:
+#         ws.send(parsed['replyPrefix'] + "That user isn't in any house.")
+#
+# def givePoints(parsed):
+#     if parsed['numrank'] < numRank('+') and parsed['user'] not in config.goodUsers:
+#         ws.send(parsed['replyPrefix'] + "Your rank is not high enough to give points.")
+#         return
+#     if parsed['type'] == 'pm':
+#         ws.send(parsed['replyPrefix'] + "For transparency, please don't give points in PMs.")
+#         return
+#     loadPoints()
+#     args = parsed['message'].split(' ', 1)[1].split(',')
+#     house = args[0].lower()
+#     user = re.sub(r'[^a-zA-Z0-9]','',args[0].lower().strip().encode("ascii", "ignore").decode("utf-8"))
+#     if user in gryffindor:
+#         house = 'gryffindor'
+#         try:
+#             gryffindorLB[user] += int(args[1])
+#         except:
+#             gryffindorLB[user] = int(args[1])
+#     if user in slytherin:
+#         house = 'slytherin'
+#         try:
+#             slytherinLB[user] += int(args[1])
+#         except:
+#             slytherinLB[user] = int(args[1])
+#     if user in hufflepuff:
+#         house = 'hufflepuff'
+#         try:
+#             hufflepuffLB[user] += int(args[1])
+#         except:
+#             hufflepuffLB[user] = int(args[1])
+#     if user in ravenclaw:
+#         house = 'ravenclaw'
+#         try:
+#             ravenclawLB[user] += int(args[1])
+#         except:
+#             ravenclawLB[user] = int(args[1])
+#     if house not in pointsTracker:
+#        return
+#     try:
+#         pointsTracker[house] += int(args[1])
+#         saveHouseLBs()
+#         savePoints()
+#         ws.send("harrypotter|/mn {points} points given to {user} [{hus}] by {giver}".format( points = int(args[1]), user = user, hus=house, giver = parsed['user'])) # * ( len(house) / averageHouse))))
+#         ws.send(parsed['replyPrefix'] + '{house} was given {points} points.'.format(house = args[0].encode("ascii","ignore").decode(), points = int(args[1])))
+#     except Exception as e:
+#         ws.send(parsed['replyPrefix'] + 'There was an error: {msg}. Ask Annika0 for details.'.format(msg=str(e)))
 
 if __name__ == "__main__":
     websocket.enableTrace(False)
