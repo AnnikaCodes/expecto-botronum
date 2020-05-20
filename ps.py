@@ -355,20 +355,20 @@ def superhero(parsed):
 		ws.send(parsed['replyPrefix'] + "The API request for {id} failed with response {response}. Please try again.".format(id=id, response=data['response']))
 
 	html = """<img src="{image}" width="1" height="1" style='height: 15%; width: 15%; object-fit: scale-down; padding-right: 15px; float: left'>
-	<details><summary><b>{name}</b></summary><details><summary>Stats</summary>
-	Intelligence: <b>{int}</b><br/>Strength: <b>{str}</b><br/>Speed: <b>{spe}</b><br/>
-	Durability: <b>{dur}</b><br/>Power: <b>{pow}</b><br/>Combat: <b>{com}</b><br/>
+	<details><summary>{name}</summary><details><summary>Stats</summary>
+	<b>Intelligence:</b> {int}<br/><b>Strength:</b> {str}<br/><b>Speed:</b> {spe}<br/>
+	<b>Durability:</b> {dur}<br/><b>Power:</b> {pow}<br/><b>Combat:</b> {com}<br/>
 	</details><details><summary>Biography</summary>
-	Full Name: <b>{fullname}</b><br/>Alter Egos: <b>{altergos}</b><br/>Aliases: <b>{aliases}</b><br/>
-	Birthplace: <b>{birthplace}</b><br/>Debut: <b>{debut}</b><br/>Publisher: <b>{publisher}</b><br/>
-	Alignment: <b>{alignment}</b><br/>
+	<b>Full Name:</b> {fullname}<br/><b>Alter Egos:</b> {altergos}<br/><b>Aliases:</b> {aliases}<br/>
+	<b>Birthplace:</b> {birthplace}<br/><b>Debut:</b> {debut}<br/><b>Publisher:</b> {publisher}<br/>
+	<b>Alignment:</b> {alignment}<br/>
 	</details><details><summary>Appearance</summary>
-	Gender: <b>{gender}</b><br/>Race: <b>{race}</b><br/>Height: <b>{height}</b><br/>Weight: <b>{weight}</b><br/>
-	Eye Color: <b>{eye}</b><br/>Hair Color: <b>{hair}</b><br/>
+	<b>Gender:</b> {gender}<br/><b>Race:</b> {race}<br/><b>Height:</b> {height}<br/><b>Weight:</b> {weight}<br/>
+	<b>Eye Color:</b> {eye}<br/><b>Hair Color:</b> {hair}<br/>
 	</details><details><summary>Work</summary>
-	Occupation: <b>{occupation}</b><br/>Base: <b>{base}</b><br/>
+	<b>Occupation:</b> {occupation}<br/><b>Base:</b> {base}<br/>
 	</details><details><summary>Connections</summary>
-	Group Affiliation: <b>{group}</b><br/>Relatives: <b>{relatives}</b><br/>
+	<b>Group Affiliation:</b> {group}<br/><b>Relatives:</b> {relatives}<br/>
 	</details></details>
 	"""
 	aliases = data['biography']['aliases']
