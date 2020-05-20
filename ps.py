@@ -339,7 +339,6 @@ def timer(parsed):
 ###################
 
 def superhero(parsed):
-	print(str(parsed))
 	argument = parsed['message'].split(' ',1)[1].strip()
 	id = re.sub(r'[^a-zA-Z0-9]', '', argument).lower() # remove non alphanumeric stuff
 	# convert to int
@@ -397,7 +396,9 @@ def superhero(parsed):
 		weight = data['appearance']['weight'][1], eye = data['appearance']['eye-color'], hair = data['appearance']['hair-color'],
 		occupation = data['work']['occupation'], base = data['work']['base'], group = data['connections']['group-affiliation'], relatives = relatives)
 	if parsed['type'] == 'pm':
-		ws.send(parsed['replyPrefix'] + "``~superhero`` currently does not work in PMs.")
+		# super hacky + you need to be in M&M for it to work
+		ws.send(parsed['replyPrefix'] + "``~superhero`` only works in PMs if you are in <<" + config.rooms[0] + ">>.")
+		ws.send(config.rooms[0] + "|/pminfobox {user},{html}".format(user=parsed['user'],html=html.replace('\n','').replace('15','40')))
 	else:
 		ws.send(parsed['replyPrefix'] + '/adduhtml superhero,' + html)
 
