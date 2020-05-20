@@ -334,6 +334,10 @@ def timer(parsed):
 	timer = Timer(duration, ws.send, args = [message])
 	timer.start()
 
+###################
+## Superhero API ##
+###################
+
 def superhero(parsed):
 	argument = parsed['message'].split(' ',1)[1].strip()
 	id = re.sub(r'[^a-zA-Z0-9]', '', argument).lower() # remove non alphanumeric stuff
@@ -342,18 +346,20 @@ def superhero(parsed):
 		id = superheroes[id]
 	elif id.isdigit():
 		id = int(id)
-	print(f"id: {id}")
-	# TODO: actually support stuff like `~superhero Iron Man`
-	if type(id) is str or id not in range(1,732): #not a valid id... yet
-		ws.send(parsed['replyPrefix'] + "{id} is not a valid superhero.".format(id=argument))
+
+	if type(id) is str or id not in range(1,732): # not a valid id
+		ws.send(parsed['replyPrefix'] + "{hero} is not a valid superhero.".format(hero=argument))
 		return
 
 	request = requests.get("https://superheroapi.com/api/{key}/{id}".format(key=config.superheroAPIKey, id=id)).content
 	data = json.loads(request)
 
-	if data['response'] != 'success':
-		ws.send(parsed['replyPrefix'] + "The API request for {id} failed with response {response}. Please try again.".format(id=id, response=data['response']))
+	if data['response'] != 'success': # oops! let's drop stuff for debugging
+		ws.send(parsed['replyPrefix'] + "The API request for {hero} (ID: {id}) failed with response {response}. Please try again.".format(hero=hero, id=id, response=data['response']))
 
+	# Giant string of HTML that's then formatted.
+	# This is hacky but it's the simplest way I found to do it
+	# And since we're not doing this conversion from dictionaries to HTML <details> elements much I think it's OK.
 	html = """<img src="{image}" width="1" height="1" style='height: 15%; width: 15%; object-fit: scale-down; padding-right: 15px; float: left'>
 	<details><summary>{name}</summary><details><summary>Stats</summary>
 	<b>Intelligence:</b> {int}<br/><b>Strength:</b> {str}<br/><b>Speed:</b> {spe}<br/>
@@ -371,28 +377,27 @@ def superhero(parsed):
 	<b>Group Affiliation:</b> {group}<br/><b>Relatives:</b> {relatives}<br/>
 	</details></details>
 	"""
+
+	# the API may return lists of aliases and relatives, so we can't use that data directly.
 	aliases = data['biography']['aliases']
 	relatives = data['connections']['relatives']
 	if type(aliases) is list:
 		aliases = ", ".join(aliases)
 	if type(relatives) is list:
 		relatives = ", ".join(relatives)
-	# the API may arrays for aliases and relatives that must be formatted
-	try:
-		gender = data['appearance']['gender']
-	except:
-		gender = 'No gender found.'
-	### this ^^ fixes the weird gender bugs
-	html = html.format(name=data['name'],image=data['image']['url'],int=data['powerstats']['intelligence'],
-		str=data['powerstats']['strength'],spe=data['powerstats']['speed'],dur=data['powerstats']['durability'],
-		pow=data['powerstats']['power'],com=data['powerstats']['combat'],fullname=data['biography']['full-name'],
-		altergos=data['biography']['alter-egos'],aliases=aliases,birthplace=data['biography']['place-of-birth'],
-		debut=data['biography']['first-appearance'], publisher=data['biography']['publisher'], alignment=data['biography']['alignment'],
-		gender=gender, race=data['appearance']['race'], height=data['appearance']['height'][1],
-		weight=data['appearance']['weight'][1], eye=data['appearance']['eye-color'], hair=data['appearance']['hair-color'],
-		occupation=data['work']['occupation'], base=data['work']['base'],group=data['connections']['group-affiliation'],relatives=relatives)
-	print(html)
+
+	# To whomever needs to read this code, I'm sorry.
+	html = html.format(name = data['name'], image = data['image']['url'], int = data['powerstats']['intelligence'],
+		str = data['powerstats']['strength'], spe = data['powerstats']['speed'], dur = data['powerstats']['durability'],
+		pow = ata['powerstats']['power'], com = data['powerstats']['combat'], fullname = data['biography']['full-name'],
+		altergos = data['biography']['alter-egos'], aliases = aliases, birthplace = data['biography']['place-of-birth'],
+		debut = data['biography']['first-appearance'], publisher = data['biography']['publisher'], alignment = data['biography']['alignment'],
+		gender = data['appearance']['gender'], race = data['appearance']['race'], height = data['appearance']['height'][1],
+		weight = data['appearance']['weight'][1], eye = data['appearance']['eye-color'], hair = data['appearance']['hair-color'],
+		occupation = data['work']['occupation'], base = data['work']['base'], group = data['connections']['group-affiliation'], relatives = relatives)
+
 	ws.send(parsed['replyPrefix'] + '/adduhtml superhero,' + html)
+
 
 ###################
 ## Fact Handling ##
