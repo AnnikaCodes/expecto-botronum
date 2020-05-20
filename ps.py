@@ -339,9 +339,52 @@ def superhero(parsed):
 	if (not id.isdigit()) or int(id) not in range(1,732): #not a valid id... yet
 		ws.send(parsed['replyPrefix'] + "{id} is not a valid superhero.".format(id=id))
 		return
+
 	request = requests.get("https://superheroapi.com/api/{key}/{id}".format(key=config.superheroAPIKey, id=id)).content
 	data = json.loads(request)
-	ws.send(parsed['replyPrefix'] + data['name'])
+
+	if data['response'] != 'success':
+		ws.send(parsed['replyPrefix'] + "The API request for {id} failed with response {response}. Please try again.".format(id=id, response=data['response']))
+
+	html = """<img src="{image}" width="1" height="1" style='height: 15%; width: 15%; object-fit: scale-down; padding-right: 15px; float: left'>
+	<details><summary><b>{name}</b></summary><details><summary>Stats</summary>
+	Intelligence: <b>{int}</b><br/>Strength: <b>{str}</b><br/>Speed: <b>{spe}</b><br/>
+	Durability: <b>{dur}</b><br/>Power: <b>{pow}</b><br/>Combat: <b>{com}</b><br/>
+	</details><details><summary>Biography</summary>
+	Full Name: <b>{fullname}</b><br/>Alter Egos: <b>{altergos}</b><br/>Aliases: <b>{aliases}</b><br/>
+	Birthplace: <b>{birthplace}</b><br/>Debut: <b>{debut}</b><br/>Publisher: <b>{publisher}</b><br/>
+	Alignment: <b>{alignment}</b><br/>
+	</details><details><summary>Appearance</summary>
+	Gender: <b>{gender}</b><br/>Race: <b>{race}</b><br/>Height: <b>{height}</b><br/>Weight: <b>{weight}</b><br/>
+	Eye Color: <b>{eye}</b><br/>Hair Color: <b>{hair}</b><br/>
+	</details><details><summary>Work</summary>
+	Occupation: <b>{occupation}</b><br/>Base: <b>{base}</b><br/>
+	</details><details><summary>Connections</summary>
+	Group Affiliation: <b>{group}</b><br/>Relatives: <b>{relatives}</b><br/>
+	</details></details>
+	"""
+	aliases = data['biography']['aliases']
+	relatives = data['connections']['relatives']
+	if type(aliases) is list:
+		aliases = ", ".join(aliases)
+	if type(relatives) is list:
+		relatives = ", ".join(relatives)
+	# the API may arrays for aliases and relatives that must be formatted
+	try:
+		gender = data['appearance']['gender']
+	except:
+		gender = 'No gender found.'
+	### this ^^ fixes the weird gender bugs
+	html = html.format(name=data['name'],image=data['image']['url'],int=data['powerstats']['intelligence'],
+		str=data['powerstats']['strength'],spe=data['powerstats']['speed'],dur=data['powerstats']['durability'],
+		pow=data['powerstats']['power'],com=data['powerstats']['combat'],fullname=data['biography']['full-name'],
+		altergos=data['biography']['alter-egos'],aliases=aliases,birthplace=data['biography']['place-of-birth'],
+		debut=data['biography']['first-appearance'], publisher=data['biography']['publisher'], alignment=data['biography']['alignment'],
+		gender=gender, race=data['appearance']['race'], height=data['appearance']['height'][1],
+		weight=data['appearance']['weight'][1], eye=data['appearance']['eye-color'], hair=data['appearance']['hair-color'],
+		occupation=data['work']['occupation'], base=data['work']['base'],group=data['connections']['group-affiliation'],relatives=relatives)
+	print(html)
+	ws.send(parsed['replyPrefix'] + '/adduhtml superhero,' + html)
 
 ###################
 ## Fact Handling ##
