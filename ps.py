@@ -351,8 +351,7 @@ def superhero(parsed):
 		ws.send(parsed['replyPrefix'] + "{hero} is not a valid superhero.".format(hero=argument))
 		return
 
-	request = requests.get("https://superheroapi.com/api/{key}/{id}".format(key=config.superheroAPIKey, id=id)).content
-	data = json.loads(request)
+	data = requests.get("https://superheroapi.com/api/{key}/{id}".format(key=config.superheroAPIKey, id=id)).json()
 
 	if data['response'] != 'success': # oops! let's drop stuff for debugging
 		ws.send(parsed['replyPrefix'] + "The API request for {hero} (ID: {id}) failed with response {response}. Please try again.".format(hero=hero, id=id, response=data['response']))
