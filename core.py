@@ -71,4 +71,21 @@ class User():
             (action === 'hostgame' and self.id in room.usersWithRankGreaterThan(config.hostgameRank)) or
             (action === 'manage' and self.id in room.usersWithRankGreaterThan(config.manageRank)) or
             self.isAdmin)
-    
+
+class Message():
+    def __init__(self, raw):
+        '''creates a Message object from the given `raw` websocket message'''
+        log("W: Message() classes can't be properly instantiated yet, since __init__() logic isn't implemented yet")
+        log("DEBUG: Message(): raw = {raw}".format(raw=raw))
+
+        self.sender = None
+        self.arguments = None
+        self.room = None
+        self.body = None
+        self.time = None
+        self.type = None
+        self.challstr = None
+
+        ### HACKY code to bootstrap for logins!
+        if '|challstr|' in raw:
+            self.challstr = raw.split('|challstr|')
