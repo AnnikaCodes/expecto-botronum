@@ -1,7 +1,7 @@
-config.py
+config.json
 __pycache__/**
 __pycache__
 backup/*
 logs/*
 data/*
-backup/**Ã
+backup/**ï¿½
