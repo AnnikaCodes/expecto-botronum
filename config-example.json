@@ -1,5 +1,11 @@
 {
   "username": "",
   "password": "",
-  "loglevel": 2
+  "loglevel": 2,
+  "sysops": [],
+  "broadcastRank": "+",
+  "addfactRank": "+",
+  "hostgameRank": "%",
+  "manageRank": "#",
+  "roomRanksInOrder": ["+", "%", "@", "*", "#"]
 }

@@ -8,7 +8,8 @@ import json
 ################################################
 
 CONFIG_PATH = 'config.json'
-CONFIG_VARS = ['username', 'password', 'loglevel']
+CONFIG_VARS = ['username', 'password', 'loglevel', 'sysops', 'broadcastRank',
+    'addfactRank', 'hostgameRank', 'manageRank', 'roomRanksInOrder']
 
 def loadConfig():
     configData = json.load(open(CONFIG_PATH, 'r'))
@@ -22,5 +23,5 @@ def loadConfig():
             returnValue.append(configData[configItem])
     return returnValue
 
-username, password, loglevel = loadConfig()
+username, password, loglevel, sysops, broadcastRank, addfactRank, hostgameRank, manageRank, roomRanksInOrder = loadConfig()
 # the order of these needs to be the same as in CONFIG_VARS
