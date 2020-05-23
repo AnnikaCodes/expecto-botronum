@@ -89,11 +89,8 @@ class User():
 ###################
 
 class Message():
-    def __init__(self, raw):
+    def __init__(self, raw, connection):
         '''creates a Message object from the given `raw` websocket message'''
-        log("W: Message() classes can't be properly instantiated yet, since __init__() logic isn't implemented yet")
-        log("DEBUG: Message(): raw = {raw}".format(raw=raw))
-
         self.sender = None
         self.arguments = None
         self.room = None
@@ -101,10 +98,32 @@ class Message():
         self.time = None
         self.type = None
         self.challstr = None
+        self.connection = connection
 
-        ### HACKY code to bootstrap for logins!
-        if '|challstr|' in raw:
-            self.challstr = raw.split('|challstr|')
+        split = raw.split("|")
+        self.type = split[1]
+
+        if self.type == 'challstr':
+            self.challstr = "|".join(split[2:])
+        elif self.type == 'c:':
+            self.type = 'chat'
+            self.room = connection.getRoomByID(split[0].strip('>').strip('\n'))
+            self.time = split[2]
+            self.sender = User(split[3])
+            self.body = "|".join(split[4:]).strip('\n')
+            self.arguments = self.body.split(config.separator)
+            log("DEBUG: Message(): body = " + self.body)
+        elif self.type in ['J', 'j', 'join']:
+            self.type = 'join'
+            self.room = connection.getRoomByID(split[0].strip('>').strip('\n'))
+            self.sender = User(split[2])
+        elif self.type == 'pm':
+            self.type = 'pm'
+            # TODO: implement PM handling when the bot isn't locked
+        else:
+            log("DEBUG: Message(): raw = {raw}".format(raw=raw))
+
+
 
 ######################
 ## Connection Class ##
@@ -129,7 +148,7 @@ class Connection():
         log("I: Connection.onOpen(): websocket successfully opened")
 
     def onMessage(self, rawMessage):
-        message = Message(rawMessage)
+        message = Message(rawMessage, self)
         if message.challstr:
             self.login(message.challstr)
 

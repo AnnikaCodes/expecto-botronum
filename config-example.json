@@ -9,5 +9,6 @@
   "hostgameRank": "%",
   "manageRank": "#",
   "roomRanksInOrder": ["+", "%", "@", "*", "#"],
-  "rooms": []
+  "rooms": [],
+  "separator": ","
 }
