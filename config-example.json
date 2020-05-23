@@ -1,11 +1,13 @@
 {
   "username": "",
   "password": "",
+  "websocketURL": "ws://sim.smogon.com:8000/showdown/websocket",
   "loglevel": 2,
   "sysops": [],
   "broadcastRank": "+",
   "addfactRank": "+",
   "hostgameRank": "%",
   "manageRank": "#",
-  "roomRanksInOrder": ["+", "%", "@", "*", "#"]
+  "roomRanksInOrder": ["+", "%", "@", "*", "#"],
+  "rooms": []
 }
