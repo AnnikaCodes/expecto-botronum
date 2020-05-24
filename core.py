@@ -69,10 +69,11 @@ class Room():
 ################
 
 class User():
-    def __init__(self, name):
+    def __init__(self, name, connection):
         self.name = name
         self.id = toID(name)
         self.isAdmin = self.id in config.sysops
+        self.connection = connection
 
     def can(self, action, room):
         '''returns True if the user can do the action and False otherwise'''
@@ -83,6 +84,10 @@ class User():
             (action == 'hostgame' and self.id in room.usersWithRankGreaterThan(config.hostgameRank)) or
             (action == 'manage' and self.id in room.usersWithRankGreaterThan(config.manageRank)) or
             self.isAdmin)
+
+    def PM(self, message):
+        '''PMs the user the given message'''
+        self.connection.send('|/pm {user},{message}'.format(user = self.id, message = message))
 
 ###################
 ## Message Class ##
@@ -109,14 +114,14 @@ class Message():
             self.type = 'chat'
             self.room = connection.getRoomByID(split[0].strip('>').strip('\n'))
             self.time = split[2]
-            self.sender = User(split[3])
+            self.sender = User(split[3], self.connection)
             self.body = "|".join(split[4:]).strip('\n')
             self.arguments = self.body.split(config.separator)
             log("DEBUG: Message(): body = " + self.body)
         elif self.type in ['J', 'j', 'join']:
             self.type = 'join'
             self.room = connection.getRoomByID(split[0].strip('>').strip('\n'))
-            self.sender = User(split[2])
+            self.sender = User(split[2], self.connection)
         elif self.type == 'pm':
             self.type = 'pm'
             # TODO: implement PM handling when the bot isn't locked
