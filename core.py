@@ -87,7 +87,7 @@ class User():
 
     def PM(self, message):
         '''PMs the user the given message'''
-        self.connection.send('|/pm {user},{message}'.format(user = self.id, message = message))
+        self.connection.whisper(self.id, message)
 
 ###################
 ## Message Class ##
@@ -114,7 +114,13 @@ class Message():
             self.type = 'chat'
             self.room = connection.getRoomByID(split[0].strip('>').strip('\n'))
             self.time = split[2]
-            self.sender = User(split[3], self.connection)
+
+            username = split[3].strip()
+            if username[0] in config.roomRanksInOrder:
+                rank = username[0]
+                username = username[1:]
+                self.room.auth[rank].append(username)
+            self.sender = User(username, self.connection) 
             self.body = "|".join(split[4:]).strip('\n')
             self.arguments = self.body.split(config.separator)
             log("DEBUG: Message(): body = " + self.body)
@@ -142,6 +148,11 @@ class Connection():
             on_error = self.onError,
             on_close = self.onClose, on_open = self.onOpen)
         self.roomList = []
+        self.commands = {}
+        for module in config.modules:
+            self.commands.update(module.commands)
+            # Note: if multiple modules have the same command then the later module will overwrite the earlier.
+        log("I: Connection(): Loaded the following commands: " + ", ".join(self.commands.keys()))
 
     def onError(self, ws, error):
         log("E: Connection.onError(): websocket error: {error}".format(error = error))
@@ -156,6 +167,10 @@ class Connection():
         message = Message(rawMessage, self)
         if message.challstr:
             self.login(message.challstr)
+        elif message.type in ['chat', 'pm'] and message.body[0] == config.commandCharacter:
+            potentialCommand = message.body.split(' ')[0].strip(config.commandCharacter)
+            if potentialCommand in self.commands:
+                self.commands[potentialCommand](message) # Invoke the command 
 
     def login(self, challstr):
         '''logs in'''
@@ -176,7 +191,7 @@ class Connection():
     def getRoomByID(self, id):
         '''Gets the Room object corresponding to the given ID'''
         objects = [room for room in self.roomList if room.id == id]
-        if len(objects) == 1:
+        if len(objects) == 0:
             return None
         elif len(objects) > 1:
             log("W: Connection.getRoomByID(): more than 1 Room object for room " + id)
@@ -185,6 +200,15 @@ class Connection():
     def getRoomByName(self, name):
         '''Gets the Room object for the room of the given name'''
         return self.getRoomByID(toID(name))
+    
+    def sayIn(self, room, message):
+        '''Sends the given message to the given room. Both arguments are strings.'''
+        self.websocket.send(room + "|" + message)
+
+    def whisper(self, userid, message):
+        '''PMs the given message to the given userid'''
+        self.websocket.send("|/pm {user}, {message}".format(user = userid, message = message))
+    
 
 if __name__ == "__main__":
     connection = Connection()
