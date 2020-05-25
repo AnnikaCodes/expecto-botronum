@@ -33,28 +33,26 @@ def toID(string):
 
 class Room():
     def __init__(self, name, connection):
-        self.auth = []
-        self.updateAuth()
         self.id = toID(name)
+        self.auth = {}
         self.connection = connection
         self.join()
 
-    def updateAuth(self):
-        '''Updates the auth list for the room. Returns the auth list'''
-        log("W: Room.updateAuth() isn't implemented yet")
-        self.auth = {'+': [], '%': [], '@': [], '*': [], '#': []}
-        return self.auth
+    def updateAuth(self, authDict):
+        '''Updates the auth list for the room based on the given auth dict'''
+        self.auth.update(authDict)
 
     def say(self, message):
         '''Sends the `message` to the room'''
-        log("W: Room.say() isn't implemented yet")
+        self.connection.send(self.id + "|" + message)
 
     def leave(self):
         '''Leaves the room'''
         log("W: Room.leave() isn't implemented yet")
 
     def join(self):
-        connection.send("|/j " + self.id)
+        self.connection.send("|/j " + self.id)
+        self.say('/roomauth')
 
     def usersWithRankGreaterThan(self, rank):
         '''returns a list of userids for the roomauth whose room rank is greater than the given `rank`'''
@@ -108,33 +106,64 @@ class Message():
         split = raw.split("|")
         self.type = split[1]
 
+        ### Note: there's a lot of reused / copy+paste logic here
+        ### It might be worth looking into a better way to format this
+        ### tbh all of Message() is kludgy
         if self.type == 'challstr':
             self.challstr = "|".join(split[2:])
-        elif self.type == 'c:':
+        elif self.type in ['c:', 'c', 'chat']:
+            hasTimestamp = (self.type == 'c:')
             self.type = 'chat'
             self.room = connection.getRoomByID(split[0].strip('>').strip('\n'))
-            self.time = split[2]
 
-            username = split[3].strip()
+            currentSlice = 2
+            if hasTimestamp:
+                self.time = split[currentSlice]
+                currentSlice += 1
+
+            username = split[currentSlice].strip()
+            currentSlice += 1
             if username[0] in config.roomRanksInOrder:
                 rank = username[0]
                 username = username[1:]
-                self.room.auth[rank].append(username)
+                self.room.updateAuth({rank: username})
             self.sender = User(username, self.connection) 
-            self.body = "|".join(split[4:]).strip('\n')
-            self.arguments = self.body.split(config.separator)
-            log("DEBUG: Message(): body = " + self.body)
+            self.body = "|".join(split[currentSlice:]).strip('\n')
         elif self.type in ['J', 'j', 'join']:
             self.type = 'join'
             self.room = connection.getRoomByID(split[0].strip('>').strip('\n'))
             self.sender = User(split[2], self.connection)
         elif self.type == 'pm':
-            self.type = 'pm'
-            # TODO: implement PM handling when the bot isn't locked
+            self.sender = User(split[2], self.connection)
+            self.body = "|".join(split[4:]).strip('\n')
+        elif self.type == 'popup':
+            useridsFromPopup = lambda popupData : [userid.strip('*') for userid in popupData.split(", ")] 
+            if split[2] == 'Room Owners (#):':
+                roomName = split[-1].split(" is a ", 1)[0]
+                try:
+                    room = self.connection.getRoomByName(roomName)
+                except Exception as e:
+                    log("E: Message(): cannot parse auth popup for room {room}: {err}".format(room = roomName, err = str(e)))
+                
+                owners = bots = mods = drivers = voices = []
+                for i in range(len(split)):
+                    if split[i] == 'Room Owners (#):':
+                        owners = useridsFromPopup(split[i + 2])
+                    elif split[i] == 'Bots (*):':
+                        bots = useridsFromPopup(split[i + 2])
+                    elif split[i] == 'Moderators (@):':
+                        mods = useridsFromPopup(split[i + 2])
+                    elif split[i] == 'Drivers (%):':
+                        drivers = useridsFromPopup(split[i + 2])
+                    elif split[i] == 'Voices (+):':
+                        voices = useridsFromPopup(split[i + 2])
+                
+                authList = {'#': owners, '*': bots, '@': mods, '%': drivers, '+': voices}
+                room.updateAuth(authList)
         else:
-            log("DEBUG: Message(): raw = {raw}".format(raw=raw))
-
-
+            log("DEBUG: Message() of unknown type {type}: {raw}".format(type = self.type, raw = raw))
+        if self.body:
+            self.arguments = self.body.split(config.separator)
 
 ######################
 ## Connection Class ##
