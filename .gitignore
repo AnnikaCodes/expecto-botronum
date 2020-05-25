@@ -4,4 +4,5 @@ __pycache__
 backup/*
 logs/*
 data/*
-backup/**Ã
+backup/**
+.vscode/
