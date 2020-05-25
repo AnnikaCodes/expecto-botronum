@@ -40,7 +40,11 @@ class Room():
 
     def updateAuth(self, authDict):
         '''Updates the auth list for the room based on the given auth dict'''
-        self.auth.update(authDict)
+        for key in authDict.keys():
+            if self.auth[key]:
+                self.auth[key] += authDict[key]
+            else:
+                self.auth[key] = authDict[key]
 
     def say(self, message):
         '''Sends the `message` to the room'''
