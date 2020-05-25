@@ -13,6 +13,11 @@ CONFIG_VARS = ['username', 'password', 'websocketURL', 'loglevel', 'sysops', 'br
     'commandCharacter']
 
 def loadConfig():
+    """Loads configuration from CONFIG_PATH
+
+    Returns:
+        [tuple] -- the CONFIG_VARS as loaded from CONFIG_PATH
+    """    
     configData = json.load(open(CONFIG_PATH, 'r'))
     returnValue = []
     # make sure we're not missing anything
