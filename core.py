@@ -46,7 +46,7 @@ def toID(string):
 ################
 
 class Room():
-    """Represents a room on Pokémon Showdown
+    """Represents a room on Pokemon Showdown
     """
     def __init__(self, name, connection):
         """Creates a new Room object
@@ -105,13 +105,21 @@ class Room():
             if rank in self.auth:
                 userIDList.extend(self.auth[rank])
         return userIDList
+    
+    def __str__(self):
+        """String representation of the Room
+
+        Returns:
+            string -- representation
+        """        
+        return "Room: {id}; auth: {auth}".format(id = self.id, auth = self.auth)
 
 ################
 ## User Class ##
 ################
 
 class User():
-    """Represents a user on Pokémon Showdown
+    """Represents a user on Pokemon Showdown
     """
     def __init__(self, name, connection):
         """User()
@@ -150,13 +158,22 @@ class User():
             message {string} -- the message to PM the user
         """
         self.connection.whisper(self.id, message)
+    
+    def __str__(self):
+        """String representation of the User
+
+        Returns:
+            string -- representation
+        """
+        return "User: {name}; id: {id}, is {admin} bot admin".format(
+            name = self.name, id = self.id, admin = "a" if self.isAdmin else "not a")
 
 ###################
 ## Message Class ##
 ###################
 
 class Message():
-    """Represents a message sent on Pokémon Showdown
+    """Represents a message sent on Pokemon Showdown
     """
     def __init__(self, raw, connection):
         """Creates a new Message object
@@ -250,12 +267,25 @@ class Message():
         elif self.sender and not self.room:
             self.sender.PM(response)
 
+    def __str__(self):
+        """String representation of the Message
+
+        Returns:
+            string -- representation
+        """
+        # so many ternary operators, sorry
+        return "Message: " + (self.body if self.body else "") + (" from User(" + str(self.sender) + ")" if self.sender else "") \
+            + (" in Room(" + str(self.room) + ")" if self.room else "") + (" at " + str(self.time) if self.time else "") \
+            + (" of type " + self.type if self.type else "") + (" with challstr " + self.challstr if self.challstr else "") \
+            + (" with arguments " + str(self.arguments) if self.arguments else "")
+
+
 ######################
 ## Connection Class ##
 ######################
 
 class Connection():
-    """Represents a connection to Pokémon Showdown
+    """Represents a connection to Pokemon Showdown
     """
     def __init__(self):
         """Creates a new Connection object
@@ -309,7 +339,7 @@ class Connection():
                 self.commands[potentialCommand](message) # Invoke the command 
 
     def login(self, challstr):
-        """Logs into Pokémon Showdown
+        """Logs into Pokemon Showdown
 
         Arguments:
             challstr {string} -- the challstr to use to log in
@@ -376,6 +406,16 @@ class Connection():
             message {string} -- the message to PM
         """
         self.websocket.send("|/pm {user}, {message}".format(user = userid, message = message))
+
+    def __str__(self):
+        """String representation of the Connection
+
+        Returns:
+            string -- representation
+        """
+        return "Connection to {url} with commands {commands} in these rooms: {rooms}".format(
+            url = self.websocket.url, commands = str(self.commands), rooms = str(self.roomList)
+        )
     
 if __name__ == "__main__":
     connection = Connection()

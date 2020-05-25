@@ -17,3 +17,11 @@ class Module:
             message {Message} -- the Message object that invoked the command
         """       
         message.respond("Pong!")
+    
+    def __str__(self):
+        """String representation of the Module
+
+        Returns:
+            string -- representation
+        """
+        return "Example module: provides an example for how to write modules. Commands: " + ", ".join(self.commands.keys())
