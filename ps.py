@@ -361,19 +361,19 @@ def superhero(parsed):
 	# And since we're not doing this conversion from dictionaries to HTML <details> elements much I think it's OK.
 	html = """<img src="{image}" width="1" height="1" style='height: 15%; width: 15%; object-fit: scale-down; padding-right: 15px; float: left'>
 	<details><summary>{name}</summary><details><summary>Stats</summary>
-	<b>Intelligence:</b> {int}<br/><b>Strength:</b> {str}<br/><b>Speed:</b> {spe}<br/>
-	<b>Durability:</b> {dur}<br/><b>Power:</b> {pow}<br/><b>Combat:</b> {com}<br/>
+	<b>Intelligence:</b> {int}<br><b>Strength:</b> {str}<br><b>Speed:</b> {spe}<br>
+	<b>Durability:</b> {dur}<br><b>Power:</b> {pow}<br><b>Combat:</b> {com}<br>
 	</details><details><summary>Biography</summary>
-	<b>Full Name:</b> {fullname}<br/><b>Alter Egos:</b> {altergos}<br/><b>Aliases:</b> {aliases}<br/>
-	<b>Birthplace:</b> {birthplace}<br/><b>Debut:</b> {debut}<br/><b>Publisher:</b> {publisher}<br/>
-	<b>Alignment:</b> {alignment}<br/>
+	<b>Full Name:</b> {fullname}<br><b>Alter Egos:</b> {altergos}<br><b>Aliases:</b> {aliases}<br>
+	<b>Birthplace:</b> {birthplace}<br><b>Debut:</b> {debut}<br><b>Publisher:</b> {publisher}<br>
+	<b>Alignment:</b> {alignment}<br>
 	</details><details><summary>Appearance</summary>
-	<b>Gender:</b> {gender}<br/><b>Race:</b> {race}<br/><b>Height:</b> {height}<br/><b>Weight:</b> {weight}<br/>
-	<b>Eye Color:</b> {eye}<br/><b>Hair Color:</b> {hair}<br/>
+	<b>Gender:</b> {gender}<br><b>Race:</b> {race}<br><b>Height:</b> {height}<br><b>Weight:</b> {weight}<br>
+	<b>Eye Color:</b> {eye}<br><b>Hair Color:</b> {hair}<br>
 	</details><details><summary>Work</summary>
-	<b>Occupation:</b> {occupation}<br/><b>Base:</b> {base}<br/>
+	<b>Occupation:</b> {occupation}<br><b>Base:</b> {base}<br>
 	</details><details><summary>Connections</summary>
-	<b>Group Affiliation:</b> {group}<br/><b>Relatives:</b> {relatives}<br/>
+	<b>Group Affiliation:</b> {group}<br><b>Relatives:</b> {relatives}<br>
 	</details></details>
 	"""
 
