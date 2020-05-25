@@ -16,6 +16,11 @@ import json
 ######################
 
 def log(message):
+    """Logs a message to the console according to `config.loglevel`
+
+    Arguments:
+        message {string} -- the message to be logged, beginning with E:, W:, I:, or DEBUG:
+    """
     if config.loglevel > 2 or message[:2] == 'E:':
         # Errors are always logged and everything in debug mode is logged.
         print(message)
@@ -25,6 +30,14 @@ def log(message):
         print(message)
 
 def toID(string):
+    """Converts a string into an ID
+
+    Arguments:
+        string {string} -- the string to be converted
+
+    Returns:
+        [string] -- the ID
+    """
     return re.sub('[^0-9a-zA-Z]+', '', string).lower()
 
 ################
@@ -32,14 +45,26 @@ def toID(string):
 ################
 
 class Room():
+    """Represents a room on Pokémon Showdown
+    """
     def __init__(self, name, connection):
+        """Creates a new Room object
+
+        Arguments:
+            name {string} -- the name of the room that the Room object represents (can include spaces/caps)
+            connection {Connection} -- the Connection object to use to connect to the room
+        """
         self.id = toID(name)
         self.auth = {}
         self.connection = connection
         self.join()
 
     def updateAuth(self, authDict):
-        '''Updates the auth list for the room based on the given auth dict'''
+        """Updates the auth list for the room based on the given auth dictionary
+
+        Arguments:
+            authDict {dictionary} -- dictionary of the changes to the auth list
+        """
         for key in authDict.keys():
             if self.auth[key]:
                 self.auth[key] += authDict[key]
@@ -47,19 +72,33 @@ class Room():
                 self.auth[key] = authDict[key]
 
     def say(self, message):
-        '''Sends the `message` to the room'''
+        """Sends a message to the room
+
+        Arguments:
+            message {string} -- the message to send
+        """
         self.connection.send(self.id + "|" + message)
 
     def leave(self):
-        '''Leaves the room'''
+        """Leaves the room
+        """
         log("W: Room.leave() isn't implemented yet")
 
     def join(self):
+        """Joins the room
+        """
         self.connection.send("|/j " + self.id)
         self.say('/roomauth')
 
-    def usersWithRankGreaterThan(self, rank):
-        '''returns a list of userids for the roomauth whose room rank is greater than the given `rank`'''
+    def usersWithRankGEQ(self, rank):
+        """Gets a list of userids of the roomauth whose room rank is greater than or equal to a certain rank
+
+        Arguments:
+            rank {string} -- the minimum rank
+
+        Returns:
+            [string] --  a list of userids for the roomauth whose room rank is greater than or equal to the given rank
+        """
         userIDList = []
         for rank in config.roomRanksInOrder[config.roomRanksInOrder.index(rank):]:
             if rank in self.auth:
@@ -71,24 +110,44 @@ class Room():
 ################
 
 class User():
+    """Represents a user on Pokémon Showdown
+    """
     def __init__(self, name, connection):
+        """User()
+
+        Arguments:
+            name {string} -- the username
+            connection {Connection} -- the connection to access PS with
+        """
         self.name = name
         self.id = toID(name)
         self.isAdmin = self.id in config.sysops
         self.connection = connection
 
     def can(self, action, room):
-        '''returns True if the user can do the action and False otherwise'''
+        """Checks if the user may perform an action
+
+        Arguments:
+            action {string} -- the action (one of `broadcast`, `addfact`, `hostgame`, `manage`, or `admin`)
+            room {Room} -- the room where the action is taking 
+
+        Returns:
+            [bool] -- True if the user can do the action and False otherwise
+        """
         if action not in ['broadcast', 'addfact', 'hostgame', 'manage', 'admin']:
             log("E: User.can(): {action} isn't a valid action".format(action=action))
-        return ((action == 'broadcast' and self.id in room.usersWithRankGreaterThan(config.broadcastRank)) or
-            (action == 'addfact' and self.id in room.usersWithRankGreaterThan(config.addfactRank)) or
-            (action == 'hostgame' and self.id in room.usersWithRankGreaterThan(config.hostgameRank)) or
-            (action == 'manage' and self.id in room.usersWithRankGreaterThan(config.manageRank)) or
+        return ((action == 'broadcast' and self.id in room.usersWithRankGEQ(config.broadcastRank)) or
+            (action == 'addfact' and self.id in room.usersWithRankGEQ(config.addfactRank)) or
+            (action == 'hostgame' and self.id in room.usersWithRankGEQ(config.hostgameRank)) or
+            (action == 'manage' and self.id in room.usersWithRankGEQ(config.manageRank)) or
             self.isAdmin)
 
     def PM(self, message):
-        '''PMs the user the given message'''
+        """PMs the user the given message
+
+        Arguments:
+            message {string} -- the message to PM the user
+        """
         self.connection.whisper(self.id, message)
 
 ###################
@@ -96,8 +155,15 @@ class User():
 ###################
 
 class Message():
+    """Represents a message sent on Pokémon Showdown
+    """
     def __init__(self, raw, connection):
-        '''creates a Message object from the given `raw` websocket message'''
+        """Creates a new Message object
+
+        Arguments:
+            raw {string} -- the raw data of the message
+            connection {Connection} -- the connection the message was recieved on
+        """
         self.sender = None
         self.arguments = None
         self.room = None
@@ -174,7 +240,11 @@ class Message():
 ######################
 
 class Connection():
+    """Represents a connection to Pokémon Showdown
+    """
     def __init__(self):
+        """Creates a new Connection object
+        """
         websocket.enableTrace(False)
         self.websocket = websocket.WebSocketApp(config.websocketURL,
             on_message = self.onMessage,
@@ -188,15 +258,33 @@ class Connection():
         log("I: Connection(): Loaded the following commands: " + ", ".join(self.commands.keys()))
 
     def onError(self, ws, error):
+        """Handles errors on the websocket
+
+        Arguments:
+            ws {websocket} -- the websocket that's connected to PS
+            error {string? probably} -- the error
+        """        
         log("E: Connection.onError(): websocket error: {error}".format(error = error))
 
     def onClose(self, ws):
+        """Logs when the connection closes
+
+        Arguments:
+            ws {websocket} -- the websocket that's connected to PS
+        """        
         log("I: Connection.onClose(): websocket closed")
 
     def onOpen(self):
+        """Logs when the websocket is opened
+        """        
         log("I: Connection.onOpen(): websocket successfully opened")
 
     def onMessage(self, rawMessage):
+        """Handles new messages from the websocket, creating a Message object and invoking commands
+
+        Arguments:
+            rawMessage {string} -- the raw message data
+        """        
         message = Message(rawMessage, self)
         if message.challstr:
             self.login(message.challstr)
@@ -206,7 +294,11 @@ class Connection():
                 self.commands[potentialCommand](message) # Invoke the command 
 
     def login(self, challstr):
-        '''logs in'''
+        """Logs into Pokémon Showdown
+
+        Arguments:
+            challstr {string} -- the challstr to use to log in
+        """        
         log("I: Connection.login(): logging in...")
         loginInfo = {'act': 'login', 'name': config.username, 'pass': config.password, 'challstr': challstr}
         loginResponse = requests.post('http://play.pokemonshowdown.com/action.php', data = loginInfo).content
@@ -218,11 +310,22 @@ class Connection():
         log("I: Connection.login(): rooms joined successfully")
 
     def send(self, message):
-        '''sends message on the Connection'''
+        """Sends a message
+
+        Arguments:
+            message {string} -- the message to send
+        """        
         self.websocket.send(message)
 
     def getRoomByID(self, id):
-        '''Gets the Room object corresponding to the given ID'''
+        """Gets the Room object corresponding to an ID
+
+        Arguments:
+            id {string in ID format} -- the room ID (in ID format from toID())
+
+        Returns:
+            Room -- a Room object with the given ID
+        """        
         objects = [room for room in self.roomList if room.id == id]
         if len(objects) == 0:
             return None
@@ -231,15 +334,32 @@ class Connection():
         return objects[0]
 
     def getRoomByName(self, name):
-        '''Gets the Room object for the room of the given name'''
+        """Gets the Room object with the given name
+
+        Arguments:
+            name {string} -- the name of the room
+
+        Returns:
+            Room -- a Room object with the given name
+        """        
         return self.getRoomByID(toID(name))
     
     def sayIn(self, room, message):
-        '''Sends the given message to the given room. Both arguments are strings.'''
+        """Sends a message to a room.
+
+        Arguments:
+            room {Room} -- the room to send the message to
+            message {string} -- the message to send
+        """
         self.websocket.send(room + "|" + message)
 
     def whisper(self, userid, message):
-        '''PMs the given message to the given userid'''
+        """PMs a message to a user
+
+        Arguments:
+            userid {string in ID format} -- the user to PM
+            message {string} -- the message to PM
+        """
         self.websocket.send("|/pm {user}, {message}".format(user = userid, message = message))
     
 
