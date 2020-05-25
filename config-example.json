@@ -11,6 +11,6 @@
   "roomRanksInOrder": ["+", "%", "@", "*", "#"],
   "rooms": [],
   "separator": ",",
-  "modules": {},
+  "modules": [],
   "commandCharacter": "~"
 }

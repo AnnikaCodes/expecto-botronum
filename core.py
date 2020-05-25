@@ -5,6 +5,7 @@ import re
 import websocket
 import requests
 import json
+import importlib
 
 ################## core.py #####################
 ## core functionality of Expecto Botronum     ##
@@ -66,7 +67,7 @@ class Room():
             authDict {dictionary} -- dictionary of the changes to the auth list
         """
         for key in authDict.keys():
-            if self.auth[key]:
+            if key in self.auth:
                 self.auth[key] += authDict[key]
             else:
                 self.auth[key] = authDict[key]
@@ -234,6 +235,20 @@ class Message():
             log("DEBUG: Message() of unknown type {type}: {raw}".format(type = self.type, raw = raw))
         if self.body:
             self.arguments = self.body.split(config.separator)
+    
+    def respond(self, response):
+        """Responds to the message, in a room or in PMs
+
+        If the user cannot broadcast and the command wasn't in PMs or it's not a message that can be responded to, does nothing
+
+        Arguments:
+            response {string} -- the response to be sent
+        """ 
+        log("DEBUG: responding " + response)       
+        if self.room and self.sender.can("broadcast", self.room):
+            self.room.say(response)
+        elif self.sender and not self.room:
+            self.sender.PM(response)
 
 ######################
 ## Connection Class ##
@@ -253,7 +268,7 @@ class Connection():
         self.roomList = []
         self.commands = {}
         for module in config.modules:
-            self.commands.update(module.commands)
+            self.commands.update(importlib.import_module(module).Module().commands)
             # Note: if multiple modules have the same command then the later module will overwrite the earlier.
         log("I: Connection(): Loaded the following commands: " + ", ".join(self.commands.keys()))
 
@@ -362,7 +377,6 @@ class Connection():
         """
         self.websocket.send("|/pm {user}, {message}".format(user = userid, message = message))
     
-
 if __name__ == "__main__":
     connection = Connection()
     log("I: core.py: opening websocket...")
