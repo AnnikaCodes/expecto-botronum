@@ -250,8 +250,9 @@ class Message():
                 room.updateAuth(authList)
         else:
             log("DEBUG: Message() of unknown type {type}: {raw}".format(type = self.type, raw = raw))
-        if self.body:
-            self.arguments = self.body.split(config.separator)
+        if self.body and ' ' in self.body:
+            spaceSplit = self.body.split(' ', 1)
+            self.arguments = [spaceSplit[0]] + spaceSplit[1].split(config.separator)
     
     def respond(self, response):
         """Responds to the message, in a room or in PMs
@@ -388,7 +389,7 @@ class Connection():
             Room -- a Room object with the given name
         """        
         return self.getRoomByID(toID(name))
-    
+
     def sayIn(self, room, message):
         """Sends a message to a room.
 
