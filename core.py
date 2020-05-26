@@ -137,17 +137,19 @@ class User():
         """Checks if the user may perform an action
 
         Arguments:
-            action {string} -- the action (one of `broadcast`, `addfact`, `hostgame`, `manage`, or `admin`)
+            action {string} -- the action (one of `broadcast`, `addfact`, `hostgame`, `wall`, `html`, `manage`, or `admin`)
             room {Room} -- the room where the action is taking 
 
         Returns:
             [bool] -- True if the user can do the action and False otherwise
         """
-        if action not in ['broadcast', 'addfact', 'hostgame', 'manage', 'admin']:
+        if action not in ['broadcast', 'addfact', 'hostgame', 'wall', 'html', 'manage', 'admin']:
             log("E: User.can(): {action} isn't a valid action".format(action=action))
         return ((action == 'broadcast' and self.id in room.usersWithRankGEQ(config.broadcastRank)) or
             (action == 'addfact' and self.id in room.usersWithRankGEQ(config.addfactRank)) or
             (action == 'hostgame' and self.id in room.usersWithRankGEQ(config.hostgameRank)) or
+            (action == 'wall' and self.id in room.usersWithRankGEQ('%')) or
+            (action == 'html' and self.id in room.usersWithRankGEQ('*')) or
             (action == 'manage' and self.id in room.usersWithRankGEQ(config.manageRank)) or
             self.isAdmin)
 
@@ -298,6 +300,7 @@ class Connection():
             on_close = self.onClose, on_open = self.onOpen)
         self.roomList = []
         self.commands = {}
+        self.bot = User(config.username, self)
         for module in config.modules:
             self.commands.update(importlib.import_module(module).Module().commands)
             # Note: if multiple modules have the same command then the later module will overwrite the earlier.

@@ -1,5 +1,6 @@
 import config
 import core
+import threading
 
 ########## base.py ###########
 ## contains the base module ##
@@ -10,7 +11,7 @@ class Module:
     """Represents a module, which may contain several commands
     """
     def __init__(self):
-        self.commands = {"ping": self.ping, "owo": self.owo, "uwu": self.uwu, "eval": self.eval}
+        self.commands = {"ping": self.ping, "owo": self.owo, "uwu": self.uwu, "eval": self.eval, "timer": self.timer}
 
     def ping(self, message):
         """Ping: replies "Pong!"
@@ -62,6 +63,25 @@ class Module:
             return
         response = "!code " + ("\n" if "\n" not in response else "") + response
         message.respond(response)
+
+    def timer(self, message):
+        """timer: evaluates the given Python expression
+
+        Arguments:
+            message {Message} -- the Message object that invoked the command
+        """
+        if len(message.arguments) not in range(1,4):
+            message.respond("Usage: ``" + config.commandCharacter + "timer <duration>, <optional message>``")
+            return
+        response = "/wall " if message.type == 'pm' or message.connection.bot.can('wall', message.room) else ""
+        response += message.arguments[2] if len(message.arguments) > 2 else "Timer set by {user} is up".format(user = message.sender.name)
+        duration = 5.0
+        try:
+            duration = float(message.arguments[1])
+        except ValueError:
+            message.respond(message.arguments[1] + " isn't a valid duration")
+            return
+        threading.Timer(duration, message.respond, args = [response]).start()
 
     def __str__(self):
         """String representation of the Module
