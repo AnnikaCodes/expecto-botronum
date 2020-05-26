@@ -6,3 +6,5 @@ logs/*
 data/*
 backup/**
 .vscode/
+*.pyc
+
