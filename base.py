@@ -11,7 +11,7 @@ class Module:
     """Represents a module, which may contain several commands
     """
     def __init__(self):
-        self.commands = {"ping": self.ping, "owo": self.owo, "uwu": self.uwu, "eval": self.eval, "timer": self.timer}
+        self.commands = {"ping": self.ping, "owo": self.owo, "uwu": self.uwu, "eval": self.eval, "timer": self.timer, "do": self.do}
 
     def ping(self, message):
         """Ping: replies "Pong!"
@@ -82,6 +82,23 @@ class Module:
             message.respond(message.arguments[1] + " isn't a valid duration")
             return
         threading.Timer(duration, message.respond, args = [response]).start()
+
+    def do(self, message):
+        """do: sends the given command to the given room 
+
+        Arguments:
+            message {Message} -- the Message object that invoked the command
+        """
+        if not message.arguments or len(message.arguments) < 3:
+            return message.respond("Usage: ``" + config.commandCharacter + "do <room>, <message>``.")
+        room = message.connection.getRoomByName(message.arguments[1])
+        if room:
+            if not message.sender.can("manage", room): 
+                return message.respond("Permission denied.")
+            command = ",".join(message.arguments[2:]).strip()
+            return room.say(command)
+        else:
+            return message.respond(message.arguments[1] + " isn't a room I'm in.")
 
     def __str__(self):
         """String representation of the Module
