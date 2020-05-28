@@ -12,5 +12,6 @@
   "rooms": [],
   "separator": ",",
   "modules": [],
-  "commandCharacter": "~"
+  "commandCharacter": "~",
+  "superheroAPIKey": ""
 }

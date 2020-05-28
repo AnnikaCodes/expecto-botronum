@@ -23,7 +23,7 @@ def get(variableName):
         variableName {[string]} -- the name the variable was stored under
 
     Returns:
-        [Any] -- the variable
+        [Any] -- the variable, or None if it doesn't exist
     """    
     data = __loadJSON()
     if variableName in data.keys():

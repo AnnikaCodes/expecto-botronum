@@ -269,6 +269,21 @@ class Message():
             self.room.say(response)
         elif self.sender and not self.room:
             self.sender.PM(response)
+    
+    def respondHTML(self, html):
+        """Responds to the message with a HTML box, in a room or in PMs
+
+        If the user cannot broadcast and the command wasn't in PMs or it's not a message that can be responded to, does nothing
+
+        Arguments:
+            html {string} -- the html to be sent
+        """
+        if self.room and self.sender.can("broadcast", self.room) and self.connection.bot.can("html", self.room):
+            self.room.say("/adduhtml expectobotronum, " + html)
+        elif self.sender and not self.room:
+            room = None
+            return
+            # To do: room userlists! :D
 
     def __str__(self):
         """String representation of the Message
