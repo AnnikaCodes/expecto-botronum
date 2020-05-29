@@ -217,14 +217,25 @@ class Message():
                 rank = username[0]
                 username = username[1:]
                 self.room.updateAuth({rank: username})
-            self.sender = User(username, self.connection) 
+            self.sender = self.connection.getUser(toID(username))
+            if not self.sender: self.sender = User(username, self.connection) 
+
             self.body = "|".join(split[currentSlice:]).strip('\n')
         elif self.type in ['J', 'j', 'join']:
             self.type = 'join'
             self.room = connection.getRoomByID(split[0].strip('>').strip('\n'))
-            self.sender = User(split[2], self.connection)
+            self.sender = self.connection.getUser(toID(split[2]))
+            if not self.sender: self.sender = User(split[2], self.connection)
+            self.connection.userJoinedRoom(self.sender, self.room)
+        elif self.type in ['L', 'l', 'leave']:
+            self.type = 'leave'
+            self.room = connection.getRoomByID(split[0].strip('>').strip('\n'))
+            self.sender = self.connection.getUser(toID(split[2]))
+            if not self.sender: self.sender = User(split[2], self.connection)
+            self.connection.userLeftRoom(self.sender, self.room)
         elif self.type == 'pm':
-            self.sender = User(split[2], self.connection)
+            self.sender = self.connection.getUser(toID(split[2]))
+            if not self.sender: self.sender = User(split[2], self.connection)
             self.body = "|".join(split[4:]).strip('\n')
         elif self.type == 'popup':
             useridsFromPopup = lambda popupData : [userid.strip('*') for userid in popupData.split(", ")] 
@@ -314,6 +325,7 @@ class Connection():
             on_error = self.onError,
             on_close = self.onClose, on_open = self.onOpen)
         self.roomList = []
+        self.userList = {}
         self.commands = {}
         self.bot = User(config.username, self)
         for module in config.modules:
@@ -425,7 +437,65 @@ class Connection():
             message {string} -- the message to PM
         """
         self.websocket.send("|/pm {user}, {message}".format(user = userid, message = message))
+    
+    def getUserRooms(self, user):
+        """Gets a list of the IDs (not objects) of the rooms that the user is in.
 
+        Arguments:
+            user {User} -- the user
+
+        Returns:
+            list -- the roomids for the user's rooms, or None if the user isn't found
+        """        
+        for u in self.userList:
+            if u.id == user.id:
+                return self.userList[u]
+        return None
+
+    def userJoinedRoom(self, user, room):
+        """Handles a user joining a room
+
+        Arguments:
+            user {User} -- the user who joined
+            room {Room} -- the room they joined
+        """        
+        if type(self.getUserRooms(user)) is not list:
+            self.userList[user] = [room.id]
+            return
+        else:
+            for u in self.userList:
+                if u.id == user.id and room.id not in self.userList[u]:
+                    self.userList[u].append(room.id)
+                    return
+    
+    def userLeftRoom(self, user, room):
+        """Handles a user leaving a room
+
+        Arguments:
+            user {User} -- the user who joined
+            room {Room} -- the room they joined
+        """        
+        userRooms = self.getUserRooms(user)
+        if type(userRooms) is not list or room.id not in userRooms:
+            # Do nothing if there's no room list for the user or the user wasnt marked as being in the room
+            return
+        userRooms.remove(room.id)
+        self.userList[self.getUser(user.id)] = userRooms
+
+    def getUser(self, userid):
+        """Gets the User object for a given ID
+
+        Arguments:
+            userid {string that is an ID} -- the ID of the user to search for
+
+        Returns:
+            User || None -- the user, or None if the user isn't in the records
+        """        
+        for user in self.userList:
+            if user.id == userid:
+                return user
+        return None
+    
     def __str__(self):
         """String representation of the Connection
 
