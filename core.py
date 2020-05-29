@@ -91,6 +91,7 @@ class Room():
         """
         self.connection.send("|/j " + self.id)
         self.say('/roomauth')
+        self.say('/userlist')
 
     def usersWithRankGEQ(self, rank):
         """Gets a list of userids of the roomauth whose room rank is greater than or equal to a certain rank
@@ -262,6 +263,15 @@ class Message():
                 
                 authList = {'#': owners, '*': bots, '@': mods, '%': drivers, '+': voices}
                 room.updateAuth(authList)
+        elif self.type == 'html':
+            self.room = connection.getRoomByID(split[0].strip('>').strip('\n'))
+            if "users in this room:" in raw:
+                userList = split[2].split("users in this room:<br />")[1].strip("</div>").split(", ")
+                for user in userList:
+                    userObject = self.connection.getUser(toID(user))
+                    if not userObject: userObject = User(toID(user), self.connection)
+                    self.connection.userJoinedRoom(userObject, self.room)
+        elif self.type == 'init':
         else:
             log("DEBUG: Message() of unknown type {type}: {raw}".format(type = self.type, raw = raw))
         if self.body and ' ' in self.body:
