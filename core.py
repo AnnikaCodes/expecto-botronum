@@ -69,7 +69,8 @@ class Room():
         """
         for key in authDict.keys():
             if key in self.auth:
-                self.auth[key] += authDict[key]
+                for user in authDict[key]:
+                    if user not in self.auth[key]: self.auth[key].append(user)
             else:
                 self.auth[key] = authDict[key]
 
@@ -217,8 +218,8 @@ class Message():
             currentSlice += 1
             if username[0] in config.roomRanksInOrder:
                 rank = username[0]
-                username = username[1:]
-                self.room.updateAuth({rank: username})
+                username = toID("".join(username[1:]))
+                self.room.updateAuth({rank: [username]})
             self.sender = self.connection.getUser(toID(username))
             if not self.sender: self.sender = User(username, self.connection) 
 
@@ -272,6 +273,7 @@ class Message():
                     if not userObject: userObject = User(toID(user), self.connection)
                     self.connection.userJoinedRoom(userObject, self.room)
         elif self.type == 'init':
+            pass
         else:
             log("DEBUG: Message() of unknown type {type}: {raw}".format(type = self.type, raw = raw))
         if self.body and ' ' in self.body:
@@ -402,7 +404,7 @@ class Connection():
 
         Arguments:
             message {string} -- the message to send
-        """        
+        """
         timeDiff = ((time.time() * 1000.0) - self.lastSentTime) - 600.0 # throttle = 600
         if timeDiff < 0:
             time.sleep((-1 * timeDiff) / 1000.0)
@@ -464,7 +466,7 @@ class Connection():
             list -- the roomids for the user's rooms, or None if the user isn't found
         """        
         for u in self.userList:
-            if u.id == user.id:
+            if u and u.id == user.id:
                 return self.userList[u]
         return None
 
@@ -506,9 +508,10 @@ class Connection():
 
         Returns:
             User || None -- the user, or None if the user isn't in the records
-        """        
+        """
+        if userid == self.bot.id: return self.bot
         for user in self.userList:
-            if user.id == userid:
+            if user and user.id == userid:
                 return user
         return None
     
