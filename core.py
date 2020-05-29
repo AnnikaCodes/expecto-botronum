@@ -302,12 +302,18 @@ class Message():
         Arguments:
             html {string} -- the html to be sent
         """
-        if self.room and self.sender.can("broadcast", self.room) and self.connection.bot.can("html", self.room):
-            self.room.say("/adduhtml expectobotronum, " + html)
+        if self.room and self.sender.can("broadcast", self.room):
+            return self.room.say("/adduhtml expectobotronum," + html)
         elif self.sender and not self.room:
-            room = None
-            return
-            # To do: room userlists! :D
+            possibleRoomIDs = [r for r in self.connection.getUserRooms(self.sender) \
+                if r in self.connection.getUserRooms(self.connection.bot)]
+            for possibleRoom in possibleRoomIDs:
+                possibleRoom = self.connection.getRoomByID(possibleRoom)
+                if possibleRoom and self.connection.bot.can("html", possibleRoom):
+                    return possibleRoom.say("/pminfobox {user},{html}".format(
+                        user = self.sender.id,
+                        html = html.replace('\n', '') # multiline doesnt work for /pminfobox
+                    ))
 
     def __str__(self):
         """String representation of the Message
