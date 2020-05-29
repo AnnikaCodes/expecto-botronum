@@ -6,6 +6,7 @@ import websocket
 import requests
 import json
 import importlib
+import time
 
 ################## core.py #####################
 ## core functionality of Expecto Botronum     ##
@@ -327,6 +328,7 @@ class Connection():
         self.roomList = []
         self.userList = {}
         self.commands = {}
+        self.lastSentTime = 0
         self.bot = User(config.username, self)
         for module in config.modules:
             self.commands.update(importlib.import_module(module).Module().commands)
@@ -391,7 +393,11 @@ class Connection():
         Arguments:
             message {string} -- the message to send
         """        
+        timeDiff = ((time.time() * 1000.0) - self.lastSentTime) - 600.0 # throttle = 600
+        if timeDiff < 0:
+            time.sleep((-1 * timeDiff) / 1000.0)
         self.websocket.send(message)
+        self.lastSentTime = time.time() * 1000.0
 
     def getRoomByID(self, id):
         """Gets the Room object corresponding to an ID
