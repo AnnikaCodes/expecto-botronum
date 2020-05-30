@@ -16,13 +16,16 @@ class Module:
         self.commands = {
             "reverse": self.reverse, "wallrev": self.reverse, "addreversioword": self.addReversioWord,
             "removereversioword": self.removeReversioWord, "rmreversioword": self.removeReversioWord,
-            "deletereversioword": self.removeReversioWord
+            "addpoint": self.addPoints, "addpoints": self.addPoints, "deletereversioword": self.removeReversioWord, 
+            "showpoints": self.showLB, "lb": self.showLB, "showlb": self.showLB
         }
         
         self.reversioWords = data.get("reversioWords")
         if not self.reversioWords:
             self.reversioWords = {}
             data.store("reversioWords", {})
+        
+        self.minigamePoints = {}
     
     def reverse(self, message):
         """Sends a reversed phrase for the Reversio game.
@@ -102,6 +105,56 @@ class Module:
         
         return message.respond("Permission denied.")
 
+    def addPoints(self, message):
+        """Adds points to the minigame leaderboard
+
+        Arguments:
+            message {Message} -- the Message object that invoked the command
+        """        
+        if not message.room: return message.respond("You can only add points in a room.")
+        if not message.sender.can("hostgame", message.room): return message.respond("Permission denied.")
+
+        if len(message.arguments) < 2:
+            return message.respond("Usage: ``" + config.commandCharacter + "addpoints [user], [optional number of points]``.")
+        userid = core.toID(message.arguments[1])
+        points = 1
+        if len(message.arguments) > 2 and self.isInt(message.arguments[2].strip()): points = int(message.arguments[2].strip())
+       
+        if message.room.id not in self.minigamePoints.keys(): self.minigamePoints[message.room.id] = {}
+        if userid not in self.minigamePoints[message.room.id].keys():
+            self.minigamePoints[message.room.id][userid] = points
+        else: 
+            self.minigamePoints[message.room.id][userid] += points
+        
+        return message.respond("Points added!")
+    
+    def showLB(self, message):
+        """Displays the minigame leaderboard
+
+        Arguments:
+            message {Message} -- the Message object that invoked the command
+        """
+        roomid = message.room.id if message.room else None
+        if not roomid:
+            if len(message.arguments) < 2: return message.respond("You must specify a room.")
+            roomid = core.toID(message.arguments[1])
+        
+        points = self.minigamePoints[roomid]
+        sortedUsers = sorted(points, key = points.get, reverse = True)
+        formattedPoints = ", ".join(["{user} (**{points}**)".format(user = key, points = points[key]) for key in sortedUsers])
+        return message.respond("**Scores**: " + formattedPoints)
+
+    def isInt(self, string):
+        """Returns True if a string represents an integer and False otherwise.
+
+        Arguments:
+            string {str} -- the string
+
+        Returns:
+            bool -- whether string is an integer or not
+        """
+        # Inspired by https://stackoverflow.com/questions/1265665/how-can-i-check-if-a-string-represents-an-int-without-using-try-except
+        return string[1:].isdigit() if string[0] == '-' else string.isdigit()
 
     def __str__(self):
         """String representation of the Module
