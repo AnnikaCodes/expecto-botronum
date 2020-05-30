@@ -9,6 +9,13 @@ import core
 ## by Annika        ##
 ######################
 
+TOUR_SETUP_COMMANDS = [
+    '/tour autostart 5',
+    '/tour autodq 2',
+    '/tour forcetimer on',
+    '/tour modjoin disallow'
+]
+
 class Module:
     """Represents a module, which may contain several commands
     """
@@ -17,7 +24,8 @@ class Module:
             "reverse": self.reverse, "wallrev": self.reverse, "addreversioword": self.addReversioWord,
             "removereversioword": self.removeReversioWord, "rmreversioword": self.removeReversioWord,
             "addpoint": self.addPoints, "addpoints": self.addPoints, "deletereversioword": self.removeReversioWord, 
-            "showpoints": self.showLB, "lb": self.showLB, "showlb": self.showLB
+            "showpoints": self.showLB, "lb": self.showLB, "showlb": self.showLB, "tour": self.startTournament,
+            "tournament": self.startTournament
         }
         
         self.reversioWords = data.get("reversioWords")
@@ -147,6 +155,23 @@ class Module:
             user = key, points = points[key]
         ) for key in sortedUsers])
         return message.respond(("**Scores**: " + formattedPoints) if formattedPoints else "There are no scores.")
+    
+    def startTournament(self, message):
+        """Starts a tournament
+
+        Arguments:
+            message {Message} -- the Message object that invoked the command
+        """
+        if not message.room: return message.respond("You cannot start a tournament in PMs.")
+        if not message.sender.can("hostgame", message.room): return message.respond("Permission denied.")
+        if len(message.arguments) < 2: return message.respond(
+            "Usage: ``" + config.commandCharacter + "tournament [format]``."
+        )
+
+        format = " ".join(message.arguments[1:])
+        message.room.say("/tour new " + format + ",elim")
+        for command in TOUR_SETUP_COMMANDS:
+            message.room.say(command)
 
     def isInt(self, string):
         """Returns True if a string represents an integer and False otherwise.
