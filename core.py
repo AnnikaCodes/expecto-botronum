@@ -530,7 +530,9 @@ class Connection():
             string -- representation
         """
         return "Connection to {url} with commands {commands} in these rooms: {rooms}".format(
-            url = self.websocket.url, commands = str(self.commands), rooms = str(self.roomList)
+            url = self.websocket.url, 
+            commands = ", ".join(self.commands.keys()),
+            rooms = ", ".join([str(room.id) for room in self.roomList])
         )
     
 if __name__ == "__main__":
