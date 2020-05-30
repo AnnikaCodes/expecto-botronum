@@ -32,15 +32,15 @@ class Module:
         """
         if message.room:
             roomID = message.room.id
-        elif len(message.arguments) > 1:
+        elif message.arguments and len(message.arguments) > 1:
             roomID = core.toID(message.arguments[1])
         else:
             return message.respond("You must specify a room.")
 
-        if not self.reversioWords[roomID] or len(self.reversioWords[roomID]) < 1:
+        if roomID not in self.reversioWords.keys() or len(self.reversioWords[roomID]) < 1:
             return message.respond("There are no reversio words for the room " + roomID + ".")
         response = "/wall " if (not message.room) or message.sender.can("wall", message.room) else ""
-        response += random.choice(self.reversioWords[roomID])
+        response += random.choice(self.reversioWords[roomID]).lower()[::-1].strip()
         message.respond(response)
     
     def addReversioWord(self, message):
@@ -59,12 +59,14 @@ class Module:
             word = ",".join(message.arguments[2:])
         if not room:
             return message.respond("You must specify a valid room.")
-        
-        if message.sender.can("addfact", message.room):
-            if not self.reversioWords[message.room.id]:
-                self.reversioWords[message.room.id] = [word]
+        word = word.strip().lower()
+
+        if message.sender.can("addfact", room):
+            if room.id not in self.reversioWords.keys():
+                self.reversioWords[room.id] = [word]
             else:
-                self.reversioWords[message.room.id].append(word)
+                self.reversioWords[room.id].append(word)
+            data.store("reversioWords", self.reversioWords)
             return message.respond("Word added!")
         
         return message.respond("Permission denied.")
@@ -85,15 +87,16 @@ class Module:
             word = ",".join(message.arguments[2:])
         if not room:
             return message.respond("You must specify a valid room.")
+        word = word.strip().lower()
         
-        if message.sender.can("addfact", message.room):
-            if not self.reversioWords[message.room.id] or word not in self.reversioWords[message.room.id]:
+        if message.sender.can("addfact", room):
+            if room.id not in self.reversioWords.keys() or word not in self.reversioWords[room.id]:
                 return message.respond("Word {word} not found in the Reversio database for {room}.".format(
                     word = word,
                     room = room.id
                 ))
             else:
-                self.reversioWords[message.room.id].remove(word)
+                self.reversioWords[room.id].remove(word)
                 data.store("reversioWords", self.reversioWords)
                 return message.respond("Word removed!")
         

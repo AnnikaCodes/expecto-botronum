@@ -146,6 +146,8 @@ class User():
         Returns:
             [bool] -- True if the user can do the action and False otherwise
         """
+        if not room:
+            return
         if action not in ['broadcast', 'addfact', 'hostgame', 'wall', 'html', 'manage', 'admin']:
             log("E: User.can(): {action} isn't a valid action".format(action=action))
         return ((action == 'broadcast' and self.id in room.usersWithRankGEQ(config.broadcastRank)) or
