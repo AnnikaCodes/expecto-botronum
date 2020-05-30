@@ -138,11 +138,15 @@ class Module:
         if not roomid:
             if len(message.arguments) < 2: return message.respond("You must specify a room.")
             roomid = core.toID(message.arguments[1])
+        if not roomid: return message.respond("You must specify a room.")
+        if roomid not in self.minigamePoints.keys(): return message.respond("There are no scores.")
         
-        points = self.minigamePoints[roomid]
+        points = self.minigamePoints[roomid] 
         sortedUsers = sorted(points, key = points.get, reverse = True)
-        formattedPoints = ", ".join(["{user} (**{points}**)".format(user = key, points = points[key]) for key in sortedUsers])
-        return message.respond("**Scores**: " + formattedPoints)
+        formattedPoints = ", ".join(["{user} (**{points}**)".format(
+            user = key, points = points[key]
+        ) for key in sortedUsers])
+        return message.respond(("**Scores**: " + formattedPoints) if formattedPoints else "There are no scores.")
 
     def isInt(self, string):
         """Returns True if a string represents an integer and False otherwise.
