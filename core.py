@@ -278,9 +278,10 @@ class Message():
             pass
         else:
             log("DEBUG: Message() of unknown type {type}: {raw}".format(type = self.type, raw = raw))
-        if self.body and ' ' in self.body:
+        if self.body:
             spaceSplit = self.body.split(' ', 1)
-            self.arguments = [spaceSplit[0]] + spaceSplit[1].split(config.separator)
+            self.arguments = [spaceSplit[0]]
+            if len(spaceSplit) > 1: self.arguments += spaceSplit[1].split(config.separator)
     
     def respond(self, response):
         """Responds to the message, in a room or in PMs
