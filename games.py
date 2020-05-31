@@ -16,6 +16,12 @@ TOUR_SETUP_COMMANDS = [
     '/tour modjoin disallow'
 ]
 
+UNO_COMMANDS = [
+    '/uno create 1000',
+    '/uno timer 45',
+    '/uno autostart 120'
+]
+
 class Module:
     """Represents a module, which may contain several commands
     """
@@ -24,8 +30,8 @@ class Module:
             "reverse": self.reverse, "wallrev": self.reverse, "addreversioword": self.addReversioWord,
             "removereversioword": self.removeReversioWord, "rmreversioword": self.removeReversioWord,
             "addpoint": self.addPoints, "addpoints": self.addPoints, "deletereversioword": self.removeReversioWord, 
-            "showpoints": self.showLB, "lb": self.showLB, "showlb": self.showLB, "tour": self.startTournament,
-            "tournament": self.startTournament
+            "showpoints": self.showLB, "lb": self.showLB, "showlb": self.showLB, "tour": self.startGame,
+            "tournament": self.startGame, "uno": self.startGame
         }
         
         self.reversioWords = data.get("reversioWords")
@@ -156,22 +162,28 @@ class Module:
         ) for key in sortedUsers])
         return message.respond(("**Scores**: " + formattedPoints) if formattedPoints else "There are no scores.")
     
-    def startTournament(self, message):
-        """Starts a tournament
+    def startGame(self, message):
+        """Starts a tournament or game of UNO
 
         Arguments:
             message {Message} -- the Message object that invoked the command
         """
-        if not message.room: return message.respond("You cannot start a tournament in PMs.")
+        if not message.room: return message.respond("You cannot start a game in PMs.")
         if not message.sender.can("hostgame", message.room): return message.respond("Permission denied.")
-        if len(message.arguments) < 2: return message.respond(
+        isTournament = True if message.arguments[0].strip(config.commandCharacter) in ['tour', 'tournament'] else False
+        if isTournament and len(message.arguments) < 2: return message.respond(
             "Usage: ``" + config.commandCharacter + "tournament [format]``."
         )
 
-        format = " ".join(message.arguments[1:])
-        message.room.say("/tour new " + format + ",elim")
-        for command in TOUR_SETUP_COMMANDS:
+        if isTournament:
+            commands = TOUR_SETUP_COMMANDS
+            format = " ".join(message.arguments[1:])
+            message.room.say("/tour new " + format + ",elim")
+        else: 
+            commands = UNO_COMMANDS
+        for command in commands:
             message.room.say(command)
+
 
     def isInt(self, string):
         """Returns True if a string represents an integer and False otherwise.
