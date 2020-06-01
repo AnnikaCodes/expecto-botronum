@@ -1,6 +1,8 @@
 #!/usr/bin/python3
 
 import config
+import data
+
 import re
 import websocket
 import requests
@@ -58,6 +60,8 @@ class Room():
         """
         self.id = toID(name)
         self.auth = {}
+        jpData = data.get("joinphrases")
+        self.joinphrases = jpData[self.id] if jpData else {}
         self.connection = connection
         self.join()
 
@@ -108,6 +112,31 @@ class Room():
             if rank in self.auth:
                 userIDList.extend(self.auth[rank])
         return userIDList
+    
+    def addJoinphrase(self, joinphrase, userid):
+        """Adds a joinphrase for the given user ID in the room
+
+        Arguments:
+            joinphrase {string} -- the joinphrase
+            userid {string that is an ID} -- the ID of the user to give the joinphrase to
+        """        
+        self.joinphrases[userid] = joinphrase
+        jpData = data.get("joinphrases") # there might be a race condition here; I'm not sure
+        if not jpData: jpData = {}
+        jpData[self.id] = self.joinphrases
+        data.store("joinphrases", jpData)
+    
+    def removeJoinphrase(self, userid):
+        """Removes the joinphrase for the given user ID in the room
+
+        Arguments:
+            userid {string that is an ID} -- the ID of the user whose joinphrase is being deleted
+        """        
+        if userid in self.joinphrases.keys(): del self.joinphrases[userid]
+        jpData = data.get("joinphrases") # there might be a race condition here; I'm not sure
+        if not jpData: jpData = {}
+        jpData[self.id] = self.joinphrases
+        data.store("joinphrases", jpData)
     
     def __str__(self):
         """String representation of the Room
@@ -387,6 +416,9 @@ class Connection():
         message = Message(rawMessage, self)
         if message.challstr:
             self.login(message.challstr)
+        elif message.type == 'join' and message.sender.id in message.room.joinphrases.keys():
+            # Handle joinphrases
+            message.room.say(message.room.joinphrases[message.sender.id])
         elif message.type in ['chat', 'pm'] and message.body[0] == config.commandCharacter:
             potentialCommand = message.body.split(' ')[0].strip(config.commandCharacter).lower()
             if potentialCommand in self.commands:
