@@ -388,7 +388,7 @@ class Connection():
         if message.challstr:
             self.login(message.challstr)
         elif message.type in ['chat', 'pm'] and message.body[0] == config.commandCharacter:
-            potentialCommand = message.body.split(' ')[0].strip(config.commandCharacter)
+            potentialCommand = message.body.split(' ')[0].strip(config.commandCharacter).lower()
             if potentialCommand in self.commands:
                 self.commands[potentialCommand](message) # Invoke the command 
 

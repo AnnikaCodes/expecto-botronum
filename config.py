@@ -8,7 +8,7 @@ import json
 CONFIG_PATH = 'config.json'
 CONFIG_VARS = ['username', 'password', 'websocketURL', 'loglevel', 'sysops', 'broadcastRank',
     'addfactRank', 'hostgameRank', 'manageRank', 'roomRanksInOrder', 'rooms', 'separator', 'modules',
-    'commandCharacter', 'superheroAPIKey', 'reversioRooms']
+    'commandCharacter', 'superheroAPIKey', 'reversioRooms', 'pastebinAPIKey']
 
 def loadConfig():
     """Loads configuration from CONFIG_PATH
@@ -29,5 +29,5 @@ def loadConfig():
 
 username, password, websocketURL, loglevel, sysops, broadcastRank, addfactRank, \
     hostgameRank, manageRank, roomRanksInOrder, rooms, separator, modules, \
-    commandCharacter, superheroAPIKey, reversioRooms = loadConfig()
+    commandCharacter, superheroAPIKey, reversioRooms, pastebinAPIKey = loadConfig()
 # the order of these needs to be the same as in CONFIG_VARS
