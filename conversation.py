@@ -13,7 +13,9 @@ class Module:
     """
     def __init__(self):
         self.commands = {
-            "fact": self.showSnippet, "topic": self.showSnippet, "addfact": self.addSnippet, "addtopic": self.addSnippet
+            "fact": self.showSnippet, "topic": self.showSnippet, "addfact": self.manageSnippet, 
+            "addtopic": self.manageSnippet, "deletefact": self.manageSnippet, "removefact": self.manageSnippet,
+            "deletetopic": self.manageSnippet, "removetopic": self.manageSnippet
         }
         self.factList = data.get("factList")
         self.topicList = data.get("topicList")
@@ -38,7 +40,7 @@ class Module:
         
         message.respond(random.choice(snippetList[roomid]))
     
-    def addSnippet(self, message):
+    def manageSnippet(self, message):
         if message.room and len(message.arguments) > 1:
             room = message.room
             snippet = ",".join(message.arguments[1:]).strip()
@@ -50,22 +52,30 @@ class Module:
 
         if not message.sender.can("addfact", room): return message.respond("Permission denied.")
         isFact = "fact" in message.arguments[0]
+        isAddition = "add" in message.arguments[0]
         snippetList = self.factList if isFact else self.topicList
         if not snippetList: snippetList = {room.id: []}
         if room.id not in snippetList.keys(): snippetList[room.id] = []
 
-        if snippet not in snippetList[room.id]:
+        if snippet not in snippetList[room.id] and isAddition:
             snippetList[room.id].append(snippet)
-            if isFact: 
-                self.factList = snippetList
-                data.store("factList", self.factList)
-            else:
-                self.topicList = snippetList
-                data.store("topicList", self.topicList)
-            return message.respond(("Fact" if isFact else "Topic") + " was successfully added!")
+            message.respond(("Fact" if isFact else "Topic") + " was successfully added!")
+        elif snippet in snippetList[room.id] and not isAddition:
+            snippetList[room.id].remove(snippet)
+            message.respond(("Fact" if isFact else "Topic") + " was successfully removed!")
         else:
-            return message.respond("That " + ("fact" if isFact else "topic") + " is already in the room's list!")
+            return message.respond(
+                "That " + 
+                ("fact" if isFact else "topic") + " is " + 
+                ("already" if isAddition else "not") + " in the room's list!"
+            )
 
+        if isFact: 
+            self.factList = snippetList
+            data.store("factList", self.factList)
+        else:
+            self.topicList = snippetList
+            data.store("topicList", self.topicList)
 
     
     def __str__(self):
