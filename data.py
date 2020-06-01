@@ -13,7 +13,7 @@ def __loadJSON():
     Returns:
         dictionary -- the raw data
     """    
-    f = open(DATA_PATH, 'r')
+    f = open(DATA_PATH, 'r', encoding = 'utf-8')
     return json.load(f)
 
 def get(variableName):
@@ -39,5 +39,5 @@ def store(variableName, value):
     """    
     data = __loadJSON()
     data[variableName] = value
-    f = open(DATA_PATH, 'w')
+    f = open(DATA_PATH, 'w', encoding = 'utf-8')
     json.dump(data, f)
