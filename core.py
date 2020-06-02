@@ -95,8 +95,7 @@ class Room():
         """Joins the room
         """
         self.connection.send("|/j " + self.id)
-        self.say('/roomauth')
-        self.say('/userlist')
+        self.say('/cmd roominfo ' + self.id)
 
     def usersWithRankGEQ(self, rank):
         """Gets a list of userids of the roomauth whose room rank is greater than or equal to a certain rank
@@ -271,38 +270,17 @@ class Message():
             self.sender = self.connection.getUser(toID(split[2]))
             if not self.sender: self.sender = User(split[2], self.connection)
             self.body = "|".join(split[4:]).strip('\n')
-        elif self.type == 'popup':
-            useridsFromPopup = lambda popupData : [userid.strip('*') for userid in popupData.split(", ")] 
-            if split[2] == 'Room Owners (#):':
-                roomName = split[-1].split(" is a ", 1)[0]
-                try:
-                    room = self.connection.getRoomByName(roomName)
-                except Exception as e:
-                    log("E: Message(): cannot parse auth popup for room {room}: {err}".format(room = roomName, err = str(e)))
-                
-                owners = bots = mods = drivers = voices = []
-                for i in range(len(split)):
-                    if split[i] == 'Room Owners (#):':
-                        owners = useridsFromPopup(split[i + 2])
-                    elif split[i] == 'Bots (*):':
-                        bots = useridsFromPopup(split[i + 2])
-                    elif split[i] == 'Moderators (@):':
-                        mods = useridsFromPopup(split[i + 2])
-                    elif split[i] == 'Drivers (%):':
-                        drivers = useridsFromPopup(split[i + 2])
-                    elif split[i] == 'Voices (+):':
-                        voices = useridsFromPopup(split[i + 2])
-                
-                authList = {'#': owners, '*': bots, '@': mods, '%': drivers, '+': voices}
-                room.updateAuth(authList)
-        elif self.type == 'html':
-            self.room = connection.getRoomByID(split[0].strip('>').strip('\n'))
-            if "users in this room:" in raw:
-                userList = split[2].split("users in this room:<br />")[1].strip("</div>").split(", ")
-                for user in userList:
-                    userObject = self.connection.getUser(toID(user))
-                    if not userObject: userObject = User(toID(user), self.connection)
-                    self.connection.userJoinedRoom(userObject, self.room)
+        elif self.type == 'queryresponse':
+            query = split[2]
+            if query == 'roominfo': 
+                roomData = json.loads(split[3])
+                room = self.connection.getRoomByID(roomData['id']) if 'id' in roomData.keys() else None
+                if room and 'auth' in roomData.keys(): room.updateAuth(roomData['auth'])
+                if room and 'users' in roomData.keys():
+                    for user in roomData['users']:
+                        userObject = self.connection.getUser(toID(user))
+                        if not userObject: userObject = User(toID(user), self.connection)
+                        self.connection.userJoinedRoom(userObject, room)
         elif self.type == 'init':
             pass
         else:
