@@ -501,7 +501,7 @@ class Connection():
             return
         else:
             for u in self.userList:
-                if u.id == user.id and room.id not in self.userList[u]:
+                if u.id == user.id:
                     self.userList[u].add(room.id)
                     return
     
