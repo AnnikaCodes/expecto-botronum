@@ -3,6 +3,7 @@ import core
 
 import pathlib
 from datetime import datetime
+import pytz
 
 ####### chatlog.py #######
 ## handles logging chat ##
@@ -61,22 +62,54 @@ class Chatlogger:
         """
         return "|".join([
             str(message.sender.id) if message.sender else '',
-            str((datetime.utcfromtimestamp(int(message.time)) if message.time else datetime.utcnow()).time()).split('.', 1)[0],
+            str(int(datetime.utcfromtimestamp(int(message.time)).astimezone(pytz.utc).timestamp())) if message.time else str(int(datetime.timestamp(datetime.utcnow()))),
             str(message.type) if message.type else '',
             str(message.senderName) if message.senderName else '',
             (str(message.body) if message.body else '') + '\n'
         ])
-
-class Module:
-    """Represents a module, which may contain several commands
-    """
-    def __init__(self):
-        self.commands = {}
     
-    def __str__(self):
-        """String representation of the Module
+    def search(self, roomid="", userid="", keyword=""):
+        """Searches chatlogs
+
+        Args:
+            roomid (str, optional): The ID of the room to search in. Defaults to "".
+            userid (str, optional): The user. Defaults to "".
+            keyword (str, optional): [description]. Defaults to "".
 
         Returns:
-            string -- representation
-        """
-        return "Chatlog module: handles chatlogging. Commands: " + ", ".join(self.commands.keys())
+            list: a list of matched messages (formatted as userid|time|type|senderName|body)
+        """        
+        results = []
+        searchDir = self.path.joinpath(roomid)
+        userSearch = (userid + '|') if userid else ""
+        if roomid and searchDir.is_dir():
+            for logFilePath in searchDir.iterdir():
+                for line in logFilePath.open('r').readlines():
+                    if line[:len(userSearch)] == userSearch and keyword in line.split('|',5)[5]: results.append(line)
+        return results
+    
+    def formatData(self, data):
+        """Formats data to text
+
+        Args:
+            data (string of form userid|time|type|senderName|body): the data
+
+        Returns:
+            string: a human-readable version of the message
+        """        
+        userid, time, msgType, senderName, body = data.split("|", 5)
+        try:
+            time = "[" + str(datetime.utcfromtimestamp(int(time)).time()) + "] "
+        except ValueError:
+            time = ""
+        if msgType in ['chat', 'pm']:
+            return time + "{sender}: {body}".format(
+                sender = senderName.strip(),
+                body = body.strip().strip('\n')
+            )
+        elif msgType == 'join':
+            return time + "{sender} joined".format(sender = senderName.strip())
+        elif msgType == 'leave':
+            return time + "{sender} left".format(sender = senderName.strip())
+        else:
+            return "Unparseable message"
