@@ -14,5 +14,6 @@
   "modules": [],
   "commandCharacter": "~",
   "superheroAPIKey": "",
-  "pastebinAPIKey": ""
+  "pastebinAPIKey": "",
+  "logchat": false
 }
