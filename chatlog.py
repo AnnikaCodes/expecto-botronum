@@ -132,3 +132,6 @@ class Chatlogger:
             return time + "{sender} left".format(sender = sender)
         else:
             return "Unparseable message"
+    
+    def __str__(self):
+        return "Chatlogger logging to path " + str(self.path.absolute()) + "/"
