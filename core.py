@@ -45,17 +45,6 @@ def toID(string):
     """
     return re.sub('[^0-9a-zA-Z]+', '', string).lower()
 
-def escapeHTML(string):
-    """Escapes a string for use in HTML responses.
-
-    Args:
-        string (str): the string to escape
-
-    Returns:
-        string: The escaped string
-    """
-    # TODO: implement this
-    return string
 ################
 ## Room Class ##
 ################
