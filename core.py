@@ -45,6 +45,17 @@ def toID(string):
     """
     return re.sub('[^0-9a-zA-Z]+', '', string).lower()
 
+def escapeHTML(string):
+    """Escapes a string for use in HTML responses.
+
+    Args:
+        string (str): the string to escape
+
+    Returns:
+        string: The escaped string
+    """
+    # TODO: implement this
+    return string
 ################
 ## Room Class ##
 ################
@@ -169,7 +180,7 @@ class User():
         """Checks if the user may perform an action
 
         Arguments:
-            action {string} -- the action (one of `broadcast`, `addfact`, `hostgame`, `wall`, `html`, `manage`, or `admin`)
+            action {string} -- the action (one of `broadcast`, `addfact`, `hostgame`, `searchlog`, `wall`, `html`, `manage`, or `admin`)
             room {Room} -- the room where the action is taking 
 
         Returns:
@@ -177,11 +188,12 @@ class User():
         """
         if not room:
             return
-        if action not in ['broadcast', 'addfact', 'hostgame', 'wall', 'html', 'manage', 'admin']:
+        if action not in ['broadcast', 'addfact', 'hostgame', 'searchlog', 'wall', 'html', 'manage', 'admin']:
             log("E: User.can(): {action} isn't a valid action".format(action=action))
         return ((action == 'broadcast' and self.id in room.usersWithRankGEQ(config.broadcastRank)) or
             (action == 'addfact' and self.id in room.usersWithRankGEQ(config.addfactRank)) or
             (action == 'hostgame' and self.id in room.usersWithRankGEQ(config.hostgameRank)) or
+            (action == 'searchlog' and self.id in room.usersWithRankGEQ(config.searchlogRank)) or
             (action == 'wall' and self.id in room.usersWithRankGEQ('%')) or
             (action == 'html' and self.id in room.usersWithRankGEQ('*')) or
             (action == 'manage' and self.id in room.usersWithRankGEQ(config.manageRank)) or
