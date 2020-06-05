@@ -4,6 +4,7 @@ import core
 import pathlib
 from datetime import datetime
 import pytz
+import html
 
 ####### chatlog.py #######
 ## handles logging chat ##
@@ -68,7 +69,7 @@ class Chatlogger:
             (str(message.body) if message.body else '') + '\n'
         ])
     
-    def search(self, roomid="", userid="", keyword=""):
+    def search(self, roomid="", userid="", keyword="", includeJoins=False):
         """Searches chatlogs
 
         Args:
@@ -87,7 +88,8 @@ class Chatlogger:
                 date = logFilePath.name.strip(".txt")
                 for line in logFilePath.open('r').readlines():
                     try:
-                        if line[:len(userSearch)] == userSearch and keyword in line.split('|',4)[4]: 
+                        split = line.split('|',4)
+                        if line[:len(userSearch)] == userSearch and keyword in split[4] and (includeJoins or (split[2] not in ['join', 'leave'])): 
                             if date not in results.keys(): 
                                 results[date] = [line]
                             else:
@@ -96,11 +98,12 @@ class Chatlogger:
                         pass
         return results
     
-    def formatData(self, data):
+    def formatData(self, data, isHTML=False):
         """Formats data to text
 
         Args:
             data (string of form userid|time|type|senderName|body): the data
+            isHTML (bool, optional): Whether to format as HTML. Defaults to False.
 
         Returns:
             string: a human-readable version of the message
@@ -108,16 +111,24 @@ class Chatlogger:
         userid, time, msgType, senderName, body = data.split("|", 4)
         try:
             time = "[" + str(datetime.utcfromtimestamp(int(time)).time()) + "] "
+            if isHTML: time = "<small>" + html.escape(time) + "</small>"
         except ValueError:
             time = ""
+        body = body.strip().strip('\n')
+        sender = senderName.strip()
+        if isHTML:
+            body = html.escape(body)
+            sender = html.escape(sender)
+        # allow people to add more ranks in config.roomRanksInOrder if they want to
+        if sender[0] in set(config.roomRanksInOrder).union(set('+%@*#&~')):
+            sender = "<small>{rank}</small><b>{name}</b>".format(rank = sender[0], name = sender[1:])
+        else:
+            sender = "<b>" + sender + "</b>"
         if msgType in ['chat', 'pm']:
-            return time + "{sender}: {body}".format(
-                sender = senderName.strip(),
-                body = body.strip().strip('\n')
-            )
+            return time + "{sender}: {body}".format(sender = sender, body = body)
         elif msgType == 'join':
-            return time + "{sender} joined".format(sender = senderName.strip())
+            return time + "{sender} joined".format(sender = sender)
         elif msgType == 'leave':
-            return time + "{sender} left".format(sender = senderName.strip())
+            return time + "{sender} left".format(sender = sender)
         else:
             return "Unparseable message"
