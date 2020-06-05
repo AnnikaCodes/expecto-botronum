@@ -406,7 +406,7 @@ class Connection():
             rawMessage {string} -- the raw message data
         """        
         message = Message(rawMessage, self)
-        self.chatlogger.handleMessage(message)
+        if config.logchat: self.chatlogger.handleMessage(message)
         if message.challstr:
             self.login(message.challstr)
         elif message.type == 'join' and message.sender.id in message.room.joinphrases.keys():

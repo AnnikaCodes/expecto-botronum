@@ -30,7 +30,6 @@ class Chatlogger:
         Args:
             message (Message): the Message
         """
-        if not config.logchat: return
         room = message.room.id if message.room else 'global'
         logFile = self.getFile(room, 'a')
         logFile.write(self.formatMessage(message))
