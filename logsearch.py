@@ -1,10 +1,14 @@
 import config
 import core
 
+import html
+
 ########## logsearch.py #########
 ## Handles searching chat logs ##
 ## by Annika                   ##
 #################################
+
+MAX_BUF_LEN = 102370 - 9 # from testing and len("</details>")
 
 class Module:
     """Represents a module, which may contain several commands
@@ -38,11 +42,14 @@ class Module:
         )
         htmlBuf = "<details><summary>{summary}</summary>".format(summary = summary)
         for day in resultsDict.keys():
-            htmlBuf += "<details><summary>" + day + "</summary>"
-            htmlBuf += "<br />".join([core.escapeHTML(message.connection.chatlogger.formatData(result)) for result in resultsDict[day]])
-            htmlBuf += "</details>"
+            attemptedBuf = '<details style="margin-left: 5px;"><summary>' + day + '</summary><div style="margin-left: 10px;">'
+            attemptedBuf += "<br />".join([message.connection.chatlogger.formatData(result, isHTML = True) for result in resultsDict[day]])
+            attemptedBuf += "</div></details>"
+            if len(htmlBuf) + len(attemptedBuf) < MAX_BUF_LEN: 
+                htmlBuf += attemptedBuf
+            else:
+                break
         htmlBuf += "</details>"
-        core.log("DEBUG: " + htmlBuf)
         message.respondHTML(htmlBuf)
 
     def __str__(self):
