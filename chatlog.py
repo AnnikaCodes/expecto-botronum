@@ -77,15 +77,23 @@ class Chatlogger:
             keyword (str, optional): [description]. Defaults to "".
 
         Returns:
-            list: a list of matched messages (formatted as userid|time|type|senderName|body)
+            dictionary: a dictionary of matched messages (formatted as {date (string): [userid|time|type|senderName|body] (list of day's results)})
         """        
-        results = []
+        results = {}
         searchDir = self.path.joinpath(roomid)
         userSearch = (userid + '|') if userid else ""
         if roomid and searchDir.is_dir():
             for logFilePath in searchDir.iterdir():
+                date = logFilePath.name.strip(".txt")
                 for line in logFilePath.open('r').readlines():
-                    if line[:len(userSearch)] == userSearch and keyword in line.split('|',5)[5]: results.append(line)
+                    try:
+                        if line[:len(userSearch)] == userSearch and keyword in line.split('|',4)[4]: 
+                            if date not in results.keys(): 
+                                results[date] = [line]
+                            else:
+                                results[date].append(line)
+                    except IndexError:
+                        pass
         return results
     
     def formatData(self, data):
@@ -97,7 +105,7 @@ class Chatlogger:
         Returns:
             string: a human-readable version of the message
         """        
-        userid, time, msgType, senderName, body = data.split("|", 5)
+        userid, time, msgType, senderName, body = data.split("|", 4)
         try:
             time = "[" + str(datetime.utcfromtimestamp(int(time)).time()) + "] "
         except ValueError:
