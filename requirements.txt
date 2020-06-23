@@ -5,7 +5,7 @@ pbwrap == 1.2.0
 
 # expecto-botronum/core.py: 8
 # expecto-botronum/superhero.py: 1
-requests == 2.12.4
+requests == 2.20.0
 
 # expecto-botronum/core.py: 7
 websocket_client == 0.57.0
