@@ -74,9 +74,9 @@ class Room():
         for key in authDict.keys():
             if key in self.auth:
                 for user in authDict[key]:
-                    if user not in self.auth[key]: self.auth[key].append(user)
+                    if user not in self.auth[key]: self.auth[key].add(user)
             else:
-                self.auth[key] = authDict[key]
+                self.auth[key] = set(authDict[key])
 
     def say(self, message):
         """Sends a message to the room
@@ -98,18 +98,18 @@ class Room():
         self.say('/cmd roominfo ' + self.id)
 
     def usersWithRankGEQ(self, rank):
-        """Gets a list of userids of the roomauth whose room rank is greater than or equal to a certain rank
+        """Gets a set of userids of the roomauth whose room rank is greater than or equal to a certain rank
 
         Arguments:
             rank {string} -- the minimum rank
 
         Returns:
-            [string] --  a list of userids for the roomauth whose room rank is greater than or equal to the given rank
+            set --  a set of userids for the roomauth whose room rank is greater than or equal to the given rank
         """
-        userIDList = []
+        userIDList = set()
         for rank in config.roomRanksInOrder[config.roomRanksInOrder.index(rank):]:
             if rank in self.auth:
-                userIDList.extend(self.auth[rank])
+                userIDList = userIDList.union(self.auth[rank])
         return userIDList
     
     def addJoinphrase(self, joinphrase, userid):
@@ -353,7 +353,7 @@ class Connection():
             on_message = self.onMessage,
             on_error = self.onError,
             on_close = self.onClose, on_open = self.onOpen)
-        self.roomList = []
+        self.roomList = set()
         self.userList = {}
         self.commands = {}
         self.lastSentTime = 0
@@ -415,7 +415,7 @@ class Connection():
         self.send('|/trn {name},0,{assertion}'.format(name = config.username, assertion = assertion))
         log("I: Connection.login(): joining rooms...")
         for room in config.rooms:
-            self.roomList.append(Room(room, self))
+            self.roomList.add(Room(room, self))
         log("I: Connection.login(): rooms joined successfully")
 
     def send(self, message):
@@ -476,13 +476,13 @@ class Connection():
         self.websocket.send("|/pm {user}, {message}".format(user = userid, message = message))
     
     def getUserRooms(self, user):
-        """Gets a list of the IDs (not objects) of the rooms that the user is in.
+        """Gets a set of the IDs (not objects) of the rooms that the user is in.
 
         Arguments:
             user {User} -- the user
 
         Returns:
-            list -- the roomids for the user's rooms, or None if the user isn't found
+            set -- the roomids for the user's rooms, or None if the user isn't found
         """        
         for u in self.userList:
             if u and u.id == user.id:
@@ -496,13 +496,13 @@ class Connection():
             user {User} -- the user who joined
             room {Room} -- the room they joined
         """        
-        if type(self.getUserRooms(user)) is not list:
-            self.userList[user] = [room.id]
+        if type(self.getUserRooms(user)) is not set:
+            self.userList[user] = {room.id}
             return
         else:
             for u in self.userList:
-                if u.id == user.id and room.id not in self.userList[u]:
-                    self.userList[u].append(room.id)
+                if u.id == user.id:
+                    self.userList[u].add(room.id)
                     return
     
     def userLeftRoom(self, user, room):
@@ -513,8 +513,8 @@ class Connection():
             room {Room} -- the room they joined
         """        
         userRooms = self.getUserRooms(user)
-        if type(userRooms) is not list or room.id not in userRooms:
-            # Do nothing if there's no room list for the user or the user wasnt marked as being in the room
+        if type(userRooms) is not set or room.id not in userRooms:
+            # Do nothing if there's no room set for the user or the user wasnt marked as being in the room
             return
         userRooms.remove(room.id)
         self.userList[self.getUser(user.id)] = userRooms
