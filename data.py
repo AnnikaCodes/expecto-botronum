@@ -12,9 +12,12 @@ def __loadJSON():
 
     Returns:
         dictionary -- the raw data
-    """    
-    f = open(DATA_PATH, 'r', encoding = 'utf-8')
-    return json.load(f)
+    """
+    try:
+        f = open(DATA_PATH, 'r', encoding = 'utf-8')
+        return json.load(f)
+    except FileNotFoundError:
+        return {}
 
 def get(variableName):
     """Gets the value of a variable that's stored in JSON
