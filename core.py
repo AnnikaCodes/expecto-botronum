@@ -9,11 +9,18 @@ import requests
 import json
 import importlib
 import time
+import pathlib
+import sys
 
 ################## core.py #####################
 ## core functionality of Expecto Botronum     ##
 ## by Annika                                  ##
 ################################################
+
+## add modules dir to the path
+basePath = pathlib.Path('.')
+modulesPath = basePath.joinpath('modules').absolute().resolve()
+if str(modulesPath) not in sys.path: sys.path.append(str(modulesPath))
 
 ######################
 ## Helper Functions ##
