@@ -7,6 +7,7 @@
   "broadcastRank": "+",
   "addfactRank": "+",
   "hostgameRank": "%",
+  "searchlogRank": "%",
   "manageRank": "#",
   "roomRanksInOrder": ["+", "%", "@", "*", "#"],
   "rooms": [],
@@ -14,5 +15,6 @@
   "modules": [],
   "commandCharacter": "~",
   "superheroAPIKey": "",
-  "pastebinAPIKey": ""
+  "pastebinAPIKey": "",
+  "logchat": false
 }
