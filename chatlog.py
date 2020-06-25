@@ -87,7 +87,7 @@ class Chatlogger:
                 date = logFilePath.name.strip(".txt")
                 for line in logFilePath.open('r').readlines():
                     try:
-                        split = line.split('|',4)
+                        split = line.lower().split('|',4)
                         if line[:len(userSearch)] == userSearch and \
                             keyword in split[-1] and \
                             (includeJoins or (split[2] not in ['join', 'leave'])): 

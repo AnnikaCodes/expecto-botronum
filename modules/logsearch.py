@@ -16,7 +16,7 @@ class Module:
     """
     def __init__(self):
         self.commands = {"logsearch": self.logsearch, "searchlogs": self.logsearch}
-    
+
     def logsearch(self, message):
         """Searches logs
 
@@ -26,9 +26,9 @@ class Module:
         if len(message.arguments) < 2: return message.respond(
             "Usage: ``{char}logsearch <room>, [optional user], [optional keyword(s)]``.".format(char = config.commandCharacter)
         )
-        roomid = core.toID(message.arguments[1])
-        userid = core.toID(message.arguments[2]) if len(message.arguments) > 2 else ""
-        keywords = ','.join(message.arguments[3:]) if len(message.arguments) > 3 else ""
+        roomid = core.toID(message.arguments[1]).lower()
+        userid = core.toID(message.arguments[2]).lower() if len(message.arguments) > 2 else ""
+        keywords = ','.join(message.arguments[3:]).lower() if len(message.arguments) > 3 else ""
 
         room = message.connection.getRoomByID(roomid)
         if not room: return message.respond("Invalid room: " + roomid)
@@ -46,7 +46,7 @@ class Module:
             attemptedBuf = '<details style="margin-left: 5px;"><summary>' + day + '</summary><div style="margin-left: 10px;">'
             attemptedBuf += "<br />".join([message.connection.chatlogger.formatData(result, isHTML = True) for result in resultsDict[day]])
             attemptedBuf += "</div></details>"
-            if len(htmlBuf) + len(attemptedBuf) < MAX_BUF_LEN: 
+            if len(htmlBuf) + len(attemptedBuf) < MAX_BUF_LEN:
                 htmlBuf += attemptedBuf
             else:
                 break
