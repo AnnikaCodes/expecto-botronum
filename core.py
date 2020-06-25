@@ -242,9 +242,11 @@ class Message():
         if self.type == 'challstr':
             self.challstr = "|".join(split[2:])
         elif self.type in ['c:', 'c', 'chat']:
+            roomid = split[0].strip('>').strip('\n') 
+            roomid = roomid if roomid else 'lobby'
             hasTimestamp = (self.type == 'c:')
             self.type = 'chat'
-            self.room = connection.getRoomByID(split[0].strip('>').strip('\n'))
+            self.room = connection.getRoomByID(roomid)
 
             currentSlice = 2
             if hasTimestamp:
@@ -262,14 +264,18 @@ class Message():
 
             self.body = "|".join(split[currentSlice:]).strip('\n')
         elif self.type in ['J', 'j', 'join']:
+            roomid = split[0].strip('>').strip('\n') 
+            roomid = roomid if roomid else 'lobby'
             self.type = 'join'
-            self.room = connection.getRoomByID(split[0].strip('>').strip('\n'))
+            self.room = connection.getRoomByID(roomid)
             self.sender = self.connection.getUser(toID(split[2]))
             if not self.sender: self.sender = User(split[2], self.connection)
             self.connection.userJoinedRoom(self.sender, self.room)
         elif self.type in ['L', 'l', 'leave']:
+            roomid = split[0].strip('>').strip('\n') 
+            roomid = roomid if roomid else 'lobby'
             self.type = 'leave'
-            self.room = connection.getRoomByID(split[0].strip('>').strip('\n'))
+            self.room = connection.getRoomByID(roomid)
             self.sender = self.connection.getUser(toID(split[2]))
             if not self.sender: self.sender = User(split[2], self.connection)
             self.connection.userLeftRoom(self.sender, self.room)
