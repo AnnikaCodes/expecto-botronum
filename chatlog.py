@@ -88,7 +88,9 @@ class Chatlogger:
                 for line in logFilePath.open('r').readlines():
                     try:
                         split = line.split('|',4)
-                        if line[:len(userSearch)] == userSearch and keyword in split[4] and (includeJoins or (split[2] not in ['join', 'leave'])): 
+                        if line[:len(userSearch)] == userSearch and \
+                            keyword in split[-1] and \
+                            (includeJoins or (split[2] not in ['join', 'leave'])): 
                             if date not in results.keys(): 
                                 results[date] = [line]
                             else:
@@ -107,7 +109,16 @@ class Chatlogger:
         Returns:
             string: a human-readable version of the message
         """        
-        userid, time, msgType, senderName, body = data.split("|", 4)
+        splitData = data.split("|", 4)
+        if len(splitData) == 5: 
+            userid, time, msgType, senderName, body = splitData
+        elif len(splitData) == 3: 
+            userid, msgType, body = splitData
+            time = ""
+            senderName = userid
+        else:
+            core.log("DEBUG: unexpected number of data items (expected 5 or 3, got " + str(len(splitData)) + " (data: " + data + ")")
+
         try:
             time = "[" + str(datetime.utcfromtimestamp(int(time)).time()) + "] "
             if isHTML: time = "<small>" + html.escape(time) + "</small>"
