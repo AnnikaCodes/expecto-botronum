@@ -108,7 +108,7 @@ class Chatlogger:
 
         Returns:
             string: a human-readable version of the message
-        """        
+        """
         splitData = data.split("|", 4)
         if len(splitData) == 5: 
             userid, time, msgType, senderName, body = splitData
@@ -129,9 +129,16 @@ class Chatlogger:
         if isHTML:
             body = html.escape(body)
             sender = html.escape(sender)
-        # allow people to add more ranks in config.roomRanksInOrder if they want to
-        if sender[0] in set(config.roomRanksInOrder).union(set('+%@*#&~')):
-            sender = "<small>{rank}</small><b>{name}</b>".format(rank = sender[0], name = sender[1:])
+
+        isAdmin = sender[:5] == '&amp;' if sender else False
+        htmlRankSet = set(config.roomRanksInOrder)
+        htmlRankSet.discard('&') # '&' rank is already handled with isAdmin
+        if sender and (isAdmin or sender[0] in htmlRankSet.union(set('+%@*#~'))):
+            rank = sender[:5] if isAdmin else sender[0]
+            sender = "<small>{rank}</small><b>{name}</b>".format(
+                rank = rank,
+                name = sender[len(rank):]
+            ) if isHTML else rank + sender[len(rank):]
         else:
             sender = "<b>" + sender + "</b>"
         if msgType in ['chat', 'pm']:
