@@ -2,6 +2,7 @@
 
 import config
 import data
+import chatlog
 
 import re
 import websocket
@@ -175,7 +176,7 @@ class User():
         """Checks if the user may perform an action
 
         Arguments:
-            action {string} -- the action (one of `broadcast`, `addfact`, `hostgame`, `wall`, `html`, `manage`, or `admin`)
+            action {string} -- the action (one of `broadcast`, `addfact`, `hostgame`, `searchlog`, `wall`, `html`, `manage`, or `admin`)
             room {Room} -- the room where the action is taking 
 
         Returns:
@@ -183,11 +184,12 @@ class User():
         """
         if not room:
             return
-        if action not in ['broadcast', 'addfact', 'hostgame', 'wall', 'html', 'manage', 'admin']:
+        if action not in ['broadcast', 'addfact', 'hostgame', 'searchlog', 'wall', 'html', 'manage', 'admin']:
             log("E: User.can(): {action} isn't a valid action".format(action=action))
         return ((action == 'broadcast' and self.id in room.usersWithRankGEQ(config.broadcastRank)) or
             (action == 'addfact' and self.id in room.usersWithRankGEQ(config.addfactRank)) or
             (action == 'hostgame' and self.id in room.usersWithRankGEQ(config.hostgameRank)) or
+            (action == 'searchlog' and self.id in room.usersWithRankGEQ(config.searchlogRank)) or
             (action == 'wall' and self.id in room.usersWithRankGEQ('%')) or
             (action == 'html' and self.id in room.usersWithRankGEQ('*')) or
             (action == 'manage' and self.id in room.usersWithRankGEQ(config.manageRank)) or
@@ -231,6 +233,7 @@ class Message():
         self.time = None
         self.type = None
         self.challstr = None
+        self.senderName = None
         self.connection = connection
 
         split = raw.split("|")
@@ -242,9 +245,11 @@ class Message():
         if self.type == 'challstr':
             self.challstr = "|".join(split[2:])
         elif self.type in ['c:', 'c', 'chat']:
+            roomid = split[0].strip('>').strip('\n') 
+            roomid = roomid if roomid else 'lobby'
             hasTimestamp = (self.type == 'c:')
             self.type = 'chat'
-            self.room = connection.getRoomByID(split[0].strip('>').strip('\n'))
+            self.room = connection.getRoomByID(roomid)
 
             currentSlice = 2
             if hasTimestamp:
@@ -252,6 +257,7 @@ class Message():
                 currentSlice += 1
 
             username = split[currentSlice].strip()
+            self.senderName = username
             currentSlice += 1
             if username[0] in config.roomRanksInOrder:
                 rank = username[0]
@@ -262,18 +268,25 @@ class Message():
 
             self.body = "|".join(split[currentSlice:]).strip('\n')
         elif self.type in ['J', 'j', 'join']:
+            roomid = split[0].strip('>').strip('\n') 
+            roomid = roomid if roomid else 'lobby'
             self.type = 'join'
-            self.room = connection.getRoomByID(split[0].strip('>').strip('\n'))
+            self.room = connection.getRoomByID(roomid)
+            self.senderName = split[2]
             self.sender = self.connection.getUser(toID(split[2]))
             if not self.sender: self.sender = User(split[2], self.connection)
             self.connection.userJoinedRoom(self.sender, self.room)
         elif self.type in ['L', 'l', 'leave']:
+            roomid = split[0].strip('>').strip('\n') 
+            roomid = roomid if roomid else 'lobby'
             self.type = 'leave'
-            self.room = connection.getRoomByID(split[0].strip('>').strip('\n'))
+            self.room = connection.getRoomByID(roomid)
+            self.senderName = split[2]
             self.sender = self.connection.getUser(toID(split[2]))
             if not self.sender: self.sender = User(split[2], self.connection)
             self.connection.userLeftRoom(self.sender, self.room)
         elif self.type == 'pm':
+            self.senderName = split[2]
             self.sender = self.connection.getUser(toID(split[2]))
             if not self.sender: self.sender = User(split[2], self.connection)
             self.body = "|".join(split[4:]).strip('\n')
@@ -365,6 +378,7 @@ class Connection():
         self.commands = {}
         self.lastSentTime = 0
         self.bot = User(config.username, self)
+        self.chatlogger = chatlog.Chatlogger('logs/')
         for module in config.modules:
             self.commands.update(importlib.import_module(module).Module().commands)
             # Note: if multiple modules have the same command then the later module will overwrite the earlier.
@@ -399,6 +413,7 @@ class Connection():
             rawMessage {string} -- the raw message data
         """        
         message = Message(rawMessage, self)
+        if config.logchat: self.chatlogger.handleMessage(message)
         if message.challstr:
             self.login(message.challstr)
         elif message.type == 'join' and message.sender.id in message.room.joinphrases.keys():
