@@ -25,7 +25,7 @@ class Chatlogger:
         if not self.path.is_dir(): core.log("E: Chatlogger(): logging directory is a file: " + self.path.as_posix())
     
     def handleMessage(self, message):
-        """Handles logging a message
+        """Handles logging a message to chatlogs
 
         Args:
             message (Message): the Message
@@ -35,11 +35,11 @@ class Chatlogger:
         logFile.write(self.formatMessage(message))
     
     def getFile(self, roomid, perms):
-        """Returns a file object corresponding to the room.
+        """Returns a file object corresponding to the room's chatlog file.
 
         Args:
             roomid (string that is an ID): the room
-            perms (string): the file perms (i.e.)
+            perms (string): the file perms (for example, 'r' or 'w')
 
         Returns:
             File: a file for the log file for that room and day
@@ -73,7 +73,7 @@ class Chatlogger:
 
         Args:
             roomid (str, optional): The ID of the room to search in. Defaults to "".
-            userid (str, optional): The user. Defaults to "".
+            userid (str, optional): The ID of the user whose messages are being searched for. Defaults to "".
             keyword (str, optional): [description]. Defaults to "".
 
         Returns:

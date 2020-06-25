@@ -8,7 +8,8 @@ import html
 ## by Annika                   ##
 #################################
 
-MAX_BUF_LEN = 102370 - 9 # from testing and len("</details>")
+# 102400 is the maximum size of a message to the PS! servers; 19 is the maximum length of a username.
+MAX_BUF_LEN = 102400 - 19 - len("/pminfobox ,") - len("</details>")
 
 class Module:
     """Represents a module, which may contain several commands
