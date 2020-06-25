@@ -36,9 +36,9 @@ class Module:
         resultsDict = message.connection.chatlogger.search(roomid = roomid, userid = userid, keyword = keywords)
 
         summary = "Chatlogs{query} in {room} from {user}".format(
-            query = " for " + keywords if keywords else "",
-            room = roomid,
-            user = userid if userid else "any user"
+            query = " for " + html.escape(keywords) if keywords else "",
+            room = html.escape(roomid),
+            user = html.escape(userid) if userid else "any user"
         )
         htmlBuf = "<details><summary>{summary}</summary>".format(summary = summary)
         for day in resultsDict.keys():
