@@ -23,27 +23,22 @@ class Module:
         Args:
             message (Message): the Message object that invoked the command
         """
-        if len(message.arguments) < 2: return message.respond(
-            "Usage: ``{char}logsearch <room>, [optional user], [optional keyword(s)]``.".format(char = config.commandCharacter)
-        )
+        if len(message.arguments) < 2: 
+            return message.respond(f"Usage: ``{config.commandCharacter}logsearch <room>, [optional user], [optional keyword]``.")
         roomid = core.toID(message.arguments[1]).lower()
         userid = core.toID(message.arguments[2]).lower() if len(message.arguments) > 2 else ""
-        keywords = ','.join(message.arguments[3:]).strip().lower() if len(message.arguments) > 3 else ""
+        keyword = ','.join(message.arguments[3:]).strip().lower() if len(message.arguments) > 3 else ""
 
         room = message.connection.getRoomByID(roomid)
-        if not room: return message.respond("Invalid room: " + roomid)
+        if not room: return message.respond(f"Invalid room: {roomid}")
         if not message.sender.can("searchlog", room): return message.respond("Permission denied.")
 
-        resultsDict = message.connection.chatlogger.search(roomid = roomid, userid = userid, keyword = keywords)
+        resultsDict = message.connection.chatlogger.search(roomid = roomid, userid = userid, keyword = keyword)
 
-        summary = "Chatlogs{query} in {room} from {user}".format(
-            query = " for " + html.escape(keywords) if keywords else "",
-            room = html.escape(roomid),
-            user = html.escape(userid) if userid else "any user"
-        )
-        htmlBuf = "<details><summary>{summary}</summary>".format(summary = summary)
+        summary = f"Chatlogs{f' for {html.escape(keyword)}' if keyword else ''} in {html.escape(roomid)} from {html.escape(userid) if userid else 'any user'}"
+        htmlBuf = f"<details><summary>{summary}</summary>"
         for day in resultsDict.keys():
-            attemptedBuf = '<details style="margin-left: 5px;"><summary>' + day + '</summary><div style="margin-left: 10px;">'
+            attemptedBuf = f'<details style="margin-left: 5px;"><summary>{day}</summary><div style="margin-left: 10px;">'
             attemptedBuf += "<br />".join([message.connection.chatlogger.formatData(result, isHTML = True) for result in resultsDict[day]])
             attemptedBuf += "</div></details>"
             if len(htmlBuf) + len(attemptedBuf) < MAX_BUF_LEN:
@@ -59,4 +54,4 @@ class Module:
         Returns:
             string -- representation
         """
-        return "Logsearch module: handles searching chatlogs. Commands: " + ", ".join(self.commands.keys())
+        return f"Logsearch module: handles searching chatlogs. Commands: {', '.join(self.commands.keys())}"
