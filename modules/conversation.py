@@ -40,7 +40,7 @@ class Module:
             return message.respond("You must specify a room.")
 
         if not snippetList or roomid not in snippetList.keys():
-            return message.respond("There are no " + ("facts" if isFact else "topics") + " for this room.")
+            return message.respond(f"There are no {'facts' if isFact else 'topics'} for this room.")
         
         message.respond(random.choice(snippetList[roomid]))
     
@@ -68,16 +68,13 @@ class Module:
 
         if snippet not in snippetList[room.id] and isAddition:
             snippetList[room.id].append(snippet)
-            message.respond(("Fact" if isFact else "Topic") + " was successfully added!")
+            message.respond(f"{'Fact' if isFact else 'Topic'} was successfully added!")
         elif snippet in snippetList[room.id] and not isAddition:
             snippetList[room.id].remove(snippet)
-            message.respond(("Fact" if isFact else "Topic") + " was successfully removed!")
+            message.respond(f" was successfully removed!")
         else:
-            return message.respond(
-                "That " + 
-                ("fact" if isFact else "topic") + " is " + 
-                ("already" if isAddition else "not") + " in the room's list!"
-            )
+            return message.respond(f"That {'Fact' if isFact else 'Topic'} is \
+                {'already' if isAddition else 'not'} in the room's list!")
 
         if isFact: 
             self.factList = snippetList
@@ -103,11 +100,8 @@ class Module:
         
         num = 0
         if snippetList and room.id in snippetList.keys(): num = len(snippetList[room.id])
-        return message.respond(
-            "There " + ("is " if num == 1 else "are ") + str(num) + 
-            (" fact" if isFact else " topic") + ("" if num == 1 else "s") +
-             " for the room " + room.id + "."
-        )
+        return message.respond(f"There {'is ' if num == 1 else 'are '} {str(num)} \
+            {'fact' if isFact else 'topic'}{'' if num == 1 else 's'} for the room {room.id}.")
     
     def exportSnippets(self, message):
         """Exports the snippets to Pastebin
@@ -125,12 +119,13 @@ class Module:
             return message.respond("You must specify a room.")
         if not message.sender.can("addfact", room): return message.respond("Permission denied.")
         if room.id not in snippetList.keys() or len(snippetList[room.id]) == 0: 
-            return message.respond("There are no " + ("facts" if isFact else "topics") + " for the room " + room.id + ".")
+            return message.respond(f"There are no {'facts' if isFact else 'topics'} for the room {room.id}.")
+
         pasteData = "\n".join(snippetList[room.id])
         return message.respond(str(Pastebin(config.pastebinAPIKey).create_paste(
             pasteData, # the data
             1, # unlisted paste
-            "{type} for room {room}".format(room = room.id, type = "Facts" if isFact else "Topics") # title
+            f"{'Facts' if isFact else 'Topics'} for room {room.id}" # title
         )))
 
     def __str__(self):
@@ -139,4 +134,4 @@ class Module:
         Returns:
             string -- representation
         """
-        return "Conversation module: helps start conversations by displaying snippets. Commands: " + ", ".join(self.commands.keys())
+        return f"Conversation module: helps start conversations by displaying snippets. Commands: {', '.join(self.commands.keys())}"
