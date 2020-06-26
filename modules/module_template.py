@@ -24,4 +24,4 @@ class Module:
         Returns:
             string -- representation
         """
-        return "Example module: provides an example for how to write modules. Commands: " + ", ".join(self.commands.keys())
+        return f"Example module: provides an example for how to write modules. Commands: {', '.join(self.commands.keys())}"
