@@ -36,8 +36,7 @@ class Module:
             return message.respond("You must specify a room.")
         if not phrase or not userid:
             return message.respond(
-                "Usage: ``" + config.commandCharacter + "addjoinphrase [user], [phrase]``. " +
-                "(``[room], [user], [phrase]`` in PMs)."
+                f"Usage: ``{config.commandCharacter}addjoinphrase {'[room], ' if not message.room else ''}[user], [phrase]``. "
             )
         if not message.sender.can("manage", room): return message.respond("Permission denied.")
         
@@ -61,10 +60,7 @@ class Module:
         else:
             return message.respond("You must specify a room.")
         if not userid:
-            return message.respond(
-                "Usage: ``" + config.commandCharacter + "removejoinphrase [user]``. " +
-                "(``[room], [user]`` in PMs)."
-            )
+            return message.respond(f"Usage: ``{config.commandCharacter}removejoinphrase {'[room], ' if not message.room else ''}[user]``. ")
         if not message.sender.can("manage", room): return message.respond("Permission denied.")
         
         room.removeJoinphrase(userid)
@@ -77,4 +73,4 @@ class Module:
         Returns:
             string -- representation
         """
-        return "Joinphrase module: handles joinphrases. Commands: " + ", ".join(self.commands.keys())
+        return f"Joinphrase module: handles joinphrases. Commands: {' ,'.join(self.commands.keys())}"
