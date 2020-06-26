@@ -55,7 +55,7 @@ class Module:
             return message.respond("You must specify a room.")
 
         if roomID not in self.reversioWords.keys() or len(self.reversioWords[roomID]) < 1:
-            return message.respond("There are no reversio words for the room " + roomID + ".")
+            return message.respond(f"There are no reversio words for the room {roomID}.")
         response = "/wall " if (not message.room) or message.sender.can("wall", message.room) else ""
         response += random.choice(self.reversioWords[roomID]).lower()[::-1].strip()
         message.respond(response)
@@ -67,7 +67,7 @@ class Module:
             message {Message} -- the Message object that invoked the command
         """
         if len(message.arguments) < 2:
-            return message.respond("Usage: ``" + config.commandCharacter + "addreversioword [room, if used in PMs], <word>``.")
+            return message.respond(f"Usage: ``{config.commandCharacter}addreversioword {'[room], ' if not message.room else ''}<word>``.")
         word = ",".join(message.arguments[1:])
         room = message.room
 
@@ -95,7 +95,7 @@ class Module:
             message {Message} -- the Message object that invoked the command
         """
         if len(message.arguments) < 2:
-            return message.respond("Usage: ``" + config.commandCharacter + "removereversioword [room, if used in PMs], <word>``.")
+            return message.respond(f"Usage: ``{config.commandCharacter}removereversioword {'[room], ' if not message.room else ''}<word>``.")
         word = ",".join(message.arguments[1:])
         room = message.room
 
@@ -108,10 +108,7 @@ class Module:
         
         if message.sender.can("addfact", room):
             if room.id not in self.reversioWords.keys() or word not in self.reversioWords[room.id]:
-                return message.respond("Word {word} not found in the Reversio database for {room}.".format(
-                    word = word,
-                    room = room.id
-                ))
+                return message.respond(f"Word {word} not found in the Reversio database for {room.id}.")
             else:
                 self.reversioWords[room.id].remove(word)
                 data.store("reversioWords", self.reversioWords)
@@ -129,7 +126,7 @@ class Module:
         if not message.sender.can("hostgame", message.room): return message.respond("Permission denied.")
 
         if len(message.arguments) < 2:
-            return message.respond("Usage: ``" + config.commandCharacter + "addpoints [user], [optional number of points]``.")
+            return message.respond(f"Usage: ``{config.commandCharacter}addpoints [user], [optional number of points]``.")
         userid = core.toID(message.arguments[1])
         points = 1
         if len(message.arguments) > 2 and self.isInt(message.arguments[2].strip()): points = int(message.arguments[2].strip())
@@ -157,10 +154,8 @@ class Module:
         
         points = self.minigamePoints[roomid] 
         sortedUsers = sorted(points, key = points.get, reverse = True)
-        formattedPoints = ", ".join(["{user} (**{points}**)".format(
-            user = key, points = points[key]
-        ) for key in sortedUsers])
-        return message.respond(("**Scores**: " + formattedPoints) if formattedPoints else "There are no scores.")
+        formattedPoints = ", ".join([f"{key} (**{points[key]}**)" for key in sortedUsers])
+        return message.respond(f"**Scores**: {formattedPoints}" if formattedPoints else "There are no scores.")
     
     def startGame(self, message):
         """Starts a tournament or game of UNO
@@ -172,13 +167,13 @@ class Module:
         if not message.sender.can("hostgame", message.room): return message.respond("Permission denied.")
         isTournament = True if message.arguments[0].strip(config.commandCharacter) in ['tour', 'tournament'] else False
         if isTournament and len(message.arguments) < 2: return message.respond(
-            "Usage: ``" + config.commandCharacter + "tournament [format]``."
+            f"Usage: ``{config.commandCharacter}tournament [format]``."
         )
 
         if isTournament:
             commands = TOUR_SETUP_COMMANDS
             format = " ".join(message.arguments[1:])
-            message.room.say("/tour new " + format + ",elim")
+            message.room.say(f"/tour new {format},elim")
         else: 
             commands = UNO_COMMANDS
         for command in commands:
@@ -203,4 +198,4 @@ class Module:
         Returns:
             string -- representation
         """
-        return "Games module: assists with the hosting of games. Commands: " + ", ".join(self.commands.keys())
+        return f"Games module: assists with the hosting of games. Commands: {', '.join(self.commands.keys())}"

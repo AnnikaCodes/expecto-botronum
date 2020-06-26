@@ -21,8 +21,8 @@ def loadConfig():
     # make sure we're not missing anything
     for configItem in CONFIG_VARS:
         if configItem not in configData:
-            # We can't use core.log because config.loglevel doesn't exist yet
-            print("E: {item} not found in config.json".format(item = configItem))
+            # We can't use core.log() because config.loglevel doesn't exist yet
+            print(f"E: {configItem} not found in config.json")
         else:
             returnValue.append(configData[configItem])
     return returnValue

@@ -29,7 +29,7 @@ class Module:
         """        
         text = config.separator.join(message.arguments[1:])
         for vowel in list("AaEeIiOoUu"):
-            text = text.replace(vowel, (vowel + 'w' + vowel))
+            text = text.replace(vowel, f"{vowel}w{vowel}")
         message.respond(text)
 
     
@@ -59,7 +59,7 @@ class Module:
               response = str(err)
         else:
             message.respond("Permission denied. This request has been logged.")
-            core.log("W: base.eval(): eval permission denied for userid: " + message.sender.id)
+            core.log(f"W: base.eval(): eval permission denied for userid: {message.sender.id}")
             return
         response = "!code " + ("\n" if "\n" not in response else "") + response
         message.respond(response)
@@ -71,15 +71,15 @@ class Module:
             message {Message} -- the Message object that invoked the command
         """
         if len(message.arguments) not in range(1,4):
-            message.respond("Usage: ``" + config.commandCharacter + "timer <duration>, <optional message>``")
+            message.respond(f"Usage: ``{config.commandCharacter}timer <duration>, <optional message>``")
             return
         response = "/wall " if message.type == 'pm' or message.connection.bot.can('wall', message.room) else ""
-        response += message.arguments[2] if len(message.arguments) > 2 else "Timer set by {user} is up".format(user = message.sender.name)
-        duration = 5.0
+        response += message.arguments[2] if len(message.arguments) > 2 else f"Timer set by {message.sender.name} is up"
+
         try:
             duration = float(message.arguments[1])
         except ValueError:
-            message.respond(message.arguments[1] + " isn't a valid duration")
+            message.respond(f"{message.arguments[1]} isn't a valid duration")
             return
         threading.Timer(duration, message.respond, args = [response]).start()
 
@@ -90,7 +90,7 @@ class Module:
             message {Message} -- the Message object that invoked the command
         """
         if not message.arguments or len(message.arguments) < 3:
-            return message.respond("Usage: ``" + config.commandCharacter + "do <room>, <message>``.")
+            return message.respond(f"Usage: ``{config.commandCharacter}do <room>, <message>``.")
         room = message.connection.getRoomByName(message.arguments[1])
         if room:
             if not message.sender.can("manage", room): 
@@ -98,7 +98,7 @@ class Module:
             command = ",".join(message.arguments[2:]).strip()
             return room.say(command)
         else:
-            return message.respond(message.arguments[1] + " isn't a room I'm in.")
+            return message.respond(f"{message.arguments[1]} isn't a room I'm in.")
 
     def __str__(self):
         """String representation of the Module
@@ -106,4 +106,4 @@ class Module:
         Returns:
             string -- representation
         """
-        return "Base module: provides basic bot functionality. Commands: " + ", ".join(self.commands.keys())
+        return f"Base module: provides basic bot functionality. Commands: {', '.join(self.commands.keys())}"
