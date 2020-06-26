@@ -92,7 +92,7 @@ class Room():
         Arguments:
             message {string} -- the message to send
         """
-        self.connection.send(self.id + "|" + message)
+        self.connection.send(f"{self.id}|{message}")
 
     def leave(self):
         """Leaves the room
@@ -102,8 +102,8 @@ class Room():
     def join(self):
         """Joins the room
         """
-        self.connection.send("|/j " + self.id)
-        self.say('/cmd roominfo ' + self.id)
+        self.connection.send(f'|/j {self.id}')
+        self.say(f'/cmd roominfo {self.id}')
 
     def usersWithRankGEQ(self, rank):
         """Gets a set of userids of the roomauth whose room rank is greater than or equal to a certain rank
@@ -151,7 +151,7 @@ class Room():
         Returns:
             string -- representation
         """        
-        return "Room: {id}; auth: {auth}".format(id = self.id, auth = self.auth)
+        return f"Room: {self.id}; auth: {self.auth}"
 
 ################
 ## User Class ##
@@ -185,7 +185,7 @@ class User():
         if not room:
             return
         if action not in ['broadcast', 'addfact', 'hostgame', 'searchlog', 'wall', 'html', 'manage', 'admin']:
-            log("E: User.can(): {action} isn't a valid action".format(action=action))
+            log(f"E: User.can(): {action} isn't a valid action")
         return ((action == 'broadcast' and self.id in room.usersWithRankGEQ(config.broadcastRank)) or
             (action == 'addfact' and self.id in room.usersWithRankGEQ(config.addfactRank)) or
             (action == 'hostgame' and self.id in room.usersWithRankGEQ(config.hostgameRank)) or
@@ -209,8 +209,7 @@ class User():
         Returns:
             string -- representation
         """
-        return "User: {name}; id: {id}, is {admin} bot admin".format(
-            name = self.name, id = self.id, admin = "a" if self.isAdmin else "not a")
+        return f"User: {self.name}; id: {self.id}{'; is a bot admin' if self.isAdmin else ''}"
 
 ###################
 ## Message Class ##
@@ -304,7 +303,7 @@ class Message():
         elif self.type == 'init':
             pass
         else:
-            log("DEBUG: Message() of unknown type {type}: {raw}".format(type = self.type, raw = raw))
+            log(f"DEBUG: Message() of unknown type {self.type}: {raw}")
         if self.body:
             spaceSplit = self.body.split(' ', 1)
             self.arguments = [spaceSplit[0]]
@@ -318,7 +317,7 @@ class Message():
         Arguments:
             response {string} -- the response to be sent
         """ 
-        log("DEBUG: responding " + response)       
+        log(f"DEBUG: responding {response}")       
         if self.room and self.sender.can("broadcast", self.room):
             self.room.say(response)
         elif self.sender and not self.room:
@@ -333,17 +332,14 @@ class Message():
             html {string} -- the html to be sent
         """
         if self.room and self.sender.can("broadcast", self.room):
-            return self.room.say("/adduhtml expectobotronum," + html)
+            return self.room.say(f"/adduhtml expectobotronum,{html}")
         elif self.sender and not self.room:
             possibleRoomIDs = [r for r in self.connection.getUserRooms(self.sender) \
                 if r in self.connection.getUserRooms(self.connection.bot)]
             for possibleRoom in possibleRoomIDs:
                 possibleRoom = self.connection.getRoomByID(possibleRoom)
                 if possibleRoom and self.connection.bot.can("html", possibleRoom):
-                    return possibleRoom.say("/pminfobox {user},{html}".format(
-                        user = self.sender.id,
-                        html = html.replace('\n', '') # multiline doesnt work for /pminfobox
-                    ))
+                    return possibleRoom.say(f"/pminfobox {self.sender.id}," + html.replace('\n', ''))
 
     def __str__(self):
         """String representation of the Message
@@ -351,11 +347,16 @@ class Message():
         Returns:
             string -- representation
         """
-        # so many ternary operators, sorry
-        return "Message: " + (self.body if self.body else "") + (" from User(" + str(self.sender) + ")" if self.sender else "") \
-            + (" in Room(" + str(self.room) + ")" if self.room else "") + (" at " + str(self.time) if self.time else "") \
-            + (" of type " + self.type if self.type else "") + (" with challstr " + self.challstr if self.challstr else "") \
-            + (" with arguments " + str(self.arguments) if self.arguments else "")
+        buf = "Message"
+        if self.body: buf += f" with content {self.body}"
+        if self.sender: buf += f" from User({str(self.sender)})"
+        if self.senderName: buf += f"sent by {self.senderName}"
+        if self.room: buf += f" in Room({str(self.room)})"
+        if self.time: buf += f" at {str(self.time)}"
+        if self.type: buf += f" of type {self.type}"
+        if self.challstr: buf += f" with challstr {self.challstr}"
+        if self.arguments: buf += f" with arguments {self.arguments}"
+        return buf
 
 
 ######################
@@ -382,7 +383,7 @@ class Connection():
         for module in config.modules:
             self.commands.update(importlib.import_module(module).Module().commands)
             # Note: if multiple modules have the same command then the later module will overwrite the earlier.
-        log("I: Connection(): Loaded the following commands: " + ", ".join(self.commands.keys()))
+        log(f"I: Connection(): Loaded the following commands: {', '.join(self.commands.keys())}")
 
     def onError(self, ws, error):
         """Handles errors on the websocket
@@ -391,7 +392,7 @@ class Connection():
             ws {websocket} -- the websocket that's connected to PS
             error {string? probably} -- the error
         """        
-        log("E: Connection.onError(): websocket error: {error}".format(error = error))
+        log(f"E: Connection.onError(): websocket error: {error}")
 
     def onClose(self, ws):
         """Logs when the connection closes
@@ -434,7 +435,7 @@ class Connection():
         loginInfo = {'act': 'login', 'name': config.username, 'pass': config.password, 'challstr': challstr}
         loginResponse = requests.post('http://play.pokemonshowdown.com/action.php', data = loginInfo).content
         assertion = json.loads(loginResponse[1:].decode('utf-8'))['assertion']
-        self.send('|/trn {name},0,{assertion}'.format(name = config.username, assertion = assertion))
+        self.send(f"|/trn {config.username},0,{assertion}")
         log("I: Connection.login(): joining rooms...")
         for room in config.rooms:
             self.roomList.add(Room(room, self))
@@ -465,7 +466,7 @@ class Connection():
         if len(objects) == 0:
             return None
         elif len(objects) > 1:
-            log("W: Connection.getRoomByID(): more than 1 Room object for room " + id)
+            log(f"W: Connection.getRoomByID(): more than 1 Room object for room {id}")
         return objects[0]
 
     def getRoomByName(self, name):
@@ -486,7 +487,7 @@ class Connection():
             room {Room} -- the room to send the message to
             message {string} -- the message to send
         """
-        self.websocket.send(room + "|" + message)
+        self.websocket.send(f"{room}|{message}")
 
     def whisper(self, userid, message):
         """PMs a message to a user
@@ -495,7 +496,7 @@ class Connection():
             userid {string in ID format} -- the user to PM
             message {string} -- the message to PM
         """
-        self.websocket.send("|/pm {user}, {message}".format(user = userid, message = message))
+        self.websocket.send(f"|/pm {userid}, {message}")
     
     def getUserRooms(self, user):
         """Gets a set of the IDs (not objects) of the rooms that the user is in.
@@ -536,7 +537,7 @@ class Connection():
         """        
         userRooms = self.getUserRooms(user)
         if type(userRooms) is not set or room.id not in userRooms:
-            # Do nothing if there's no room set for the user or the user wasnt marked as being in the room
+            # Do nothing if there's no room set for the user or the user wasn't marked as being in the room
             return
         userRooms.remove(room.id)
         self.userList[self.getUser(user.id)] = userRooms
@@ -562,11 +563,8 @@ class Connection():
         Returns:
             string -- representation
         """
-        return "Connection to {url} with commands {commands} in these rooms: {rooms}".format(
-            url = self.websocket.url, 
-            commands = ", ".join(self.commands.keys()),
-            rooms = ", ".join([str(room.id) for room in self.roomList])
-        )
+        return f"Connection to {self.websocket.url} with commands {', '.join(self.commands.keys())} \
+            in these rooms: {', '.join([str(room.id) for room in self.roomList])}"
     
 if __name__ == "__main__":
     connection = Connection()
