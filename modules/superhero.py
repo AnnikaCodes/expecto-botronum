@@ -24,35 +24,12 @@ class Module:
         superheroIDDictionary = data.get("superheroIDDictionary") or self.__initializeData()
         superhero = core.toID(config.separator.join(message.arguments[1:]))
         if superhero not in superheroIDDictionary:
-            return message.respond(superhero + "isn't a superhero that can be looked up with the API.")
+            return message.respond(f"{superhero} isn't a superhero that can be looked up with the API.")
         superheroID = superheroIDDictionary[superhero]
 
-        APIResponse = requests.get("https://superheroapi.com/api/{key}/{id}".format(key = config.superheroAPIKey, id = superheroID)).json()
+        APIResponse = requests.get(f"https://superheroapi.com/api/{config.superheroAPIKey}/{superheroID}").json()
         if APIResponse['response'] != 'success':
-            return message.respond("The API request for {superhero} (ID: {id}) failed with response {response}. Please try again.".format(
-                superhero = superhero,
-                id = superheroID,
-                response = APIResponse['response']
-            ))
-
-        html = """
-            <img src="{image}" width="1" height="1" style='height: 15%; width: 15%; object-fit: scale-down; padding-right: 15px; float: left'>
-            <details><summary>{name}</summary><details><summary>Stats</summary>
-            <b>Intelligence:</b> {intelligence}<br><b>Strength:</b> {strength}<br><b>Speed:</b> {speed}<br>
-            <b>Durability:</b> {durability}<br><b>Power:</b> {power}<br><b>Combat:</b> {combat}<br>
-            </details><details><summary>Biography</summary>
-            <b>Full Name:</b> {fullname}<br><b>Alter Egos:</b> {alteregos}<br><b>Aliases:</b> {aliases}<br>
-            <b>Birthplace:</b> {birthplace}<br><b>Debut:</b> {debut}<br><b>Publisher:</b> {publisher}<br>
-            <b>Alignment:</b> {alignment}<br>
-            </details><details><summary>Appearance</summary>
-            <b>Gender:</b> {gender}<br><b>Race:</b> {race}<br><b>Height:</b> {height}<br><b>Weight:</b> {weight}<br>
-            <b>Eye Color:</b> {eye}<br><b>Hair Color:</b> {hair}<br>
-            </details><details><summary>Work</summary>
-            <b>Occupation:</b> {occupation}<br><b>Base:</b> {base}<br>
-            </details><details><summary>Connections</summary>
-            <b>Group Affiliation:</b> {group}<br><b>Relatives:</b> {relatives}<br>
-            </details></details>
-        """
+            return message.respond(f"The API request for {superhero} (ID: {superheroID}) failed with response {APIResponse['response']}. Please try again.")
 
         # Aliases and relatives can be lists
         aliases = APIResponse['biography']['aliases']
@@ -60,33 +37,43 @@ class Module:
         aliases = aliases if type(aliases) is str else ", ".join(aliases)
         relatives = relatives  if type(relatives) is str else ", ".join(relatives)
 
-        html = html.format(
-            name = APIResponse['name'],
-            image = APIResponse['image']['url'],
-            intelligence = APIResponse['powerstats']['intelligence'],
-            strength = APIResponse['powerstats']['strength'],
-            speed = APIResponse['powerstats']['speed'],
-            durability = APIResponse['powerstats']['durability'],
-            power = APIResponse['powerstats']['power'],
-            combat = APIResponse['powerstats']['combat'],
-            fullname = APIResponse['biography']['full-name'],
-            alteregos = APIResponse['biography']['alter-egos'],
-            birthplace = APIResponse['biography']['place-of-birth'],
-            debut = APIResponse['biography']['first-appearance'],
-            publisher = APIResponse['biography']['publisher'],
-            alignment = APIResponse['biography']['alignment'],
-            gender = APIResponse['appearance']['gender'],
-            race = APIResponse['appearance']['race'],
-            height = APIResponse['appearance']['height'][1],
-            weight = APIResponse['appearance']['weight'][1],
-            eye = APIResponse['appearance']['eye-color'],
-            hair = APIResponse['appearance']['hair-color'],
-            occupation = APIResponse['work']['occupation'],
-            base = APIResponse['work']['base'],
-            group = APIResponse['connections']['group-affiliation'],
-            aliases = aliases,
-            relatives = relatives
-        )
+        html = f"""
+            <img src="{APIResponse['image']['url']}" width="1" height="1" style='height: 15%; width: 15%; object-fit: scale-down; padding-right: 15px; float: left'>
+
+            <details><summary>{APIResponse['name']}</summary><details><summary>Stats</summary>
+            <b>Intelligence:</b> {APIResponse['powerstats']['intelligence']}<br>
+            <b>Strength:</b> {APIResponse['powerstats']['strength']}<br>
+            <b>Speed:</b> {APIResponse['powerstats']['speed']}<br>
+            <b>Durability:</b> {APIResponse['powerstats']['durability']}<br>
+            <b>Power:</b> {APIResponse['powerstats']['power']}<br>
+            <b>Combat:</b> {APIResponse['powerstats']['combat']}<br>
+
+            </details><details><summary>Biography</summary>
+            <b>Full Name:</b> {APIResponse['biography']['full-name']}<br>
+            <b>Alter Egos:</b> {APIResponse['biography']['alter-egos']}<br>
+            <b>Aliases:</b> {aliases}<br>
+            <b>Birthplace:</b> {APIResponse['biography']['place-of-birth']}<br>
+            <b>Debut:</b> {APIResponse['biography']['first-appearance']}<br>
+            <b>Publisher:</b> {APIResponse['biography']['publisher']}<br>
+            <b>Alignment:</b> {APIResponse['biography']['alignment']}<br>
+
+            </details><details><summary>Appearance</summary>
+            <b>Gender:</b> {APIResponse['appearance']['gender']}<br>
+            <b>Race:</b> {APIResponse['appearance']['race']}<br>
+            <b>Height:</b> {APIResponse['appearance']['height'][1]}<br>
+            <b>Weight:</b> {APIResponse['appearance']['weight'][1]}<br>
+            <b>Eye Color:</b> {APIResponse['appearance']['eye-color']}<br>
+            <b>Hair Color:</b> {APIResponse['appearance']['hair-color']}<br>
+
+            </details><details><summary>Work</summary>
+            <b>Occupation:</b> {APIResponse['work']['occupation']}<br>
+            <b>Base:</b> {APIResponse['work']['base']}<br>
+
+            </details><details><summary>Connections</summary>
+            <b>Group Affiliation:</b> {APIResponse['connections']['group-affiliation']}<br>
+            <b>Relatives:</b> {relatives}<br>
+            </details></details>
+        """
 
         message.respondHTML(html)
 
@@ -96,7 +83,7 @@ class Module:
         Returns:
             string -- representation
         """
-        return "Superhero module: interacts with the Superhero API. Commands: " + ", ".join(self.commands.keys())
+        return f"Superhero module: interacts with the Superhero API. Commands: {', '.join(self.commands.keys())}"
 
     def __initializeData(self):
         """Initializes (or updates) the "superheroIDDictionary" data variable
