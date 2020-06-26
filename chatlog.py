@@ -22,7 +22,7 @@ class Chatlogger:
         """
         self.path = pathlib.Path(path)
         if not self.path.exists(): self.path.mkdir()
-        if not self.path.is_dir(): core.log("E: Chatlogger(): logging directory is a file: " + self.path.as_posix())
+        if not self.path.is_dir(): core.log(f"E: Chatlogger(): logging directory is a file: {str(self.path.resolve())}")
 
     def handleMessage(self, message):
         """Handles logging a message to chatlogs
@@ -47,8 +47,8 @@ class Chatlogger:
         roomFolderPath = self.path.joinpath(roomid)
         if not roomFolderPath.exists(): roomFolderPath.mkdir()
         if not roomFolderPath.is_dir(): 
-            return core.log("E: Chatlogger(): logging directory is a file: " + roomFolderPath.as_posix())
-        filePath = roomFolderPath.joinpath(str(datetime.now().date()) + '.txt')
+            return core.log(f"E: Chatlogger(): logging directory is a file: {str(roomFolderPath.resolve())}")
+        filePath = roomFolderPath.joinpath(f"{str(datetime.now().date())}.txt")
         return filePath.open(perms)
 
     def formatMessage(self, message):
@@ -65,7 +65,7 @@ class Chatlogger:
             str(int(datetime.utcfromtimestamp(int(message.time)).astimezone(pytz.utc).timestamp())) if message.time else str(int(datetime.timestamp(datetime.utcnow()))),
             str(message.type) if message.type else '',
             str(message.senderName) if message.senderName else '',
-            (str(message.body) if message.body else '') + '\n'
+            f"{str(message.body) if message.body else ''}\n"
         ])
 
     def search(self, roomid="", userid="", keyword="", includeJoins=False):
@@ -81,7 +81,7 @@ class Chatlogger:
         """
         results = {}
         searchDir = self.path.joinpath(roomid)
-        userSearch = (userid + '|') if userid else ""
+        userSearch = f"{userid}|" if userid else ""
         if roomid and searchDir.is_dir():
             for logFilePath in searchDir.iterdir():
                 date = logFilePath.name.strip(".txt")
@@ -117,11 +117,11 @@ class Chatlogger:
             time = ""
             senderName = userid
         else:
-            core.log("DEBUG: unexpected number of data items (expected 5 or 3, got " + str(len(splitData)) + " (data: " + data + ")")
+            core.log(f"DEBUG: unexpected number of data items (expected 5 or 3, got {str(len(splitData))}; data: f{data})")
 
         try:
-            time = "[" + str(datetime.utcfromtimestamp(int(time)).time()) + "] "
-            if isHTML: time = "<small>" + html.escape(time) + "</small>"
+            time = f"[{str(datetime.utcfromtimestamp(int(time)).time())}] "
+            if isHTML: time = f"<small>{html.escape(time)}</small>"
         except ValueError:
             time = ""
         body = body.strip().strip('\n')
@@ -135,20 +135,17 @@ class Chatlogger:
         htmlRankSet.discard('&') # '&' rank is already handled with isAdmin
         if sender and (isAdmin or sender[0] in htmlRankSet.union(set('+%@*#~'))):
             rank = sender[:5] if isAdmin else sender[0]
-            sender = "<small>{rank}</small><b>{name}</b>".format(
-                rank = rank,
-                name = sender[len(rank):]
-            ) if isHTML else rank + sender[len(rank):]
+            sender = f"<small>{rank}</small><b>{sender[len(rank):]}</b>" if isHTML else rank + sender[len(rank):]
         else:
-            sender = "<b>" + sender + "</b>"
+            sender = f"<b>{sender}</b>"
         if msgType in ['chat', 'pm']:
-            return time + "{sender}: {body}".format(sender = sender, body = body)
+            return f"{time}{sender}: {body}"
         elif msgType == 'join':
-            return time + "{sender} joined".format(sender = sender)
+            return f"{time}{sender} joined"
         elif msgType == 'leave':
-            return time + "{sender} left".format(sender = sender)
+            return f"{time}{sender} left"
         else:
             return "Unparseable message"
 
     def __str__(self):
-        return "Chatlogger logging to path " + str(self.path.absolute()) + "/"
+        return f"Chatlogger logging to path {str(self.path.resolve())}/"
