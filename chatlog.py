@@ -13,17 +13,17 @@ import html
 
 class Chatlogger:
     """Class for logging chat
-    """    
+    """
     def __init__(self, path):
         """Creates a new Chatlogger
 
         Args:
             path (string): the path to the logging directory
-        """        
+        """
         self.path = pathlib.Path(path)
         if not self.path.exists(): self.path.mkdir()
         if not self.path.is_dir(): core.log("E: Chatlogger(): logging directory is a file: " + self.path.as_posix())
-    
+
     def handleMessage(self, message):
         """Handles logging a message to chatlogs
 
@@ -33,7 +33,7 @@ class Chatlogger:
         room = message.room.id if message.room else 'global'
         logFile = self.getFile(room, 'a')
         logFile.write(self.formatMessage(message))
-    
+
     def getFile(self, roomid, perms):
         """Returns a file object corresponding to the room's chatlog file.
 
@@ -50,7 +50,7 @@ class Chatlogger:
             return core.log("E: Chatlogger(): logging directory is a file: " + roomFolderPath.as_posix())
         filePath = roomFolderPath.joinpath(str(datetime.now().date()) + '.txt')
         return filePath.open(perms)
-    
+
     def formatMessage(self, message):
         """Formats a message for logging.
         Format: userid|time|type|senderName|body
@@ -67,7 +67,7 @@ class Chatlogger:
             str(message.senderName) if message.senderName else '',
             (str(message.body) if message.body else '') + '\n'
         ])
-    
+
     def search(self, roomid="", userid="", keyword="", includeJoins=False):
         """Searches chatlogs
 
@@ -78,7 +78,7 @@ class Chatlogger:
 
         Returns:
             dictionary: a dictionary of matched messages (formatted as {date (string): [userid|time|type|senderName|body] (list of day's results)})
-        """        
+        """
         results = {}
         searchDir = self.path.joinpath(roomid)
         userSearch = (userid + '|') if userid else ""
@@ -90,15 +90,15 @@ class Chatlogger:
                         split = line.lower().split('|',4)
                         if line[:len(userSearch)] == userSearch and \
                             keyword in split[-1] and \
-                            (includeJoins or (split[2] not in ['join', 'leave'])): 
-                            if date not in results.keys(): 
+                            (includeJoins or (split[2] not in ['join', 'leave'])):
+                            if date not in results.keys():
                                 results[date] = [line]
                             else:
                                 results[date].append(line)
                     except IndexError:
                         pass
         return results
-    
+
     def formatData(self, data, isHTML=False):
         """Formats data to text
 
@@ -110,9 +110,9 @@ class Chatlogger:
             string: a human-readable version of the message
         """
         splitData = data.split("|", 4)
-        if len(splitData) == 5: 
+        if len(splitData) == 5:
             userid, time, msgType, senderName, body = splitData
-        elif len(splitData) == 3: 
+        elif len(splitData) == 3:
             userid, msgType, body = splitData
             time = ""
             senderName = userid
@@ -149,6 +149,6 @@ class Chatlogger:
             return time + "{sender} left".format(sender = sender)
         else:
             return "Unparseable message"
-    
+
     def __str__(self):
         return "Chatlogger logging to path " + str(self.path.absolute()) + "/"
