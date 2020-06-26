@@ -28,7 +28,7 @@ class Module:
         )
         roomid = core.toID(message.arguments[1]).lower()
         userid = core.toID(message.arguments[2]).lower() if len(message.arguments) > 2 else ""
-        keywords = ','.join(message.arguments[3:]).lower() if len(message.arguments) > 3 else ""
+        keywords = ','.join(message.arguments[3:]).strip().lower() if len(message.arguments) > 3 else ""
 
         room = message.connection.getRoomByID(roomid)
         if not room: return message.respond("Invalid room: " + roomid)
