@@ -108,7 +108,7 @@ class Module:
             sys.exit()
             return message.respond("Something went wrong killing the bot process.")
         return message.respond("Permission denied.")
-    
+
     def update(self, message):
         """Pulls latest code from git
 
@@ -116,16 +116,16 @@ class Module:
             message (Message): the Message object that invoked the command
         """
         if not message.sender.isAdmin: return message.respond("Permission denied.")
-        output = subprocess.run(GIT_COMMAND.split(), capture_output = True, text = True)
+        output = subprocess.run(GIT_COMMAND.split(), stdout = subprocess.PIPE, stderr = subprocess.PIPE)
         results = ""
         success = True
         if len(output.stderr) > 0:
             message.respond(f"``{GIT_COMMAND}`` failed!")
-            results = output.stdout + output.stderr
+            results = (output.stdout + output.stderr).decode('utf-8')
             success = False
         else:
-            results = output.stdout
-        if len(results) > 295 and '\n' not in results: results = f"\n{results}"
+            results = output.stdout.decode('utf-8')
+        if len(results) > 295: results = f"\n{results}"
         message.respond(f"!code {results}")
         message.respond(
             f"Pulled code! Use ``{config.commandCharacter}hotpatch`` to reload modules." if success 
