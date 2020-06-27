@@ -11,7 +11,7 @@ class Module:
     """Represents a module, which may contain several commands
     """
     def __init__(self):
-        self.commands = {"ping": self.ping, "owo": self.owo, "uwu": self.uwu, "eval": self.eval, "timer": self.timer, "do": self.do}
+        self.commands = {"ping": self.ping, "owo": self.owo, "uwu": self.uwu, "timer": self.timer}
 
     def ping(self, message):
         """Ping: replies "Pong!"
@@ -45,25 +45,6 @@ class Module:
             text = text.replace(key, uwuRules[key])
         message.respond(text)
     
-    def eval(self, message):
-        """eval: evaluates the given Python expression
-
-        Arguments:
-            message {Message} -- the Message object that invoked the command
-        """
-        if message.sender.isAdmin and message.sender.id in config.sysops:
-            expression = config.separator.join(message.arguments[1:])
-            try:
-                response = str(eval(expression))
-            except Exception as err:
-              response = str(err)
-        else:
-            message.respond("Permission denied. This request has been logged.")
-            core.log(f"W: base.eval(): eval permission denied for userid: {message.sender.id}")
-            return
-        response = "!code " + ("\n" if "\n" not in response else "") + response
-        message.respond(response)
-
     def timer(self, message):
         """timer: evaluates the given Python expression
 
@@ -82,23 +63,6 @@ class Module:
             message.respond(f"{message.arguments[1]} isn't a valid duration")
             return
         threading.Timer(duration, message.respond, args = [response]).start()
-
-    def do(self, message):
-        """do: sends the given command to the given room 
-
-        Arguments:
-            message {Message} -- the Message object that invoked the command
-        """
-        if not message.arguments or len(message.arguments) < 3:
-            return message.respond(f"Usage: ``{config.commandCharacter}do <room>, <message>``.")
-        room = message.connection.getRoomByName(message.arguments[1])
-        if room:
-            if not message.sender.can("manage", room): 
-                return message.respond("Permission denied.")
-            command = ",".join(message.arguments[2:]).strip()
-            return room.say(command)
-        else:
-            return message.respond(f"{message.arguments[1]} isn't a room I'm in.")
 
     def __str__(self):
         """String representation of the Module

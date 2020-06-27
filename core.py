@@ -377,12 +377,17 @@ class Connection():
         self.roomList = set()
         self.userList = {}
         self.commands = {}
+        self.modules = set()
         self.lastSentTime = 0
         self.bot = User(config.username, self)
         self.chatlogger = chatlog.Chatlogger('logs/')
         for module in config.modules:
-            self.commands.update(importlib.import_module(module).Module().commands)
             # Note: if multiple modules have the same command then the later module will overwrite the earlier.
+            try:
+                self.commands.update(importlib.import_module(module).Module().commands)
+                self.modules.add(module)
+            except Exception as err:
+                log(f"E: Connection(): error loading module {module}: {str(err)}")
         log(f"I: Connection(): Loaded the following commands: {', '.join(self.commands.keys())}")
 
     def onError(self, ws, error):
@@ -393,7 +398,7 @@ class Connection():
             error {string? probably} -- the error
         """        
         log(f"E: Connection.onError(): websocket error: {error}")
-
+    
     def onClose(self, ws):
         """Logs when the connection closes
 
