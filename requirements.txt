@@ -3,6 +3,9 @@
 # expecto-botronum/modules/conversation.py: 5
 pbwrap >= 1.2.0
 
+# expecto-botronum/modules/admin.py: 8
+psutil >= 5.7.0
+
 # expecto-botronum/modules/chatlog.py: 6
 pytz >= 2020.1
 

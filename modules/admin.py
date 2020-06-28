@@ -5,6 +5,7 @@ import importlib
 import sys
 import subprocess
 import pathlib
+import psutil
 
 ############# admin.py ##############
 ## commands for bot administrators ##
@@ -118,13 +119,16 @@ class Module:
             message (Message): the Message object that invoked the command
         """
         if not message.sender.isAdmin: return message.respond("Permission denied.")
-        meminfoPath = pathlib.Path("/proc/meminfo")
-        if not meminfoPath.is_file(): return message.respond(f"``/proc/meminfo`` doesn't exist.")
         buf = []
-        for line in open('/proc/meminfo','r').readlines():
-            if 'MemAvailable' in line: buf.append(f"{round(int(line.split(':')[1].split('kB')[0]) / 1024, 2)} MB available")
-            if 'MemFree' in line: buf.append(f"{round(int(line.split(':')[1].split('kB')[0]) / 1024, 2)} MB free")
-            if 'MemTotal' in line: buf.append(f"{round(int(line.split(':')[1].split('kB')[0]) / 1024, 2)} MB total")
+
+        meminfoPath = pathlib.Path("/proc/meminfo")
+        if meminfoPath.is_file():
+            for line in open('/proc/meminfo','r').readlines():
+                if 'MemAvailable' in line: buf.append(f"{round(int(line.split(':')[1].split('kB')[0]) / 1024, 2)} MB available")
+                if 'MemFree' in line: buf.append(f"{round(int(line.split(':')[1].split('kB')[0]) / 1024, 2)} MB free")
+                if 'MemTotal' in line: buf.append(f"{round(int(line.split(':')[1].split('kB')[0]) / 1024, 2)} MB total")
+        
+        buf.append(f"{round(psutil.Process().memory_info().rss / 1024 ** 2, 2)} MB used by the bot process")
         return message.respond(f"Memory stats: {', '.join(buf)}")
 
     def update(self, message):
