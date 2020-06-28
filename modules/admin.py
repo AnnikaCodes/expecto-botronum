@@ -4,6 +4,7 @@ import core
 import importlib
 import sys
 import subprocess
+import pathlib
 
 ############# admin.py ##############
 ## commands for bot administrators ##
@@ -20,7 +21,8 @@ class Module:
             "eval": self.eval, "do": self.do, "sayin": self.do, "load": self.handleModule,
             "loadmodule": self.handleModule, "unload": self.handleModule, "unloadmodule": self.handleModule,
             "hotpatch": self.handleModule, "modules": self.viewModules, "listmodules": self.viewModules,
-            "vm": self.viewModules, "restart": self.kill, "kill": self.kill, "update": self.update, "git": self.update
+            "vm": self.viewModules, "restart": self.kill, "kill": self.kill, "update": self.update, "git": self.update,
+            "memory": self.memoryStats, "free": self.memoryStats
         }
 
     def eval(self, message):
@@ -108,6 +110,22 @@ class Module:
             sys.exit()
             return message.respond("Something went wrong killing the bot process.")
         return message.respond("Permission denied.")
+    
+    def memoryStats(self, message):
+        """Gets info on memory usage
+
+        Args:
+            message (Message): the Message object that invoked the command
+        """
+        if not message.sender.isAdmin: return message.respond("Permission denied.")
+        meminfoPath = pathlib.Path("/proc/meminfo")
+        if not meminfoPath.is_file(): return message.respond(f"``/proc/meminfo`` doesn't exist.")
+        buf = []
+        for line in open('/proc/meminfo','r').readlines():
+            if 'MemAvailable' in line: buf.append(f"{round(int(line.split(':')[1].split('kB')[0]) / 1024, 2)} MB available")
+            if 'MemFree' in line: buf.append(f"{round(int(line.split(':')[1].split('kB')[0]) / 1024, 2)} MB free")
+            if 'MemTotal' in line: buf.append(f"{round(int(line.split(':')[1].split('kB')[0]) / 1024, 2)} MB total")
+        return message.respond(f"Memory stats: {', '.join(buf)}")
 
     def update(self, message):
         """Pulls latest code from git
