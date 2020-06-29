@@ -69,7 +69,7 @@ class Room():
         self.id = toID(name)
         self.auth = {}
         jpData = data.get("joinphrases")
-        self.joinphrases = jpData[self.id] if jpData else {}
+        self.joinphrases = jpData[self.id] if jpData and self.id in jpData.keys() else {}
         self.connection = connection
         self.join()
 
