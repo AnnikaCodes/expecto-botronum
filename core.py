@@ -343,7 +343,7 @@ class Message():
         buf = "Message"
         if self.body: buf += f" with content {self.body}"
         if self.sender: buf += f" from User({str(self.sender)})"
-        if self.senderName: buf += f"sent by {self.senderName}"
+        if self.senderName: buf += f" sent by {self.senderName}"
         if self.room: buf += f" in Room({str(self.room)})"
         if self.time: buf += f" at {str(self.time)}"
         if self.type: buf += f" of type {self.type}"
