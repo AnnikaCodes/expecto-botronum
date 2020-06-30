@@ -1,23 +1,24 @@
-##### data.py ####
-## data storage ##
-## by Annika    ##
-##################
+"""data.py
+    data storage
+    by Annika"""
 
 import json
 
 DATA_PATH = 'data.json'
 
-def __loadJSON():
+def _loadJSON():
     """Loads the raw data from the json file
 
     Returns:
         dictionary -- the raw data
     """
     try:
-        f = open(DATA_PATH, 'r', encoding = 'utf-8')
-        return json.load(f)
+        dataFile = open(DATA_PATH, 'r', encoding='utf-8')
+        retval = json.load(dataFile)
+        dataFile.close()
     except FileNotFoundError:
-        return {}
+        retval = {}
+    return retval
 
 def get(variableName):
     """Gets the value of a variable that's stored in JSON
@@ -27,8 +28,8 @@ def get(variableName):
 
     Returns:
         [Any] -- the variable, or None if it doesn't exist
-    """    
-    data = __loadJSON()
+    """
+    data = _loadJSON()
     if variableName in data.keys():
         return data[variableName]
     return None
@@ -39,8 +40,9 @@ def store(variableName, value):
     Arguments:
         variableName {string} -- the name to save the value under
         value {Any} -- the value to save
-    """    
-    data = __loadJSON()
+    """
+    data = _loadJSON()
     data[variableName] = value
-    f = open(DATA_PATH, 'w', encoding = 'utf-8')
-    json.dump(data, f)
+    dataFile = open(DATA_PATH, 'w', encoding='utf-8')
+    json.dump(data, dataFile)
+    dataFile.close()
