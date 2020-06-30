@@ -176,7 +176,7 @@ class Module:
             core.log(f"I: admin.load(): {response}")
             return response
 
-    def unload(self, connection, module, force = False):
+    def unload(self, connection, module, force=False):
         """Unloads a module
 
         Args:
