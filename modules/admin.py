@@ -176,7 +176,31 @@ class Module:
             response = f"Error loading module: {str(err)}."
             core.log(f"I: admin.load(): {response}")
             return response
-    
+
+    def unload(self, connection, module, force = False):
+        """Unloads a module
+
+        Args:
+            connection (Connection): the Connection object to unload the module into
+            module (string): the ID of the module to unload
+            force (bool, optional): whether or not to force-unload modules that are not loaded. Defaults to False.
+
+        Returns:
+            string: a description of what happened
+        """
+        if module not in connection.modules and not force:
+            return f"The ``{module}`` module isn't loaded."
+
+        try:
+            for command in importlib.import_module(module).Module().commands.keys():
+                del connection.commands[command]
+            connection.modules.remove(module)
+            return f"Successfully unloaded the ``{module}`` module."
+        except Exception as err:
+            response = f"Error unloading module: {str(err)}."
+            core.log(f"I: admin.unload(): {response}")
+            return response
+
 
     def __str__(self):
         """String representation of the Module
