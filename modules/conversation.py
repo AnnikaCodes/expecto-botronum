@@ -1,20 +1,20 @@
-import data
-import core
+"""conversation.py
+    gives conversation-starting prompts
+    by Annika"""
+
 import random
-import config
 from pbwrap import Pastebin
 
-############ conversation.py ############
-## Gives conversation-starting prompts ##
-## by Annika                           ##
-#########################################
+import data
+import core
+import config
 
 class Module:
     """Represents a module, which may contain several commands
     """
     def __init__(self):
         self.commands = {
-            "fact": self.showSnippet, "topic": self.showSnippet, "addfact": self.manageSnippet, 
+            "fact": self.showSnippet, "topic": self.showSnippet, "addfact": self.manageSnippet,
             "addtopic": self.manageSnippet, "deletefact": self.manageSnippet, "removefact": self.manageSnippet,
             "deletetopic": self.manageSnippet, "removetopic": self.manageSnippet, "countfacts": self.countSnippets,
             "factcount": self.countSnippets, "counttopics": self.countSnippets, "topiccount": self.countSnippets,
@@ -41,9 +41,9 @@ class Module:
 
         if not snippetList or roomid not in snippetList.keys():
             return message.respond(f"There are no {'facts' if isFact else 'topics'} for this room.")
-        
-        message.respond(random.choice(snippetList[roomid]))
-    
+
+        return message.respond(random.choice(snippetList[roomid]))
+
     def manageSnippet(self, message):
         """Removes or adds a fact or topic
 
@@ -71,17 +71,16 @@ class Module:
             message.respond(f"{'Fact' if isFact else 'Topic'} was successfully added!")
         elif snippet in snippetList[room.id] and not isAddition:
             snippetList[room.id].remove(snippet)
-            message.respond(f" was successfully removed!")
+            message.respond(f"{'Fact' if isFact else 'Topic'} was successfully removed!")
         else:
             return message.respond(f"That {'Fact' if isFact else 'Topic'} is \
                 {'already' if isAddition else 'not'} in the room's list!")
 
-        if isFact: 
+        if isFact:
             self.factList = snippetList
-            data.store("factList", self.factList)
-        else:
-            self.topicList = snippetList
-            data.store("topicList", self.topicList)
+            return data.store("factList", self.factList)
+        self.topicList = snippetList
+        return data.store("topicList", self.topicList)
 
     def countSnippets(self, message):
         """Counts the number of snippets
@@ -97,12 +96,12 @@ class Module:
             room = message.connection.getRoomByName(message.arguments[1])
         else:
             return message.respond("You must specify a room.")
-        
+
         num = 0
         if snippetList and room.id in snippetList.keys(): num = len(snippetList[room.id])
         return message.respond(f"There {'is ' if num == 1 else 'are '} {str(num)} \
             {'fact' if isFact else 'topic'}{'' if num == 1 else 's'} for the room {room.id}.")
-    
+
     def exportSnippets(self, message):
         """Exports the snippets to Pastebin
 
@@ -118,7 +117,7 @@ class Module:
         else:
             return message.respond("You must specify a room.")
         if not message.sender.can("addfact", room): return message.respond("Permission denied.")
-        if room.id not in snippetList.keys() or len(snippetList[room.id]) == 0: 
+        if room.id not in snippetList.keys() or len(snippetList[room.id]) == 0:
             return message.respond(f"There are no {'facts' if isFact else 'topics'} for the room {room.id}.")
 
         pasteData = "\n".join(snippetList[room.id])
@@ -134,4 +133,4 @@ class Module:
         Returns:
             string -- representation
         """
-        return f"Conversation module: helps start conversations by displaying snippets. Commands: {', '.join(self.commands.keys())}"
+        return f"Conversation module: displays snippets of text in chat. Commands: {', '.join(self.commands.keys())}"

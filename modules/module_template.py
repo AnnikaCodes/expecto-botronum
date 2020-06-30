@@ -1,8 +1,6 @@
-############## module_template.py #############
-## serves as a template for the Module class ##
-## to base other module files off of         ##
-## by Annika                                 ##
-###############################################
+"""module_template.py
+    serves as a template for the Module class to base other module files off of
+    by Annika"""
 
 class Module:
     """Represents a module, which may contain several commands
@@ -15,9 +13,9 @@ class Module:
 
         Arguments:
             message {Message} -- the Message object that invoked the command
-        """       
+        """
         message.respond("Pong!")
-    
+
     def __str__(self):
         """String representation of the Module
 
