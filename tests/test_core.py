@@ -4,27 +4,9 @@
 
 # pylint: disable=line-too-long
 
-import sys
-import pathlib
-sys.path.append(str(pathlib.Path(__file__).joinpath("../..").resolve()) + '/')
-
-import core # pylint: disable=wrong-import-position
-import config # pylint: disable=wrong-import-position
-
-## Helper Classes ##
-class DryRunConnection(core.Connection):
-    """A modified version of Connection to be used for offline testing
-    """
-    def __init__(self):
-        super().__init__()
-        self.roomList = {
-            core.Room("testroom", self), core.Room("testroom2", self),
-            core.Room("testroom3", self), core.Room("lobby", self)
-        }
-
-    def send(self, message):
-        """The send() method is disabled in DryRunConnection
-        """
+import core
+import config
+from dummies import DummyConnection
 
 def testHelperFunctions(capsys):
     """Tests the helper functions
@@ -79,7 +61,7 @@ def testMessageChallstr():
     """
     message = core.Message(
         "|challstr|4|314159265358979323846264338327950288419716939937510582097494459230781640628620899862803482534211706798214808651328230664709384460955058223172535940812848111745028410270193852110555964462294895493038196442881097566593344612847564823",
-        DryRunConnection()
+        DummyConnection()
     )
     assert message.challstr == "4|314159265358979323846264338327950288419716939937510582097494459230781640628620899862803482534211706798214808651328230664709384460955058223172535940812848111745028410270193852110555964462294895493038196442881097566593344612847564823"
 
@@ -88,7 +70,7 @@ def testMessageChat():
     """
     message = core.Message(
         "|c|#Ann/ika ^_^|Hi, I wrote a Python test|Isn't it cool?it,contains,odd characters och konstigt bokstaver från andra språk.",
-        DryRunConnection()
+        DummyConnection()
     )
     assert message.senderName == "#Ann/ika ^_^"
     assert message.sender.id == "annika"
@@ -106,7 +88,7 @@ def testMessageChatCommand():
     message = core.Message(
         """>testroom
 |c:|1593475694|#Ann/ika ^_^|~somecommand argument1,argumENT2||withpipes, argumént3""",
-        DryRunConnection()
+        DummyConnection()
     )
     assert message.senderName == "#Ann/ika ^_^"
     assert message.sender.id == "annika"
@@ -121,7 +103,7 @@ def testMessageChatCommand():
 def testMessageJoin():
     """Tests the ability of Message objects to handle join messages
     """
-    connection = DryRunConnection()
+    connection = DummyConnection()
     message = core.Message(
         """>testroom
 |J|#Ann(ik)a ^_^""",
@@ -149,7 +131,7 @@ def testMessageJoin():
 def testMessageLeave():
     """Tests the ability of Message objects to handle leave messages
     """
-    connection = DryRunConnection()
+    connection = DummyConnection()
     joinMessage = """>testroom
 |J|#Ann(ik)a ^_^"""
 
@@ -188,7 +170,7 @@ def testMessagePM():
     """
     message = core.Message(
         "|pm|+aNNika ^_^|Expecto Botronum|~somecommand argument1,argumENT2||withpipes, argumént3",
-        DryRunConnection()
+        DummyConnection()
     )
     assert message.senderName == "+aNNika ^_^"
     assert message.sender.id == "annika"
@@ -202,7 +184,7 @@ def testMessagePM():
 def testMessageQueryResponse():
     """Tests the ability of Message objects to handle query responses
     """
-    connection = DryRunConnection()
+    connection = DummyConnection()
     message = core.Message(
         """|queryresponse|roominfo|{"id":"testroom","roomid":"testroom","title":"Magic & Mayhem","type":"chat","visibility":"hidden","modchat":null,"auth":{"#":["annika","awa","cleo","meicoo"],"%":["dawnofares","instruct","ratisweep","pirateprincess","watfor","oaklynnthylacine"],"@":["gwynt","darth","profsapling","ravioliqueen","miapi"],"+":["madmonty","birdy","captanpasta","iwouldprefernotto","xprienzo","nui","toxtricityamped"],"*":["expectobotronum","kida"]}, "users":["user1","user2"]}""",
         connection
@@ -226,7 +208,7 @@ def testMessageQueryResponse():
 class TestRoom:
     """Tests for Room objects
     """
-    connection = DryRunConnection()
+    connection = DummyConnection()
     room = core.Room("testroom", connection)
 
     def testRoomAuth(self):
@@ -259,7 +241,7 @@ class TestRoom:
 def testUser():
     """Tests the User object
     """
-    connection = DryRunConnection()
+    connection = DummyConnection()
     user = core.User("&tEsT uSeR ~o///o~", connection)
     room = core.Room("testroom", connection)
 
@@ -295,7 +277,7 @@ def testUser():
 def testConnection():
     """tests the Connection object
     """
-    connection = DryRunConnection()
+    connection = DummyConnection()
 
     assert connection.commands
 
