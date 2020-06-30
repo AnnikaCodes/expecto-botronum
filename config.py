@@ -27,7 +27,8 @@ def loadConfig():
             returnValue.append(configData[configItem])
     return returnValue
 
+# pylint: disable=unbalanced-tuple-unpacking
 username, password, websocketURL, loglevel, sysops, broadcastRank, addfactRank, \
     hostgameRank, searchlogRank, manageRank, roomRanksInOrder, rooms, separator, modules, \
-    commandCharacter, superheroAPIKey, pastebinAPIKey, logchat = loadConfig() # pylint: disable=unbalanced-tuple-unpacking
+    commandCharacter, superheroAPIKey, pastebinAPIKey, logchat = loadConfig()
 # the order of these needs to be the same as in CONFIG_VARS
