@@ -1,7 +1,7 @@
 #!/bin/bash
 
 echo "Linting code..."
-pylint *.py **/*.py --disable=R || pylint-exit -wfail -efail -cfail $?
+pylint *.py */*.py */*/*.py --disable=R || pylint-exit -wfail -efail -cfail $?
 LINT_SUCCESS=$?
 echo "Running tests..."
 pytest
