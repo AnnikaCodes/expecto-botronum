@@ -119,7 +119,6 @@ def testMessageQueryResponse():
     assert auth['+'] == {"madmonty", "birdy", "captanpasta", "iwouldprefernotto", "xprienzo", "nui", "toxtricityamped"}
 
 ## Room Object Tests ##
-
 def testRoomAuth():
     connection = DryRunConnection()
     room = core.Room("testroom", connection)
@@ -137,13 +136,48 @@ def testRoomAuth():
     assert room.usersWithRankGEQ('+') == {'owner1', 'owner2', 'bot1', 'bot2', 'mod1', 'mod2', 'driver1', 'driver2', 'voice1', 'voice2'}
 
 def testRoomJoinphrases():
-    connection = DryRunConnection()
-    room = core.Room("testroom", connection)
+    room = core.Room("testroom", DryRunConnection())
 
     assert room.joinphrases == {}
     room.addJoinphrase("jp1éé || ~uwu~", "user1")
     assert room.joinphrases == {'user1': "jp1éé || ~uwu~"}
     room.removeJoinphrase("user1")
     assert room.joinphrases == {}
+
+## User Object Tests ##
+def testUser():
+    connection = DryRunConnection()
+    user = core.User("&tEsT uSeR ~o///o~", connection)
+    room = core.Room("testroom", connection)
+    
+    assert user.name == "&tEsT uSeR ~o///o~"
+    assert user.id == "testuseroo"
+    assert user.isAdmin == False
+
+    room.auth = {}
+    assert user.can("html", room) == False
+    assert user.can("wall", room) == False
+    assert user.can("admin", room) == False
+
+    room.auth = {'%': {'testuseroo'}}
+    assert user.can("html", room) == False
+    assert user.can("wall", room) == True
+    assert user.can("admin", room) == False
+
+    room.auth = {'*': {'testuseroo'}}
+    assert user.can("html", room) == True
+    assert user.can("wall", room) == True
+    assert user.can("admin", room) == False
+
+    user.isAdmin = True
+    room.auth = {}
+    assert user.can("html", room) == True
+    assert user.can("wall", room) == True
+    assert user.can("admin", room) == True
+    assert user.can("manage", room) == True
+
+
+    
+
 
 
