@@ -36,6 +36,7 @@ class DummyMessage(core.Message):
         self.senderName = senderName
         self.connection = connection
         self.response = None
+        self.HTMLResponse = None
 
     def respond(self, response):
         """Captures the response to a message
@@ -44,6 +45,14 @@ class DummyMessage(core.Message):
             response (string): the response
         """
         self.response = response
+
+    def respondHTML(self, response):
+        """Captures the HTML response to a message
+
+        Args:
+            response (string): the HTML
+        """
+        self.HTMLResponse = response
 
 class DummyUser(core.User):
     """A modified version of User to be used for offline testing
