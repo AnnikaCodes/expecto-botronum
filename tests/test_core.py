@@ -29,72 +29,73 @@ class DryRunConnection(core.Connection):
 def testMessageChallstr():
     """Tests the ability of Message objects to handle challstrs
     """
-    testMsg = core.Message(
+    message = core.Message(
         "|challstr|4|314159265358979323846264338327950288419716939937510582097494459230781640628620899862803482534211706798214808651328230664709384460955058223172535940812848111745028410270193852110555964462294895493038196442881097566593344612847564823",
         DryRunConnection()
     )
-    assert testMsg.challstr == "4|314159265358979323846264338327950288419716939937510582097494459230781640628620899862803482534211706798214808651328230664709384460955058223172535940812848111745028410270193852110555964462294895493038196442881097566593344612847564823"
+    assert message.challstr == "4|314159265358979323846264338327950288419716939937510582097494459230781640628620899862803482534211706798214808651328230664709384460955058223172535940812848111745028410270193852110555964462294895493038196442881097566593344612847564823"
 
 def testMessageChat():
     """Tests the ability of Message objects to parse chat messages including strange characters, from the Lobby
     """
-    testMsg = core.Message(
+    message = core.Message(
         "|c|#Ann/ika ^_^|Hi, I wrote a Python test|Isn't it cool?it,contains,odd characters och konstigt bokstaver från andra språk.",
         DryRunConnection()
     )
-    assert testMsg.senderName == "#Ann/ika ^_^"
-    assert testMsg.sender.id == "annika"
-    assert testMsg.arguments == ['Hi,', "I wrote a Python test|Isn't it cool?it", "contains", "odd characters och konstigt bokstaver från andra språk."]
-    assert testMsg.room.id == "lobby"
-    assert testMsg.body == "Hi, I wrote a Python test|Isn't it cool?it,contains,odd characters och konstigt bokstaver från andra språk."
-    assert testMsg.time is None
-    assert testMsg.type == 'chat'
-    assert testMsg.challstr is None
+    assert message.senderName == "#Ann/ika ^_^"
+    assert message.sender.id == "annika"
+    assert message.arguments == ['Hi,', "I wrote a Python test|Isn't it cool?it", "contains", "odd characters och konstigt bokstaver från andra språk."]
+    assert message.room.id == "lobby"
+    assert message.body == "Hi, I wrote a Python test|Isn't it cool?it,contains,odd characters och konstigt bokstaver från andra språk."
+    assert message.time is None
+    assert message.type == 'chat'
+    assert message.challstr is None
+    assert isinstance(str(message), str)
 
 def testMessageChatCommand():
     """Tests the ability of Message objects to handle commands sent to rooms, with arguments
     """
-    testMsg = core.Message(
+    message = core.Message(
         """>testroom
 |c:|1593475694|#Ann/ika ^_^|~somecommand argument1,argumENT2||withpipes, argumént3""",
         DryRunConnection()
     )
-    assert testMsg.senderName == "#Ann/ika ^_^"
-    assert testMsg.sender.id == "annika"
-    assert testMsg.arguments == ["~somecommand", "argument1", "argumENT2||withpipes", " argumént3"]
-    assert testMsg.room.id == "testroom"
-    assert testMsg.body == "~somecommand argument1,argumENT2||withpipes, argumént3"
-    assert testMsg.time == "1593475694"
-    assert testMsg.type == 'chat'
-    assert testMsg.challstr is None
+    assert message.senderName == "#Ann/ika ^_^"
+    assert message.sender.id == "annika"
+    assert message.arguments == ["~somecommand", "argument1", "argumENT2||withpipes", " argumént3"]
+    assert message.room.id == "testroom"
+    assert message.body == "~somecommand argument1,argumENT2||withpipes, argumént3"
+    assert message.time == "1593475694"
+    assert message.type == 'chat'
+    assert message.challstr is None
 
 
 def testMessageJoin():
     """Tests the ability of Message objects to handle join messages
     """
     connection = DryRunConnection()
-    testMsg = core.Message(
+    message = core.Message(
         """>testroom
 |J|#Ann(ik)a ^_^""",
         connection
     )
-    assert testMsg.type == "join"
+    assert message.type == "join"
     assert 'testroom' in connection.getUserRooms(connection.getUser('annika'))
 
-    testMsg = core.Message(
+    message = core.Message(
         """>testroom2
 |j|#Ann(ik)a ^_^""",
         connection
     )
-    assert testMsg.type == "join"
+    assert message.type == "join"
     assert 'testroom2' in connection.getUserRooms(connection.getUser('annika'))
 
-    testMsg = core.Message(
+    message = core.Message(
         """>testroom3
 |join|#Ann(ik)a ^_^""",
         connection
     )
-    assert testMsg.type == "join"
+    assert message.type == "join"
     assert 'testroom3' in connection.getUserRooms(connection.getUser('annika'))
 
 def testMessageLeave():
@@ -106,59 +107,59 @@ def testMessageLeave():
 
     core.Message(joinMessage, connection)
     assert 'testroom' in connection.getUserRooms(connection.getUser('annika'))
-    testMsg = core.Message(
+    message = core.Message(
         """>testroom
 |L|#Ann(ik)a ^_^""",
         connection
     )
-    assert testMsg.type == "leave"
+    assert message.type == "leave"
     assert 'testroom' not in connection.getUserRooms(connection.getUser('annika'))
 
     core.Message(joinMessage, connection)
     assert 'testroom' in connection.getUserRooms(connection.getUser('annika'))
-    testMsg = core.Message(
+    message = core.Message(
         """>testroom
 |l|#Ann(ik)a ^_^""",
         connection
     )
-    assert testMsg.type == "leave"
+    assert message.type == "leave"
     assert 'testroom' not in connection.getUserRooms(connection.getUser('annika'))
 
     core.Message(joinMessage, connection)
     assert 'testroom' in connection.getUserRooms(connection.getUser('annika'))
-    testMsg = core.Message(
+    message = core.Message(
         """>testroom
 |leave|#Ann(ik)a ^_^""",
         connection
     )
-    assert testMsg.type == "leave"
+    assert message.type == "leave"
     assert 'testroom' not in connection.getUserRooms(connection.getUser('annika'))
 
 def testMessagePM():
     """Tests the ability of Message objects to handle PM messages and commands
     """
-    testMsg = core.Message(
+    message = core.Message(
         "|pm|+aNNika ^_^|Expecto Botronum|~somecommand argument1,argumENT2||withpipes, argumént3",
         DryRunConnection()
     )
-    assert testMsg.senderName == "+aNNika ^_^"
-    assert testMsg.sender.id == "annika"
-    assert testMsg.arguments == ["~somecommand", "argument1", "argumENT2||withpipes", " argumént3"]
-    assert testMsg.room is None
-    assert testMsg.body == "~somecommand argument1,argumENT2||withpipes, argumént3"
-    assert testMsg.time is None
-    assert testMsg.type == 'pm'
-    assert testMsg.challstr is None
+    assert message.senderName == "+aNNika ^_^"
+    assert message.sender.id == "annika"
+    assert message.arguments == ["~somecommand", "argument1", "argumENT2||withpipes", " argumént3"]
+    assert message.room is None
+    assert message.body == "~somecommand argument1,argumENT2||withpipes, argumént3"
+    assert message.time is None
+    assert message.type == 'pm'
+    assert message.challstr is None
 
 def testMessageQueryResponse():
     """Tests the ability of Message objects to handle query responses
     """
     connection = DryRunConnection()
-    testMsg = core.Message(
+    message = core.Message(
         """|queryresponse|roominfo|{"id":"testroom","roomid":"testroom","title":"Magic & Mayhem","type":"chat","visibility":"hidden","modchat":null,"auth":{"#":["annika","awa","cleo","meicoo"],"%":["dawnofares","instruct","ratisweep","pirateprincess","watfor","oaklynnthylacine"],"@":["gwynt","darth","profsapling","ravioliqueen","miapi"],"+":["madmonty","birdy","captanpasta","iwouldprefernotto","xprienzo","nui","toxtricityamped"],"*":["expectobotronum","kida"]}, "users":["user1","user2"]}""",
         connection
     )
-    assert testMsg.type == "queryresponse"
+    assert message.type == "queryresponse"
     assert "testroom" in connection.userList[connection.getUser('user1')]
     assert "testroom" in connection.userList[connection.getUser('user2')]
 
@@ -191,6 +192,8 @@ def testRoomAuth():
     assert room.usersWithRankGEQ('@') == {'owner1', 'owner2', 'bot1', 'bot2', 'mod1', 'mod2'}
     assert room.usersWithRankGEQ('%') == {'owner1', 'owner2', 'bot1', 'bot2', 'mod1', 'mod2', 'driver1', 'driver2'}
     assert room.usersWithRankGEQ('+') == {'owner1', 'owner2', 'bot1', 'bot2', 'mod1', 'mod2', 'driver1', 'driver2', 'voice1', 'voice2'}
+
+    assert isinstance(str(room), str)
 
 def testRoomJoinphrases():
     """Tests the joinphrase storage of Room objects
@@ -237,5 +240,26 @@ def testUser():
     assert user.can("admin", room)
     assert user.can("manage", room)
 
+    assert isinstance(str(user), str)
+
 ## Connection Object Tests
 ## TODO: write these
+def testConnection():
+    """tests the Connection object
+    """
+    connection = DryRunConnection()
+
+    assert connection.commands
+
+    connection.userJoinedRoom(core.User("user1", connection), connection.getRoomByName("tE ST r]OOm"))
+    assert connection.userList[connection.getUser("user1")] == {"testroom"}
+    assert connection.getUserRooms(connection.getUser("user1")) == {"testroom"}
+
+    connection.userLeftRoom(connection.getUser("user1"), connection.getRoomByID("testroom"))
+    assert connection.userList[connection.getUser("user1")] == set()
+    assert connection.getUserRooms(connection.getUser("user1")) == set()
+
+    assert connection.getRoomByID("testroom").id == "testroom"
+    assert connection.getRoomByName("T e s tROO  &%# m").id == "testroom"
+
+    assert isinstance(str(connection), str)
