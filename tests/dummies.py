@@ -44,3 +44,10 @@ class DummyMessage(core.Message):
             response (string): the response
         """
         self.response = response
+
+class DummyUser(core.User):
+    """A modified version of User to be used for offline testing
+    """
+    def __init__(self, userid=None, isAdmin=False):
+        self.id = userid
+        self.isAdmin = isAdmin
