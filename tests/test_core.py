@@ -9,6 +9,7 @@ import pathlib
 sys.path.append(str(pathlib.Path(__file__).joinpath("../..").resolve()) + '/')
 
 import core # pylint: disable=wrong-import-position
+import config # pylint: disable=wrong-import-position
 
 ## Helper Classes ##
 class DryRunConnection(core.Connection):
@@ -24,6 +25,53 @@ class DryRunConnection(core.Connection):
     def send(self, message):
         """The send() method is disabled in DryRunConnection
         """
+
+def testHelperFunctions(capsys):
+    """Tests the helper functions
+    """
+    assert core.toID("hi") == "hi"
+    assert core.toID("HI") == "hi"
+    assert core.toID("$&@*%$HI   ^4åå") == "hi4"
+
+    config.loglevel = 0
+    core.log("E: this shows")
+    core.log("W: this doesn't show")
+    core.log("I: this doesn't show")
+    core.log("DEBUG: this doesn't show")
+    core.log("this doesn't show")
+    capture = capsys.readouterr()
+    assert capture.out == ""
+    assert capture.err == "E: this shows\n"
+
+    config.loglevel = 1
+    core.log("E: this shows")
+    core.log("W: this shows")
+    core.log("I: this doesn't show")
+    core.log("DEBUG: this doesn't show")
+    core.log("this doesn't show")
+    capture = capsys.readouterr()
+    assert capture.out == ""
+    assert capture.err == "E: this shows\nW: this shows\n"
+
+    config.loglevel = 2
+    core.log("E: this shows")
+    core.log("W: this shows")
+    core.log("I: this shows")
+    core.log("DEBUG: this doesn't show")
+    core.log("this doesn't show")
+    capture = capsys.readouterr()
+    assert capture.out == "I: this shows\n"
+    assert capture.err == "E: this shows\nW: this shows\n"
+
+    config.loglevel = 3
+    core.log("E: this shows")
+    core.log("W: this shows")
+    core.log("I: this shows")
+    core.log("DEBUG: this shows")
+    core.log("this shows")
+    capture = capsys.readouterr()
+    assert capture.out == "I: this shows\nDEBUG: this shows\nthis shows\n"
+    assert capture.err == "E: this shows\nW: this shows\n"
 
 ## Tests for Message objects ##
 def testMessageChallstr():
@@ -175,36 +223,37 @@ def testMessageQueryResponse():
     assert auth['+'] == {"madmonty", "birdy", "captanpasta", "iwouldprefernotto", "xprienzo", "nui", "toxtricityamped"}
 
 ## Room Object Tests ##
-def testRoomAuth():
-    """Tests the ability of Room objects to handle updating and checking auth
+class TestRoom:
+    """Tests for Room objects
     """
     connection = DryRunConnection()
     room = core.Room("testroom", connection)
 
-    assert room.auth == {}
-    room.updateAuth({'#': {'owner1', 'owner2'}, '*': {'bot1', 'bot2'}, '@': {'mod1', 'mod2'}})
-    assert room.auth == {'#': {'owner1', 'owner2'}, '*': {'bot1', 'bot2'}, '@': {'mod1', 'mod2'}}
-    room.updateAuth({'%': {'driver1', 'driver2'}, '+': {'voice1', 'voice2'}})
-    assert room.auth == {'#': {'owner1', 'owner2'}, '*': {'bot1', 'bot2'}, '@': {'mod1', 'mod2'}, '%': {'driver1', 'driver2'}, '+': {'voice1', 'voice2'}}
+    def testRoomAuth(self):
+        """Tests the ability of Room objects to handle updating and checking auth
+        """
+        assert self.room.auth == {}
+        self.room.updateAuth({'#': {'owner1', 'owner2'}, '*': {'bot1', 'bot2'}, '@': {'mod1', 'mod2'}})
+        assert self.room.auth == {'#': {'owner1', 'owner2'}, '*': {'bot1', 'bot2'}, '@': {'mod1', 'mod2'}}
+        self.room.updateAuth({'%': {'driver1', 'driver2'}, '+': {'voice1', 'voice2'}})
+        assert self.room.auth == {'#': {'owner1', 'owner2'}, '*': {'bot1', 'bot2'}, '@': {'mod1', 'mod2'}, '%': {'driver1', 'driver2'}, '+': {'voice1', 'voice2'}}
 
-    assert room.usersWithRankGEQ('#') == {'owner1', 'owner2'}
-    assert room.usersWithRankGEQ('*') == {'owner1', 'owner2', 'bot1', 'bot2'}
-    assert room.usersWithRankGEQ('@') == {'owner1', 'owner2', 'bot1', 'bot2', 'mod1', 'mod2'}
-    assert room.usersWithRankGEQ('%') == {'owner1', 'owner2', 'bot1', 'bot2', 'mod1', 'mod2', 'driver1', 'driver2'}
-    assert room.usersWithRankGEQ('+') == {'owner1', 'owner2', 'bot1', 'bot2', 'mod1', 'mod2', 'driver1', 'driver2', 'voice1', 'voice2'}
+        assert self.room.usersWithRankGEQ('#') == {'owner1', 'owner2'}
+        assert self.room.usersWithRankGEQ('*') == {'owner1', 'owner2', 'bot1', 'bot2'}
+        assert self.room.usersWithRankGEQ('@') == {'owner1', 'owner2', 'bot1', 'bot2', 'mod1', 'mod2'}
+        assert self.room.usersWithRankGEQ('%') == {'owner1', 'owner2', 'bot1', 'bot2', 'mod1', 'mod2', 'driver1', 'driver2'}
+        assert self.room.usersWithRankGEQ('+') == {'owner1', 'owner2', 'bot1', 'bot2', 'mod1', 'mod2', 'driver1', 'driver2', 'voice1', 'voice2'}
 
-    assert isinstance(str(room), str)
+        assert isinstance(str(self.room), str)
 
-def testRoomJoinphrases():
-    """Tests the joinphrase storage of Room objects
-    """
-    room = core.Room("testroom", DryRunConnection())
-
-    assert room.joinphrases == {}
-    room.addJoinphrase("jp1éé || ~uwu~", "user1")
-    assert room.joinphrases == {'user1': "jp1éé || ~uwu~"}
-    room.removeJoinphrase("user1")
-    assert room.joinphrases == {}
+    def testRoomJoinphrases(self):
+        """Tests the joinphrase storage of Room objects
+        """
+        assert self.room.joinphrases == {}
+        self.room.addJoinphrase("jp1éé || ~uwu~", "user1")
+        assert self.room.joinphrases == {'user1': "jp1éé || ~uwu~"}
+        self.room.removeJoinphrase("user1")
+        assert self.room.joinphrases == {}
 
 ## User Object Tests ##
 def testUser():
@@ -243,7 +292,6 @@ def testUser():
     assert isinstance(str(user), str)
 
 ## Connection Object Tests
-## TODO: write these
 def testConnection():
     """tests the Connection object
     """
