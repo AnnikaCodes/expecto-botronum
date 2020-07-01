@@ -6,13 +6,14 @@ import pytest
 
 import dummies
 import superhero
+import config
 
 class TestSuperhero():
     """Test the superhero module
     """
     module = superhero.Module()
 
-    @pytest.mark.skip(reason="will fail due to a known bug described in issue #32")
+    @pytest.mark.xfail(reason="will fail due to a known bug described in issue #32")
     def testInitializeData(self):
         # pylint: disable=protected-access
         """Tests initializing data for the Superhero API
@@ -20,6 +21,7 @@ class TestSuperhero():
         data = superhero._initializeData()
         assert len(data.keys()) == data[list(data.keys())[-1]]
 
+    @pytest.mark.skipif(len(config.superheroAPIKey) < 1, reason="no Superhero API key found")
     def testSuperhero(self):
         """Tests the superhero command
         """

@@ -17,7 +17,7 @@ def testToID():
     assert core.toID("HI") == "hi"
     assert core.toID("$&@*%$HI   ^4åå") == "hi4"
 
-@pytest.mark.skip(reason="known bug, waiting on PR #31")
+@pytest.mark.xfail(reason="known bug, waiting on PR #31")
 def testLog(capsys):
     """Tests the log() function
     """
