@@ -23,4 +23,5 @@ jobs:
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
     - name: Run test script
       run: |
+        cp config-example.json config.json
         bash test.sh
