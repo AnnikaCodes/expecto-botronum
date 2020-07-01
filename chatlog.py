@@ -33,29 +33,29 @@ class Chatlogger:
         logFile = self.getFile(room, 'a')
         logFile.write(formatMessage(message))
 
-    def getFile(self, roomid, perms):
+    def getFile(self, roomID, perms):
         """Returns a file object corresponding to the room's chatlog file.
 
         Args:
-            roomid (string that is an ID): the room
+            roomID (string that is an ID): the room
             perms (string): the file perms (for example, 'r' or 'w')
 
         Returns:
             File: a file for the log file for that room and day
         """
-        roomFolderPath = self.path.joinpath(roomid)
+        roomFolderPath = self.path.joinpath(roomID)
         if not roomFolderPath.exists(): roomFolderPath.mkdir()
         if not roomFolderPath.is_dir():
             return core.log(f"E: Chatlogger(): logging directory is a file: {str(roomFolderPath.resolve())}")
         filePath = roomFolderPath.joinpath(f"{str(datetime.now().date())}.txt")
         return filePath.open(perms)
 
-    def search(self, roomid="", userid="", keyword="", includeJoins=False):
+    def search(self, roomID="", userID="", keyword="", includeJoins=False):
         """Searches chatlogs
 
         Args:
-            roomid (str, optional): The ID of the room to search in. Defaults to "".
-            userid (str, optional): The ID of the user whose messages are being searched for. Defaults to "".
+            roomID (str, optional): The ID of the room to search in. Defaults to "".
+            userID (str, optional): The ID of the user whose messages are being searched for. Defaults to "".
             keyword (str, optional): [description]. Defaults to "".
 
         Returns:
@@ -63,9 +63,9 @@ class Chatlogger:
             (formatted as {date (string): [userid|time|type|senderName|body] (list of day's results)})
         """
         results = {}
-        searchDir = self.path.joinpath(roomid)
-        userSearch = f"{userid}|" if userid else ""
-        if not (roomid and searchDir.is_dir()): return {}
+        searchDir = self.path.joinpath(roomID)
+        userSearch = f"{userID}|" if userID else ""
+        if not (roomID and searchDir.is_dir()): return {}
         for logFilePath in searchDir.iterdir():
             date = logFilePath.name.strip(".txt")
             if not logFilePath.is_file(): continue
@@ -121,11 +121,11 @@ def formatData(data, isHTML=False):
     """
     splitData = data.split("|", 4)
     if len(splitData) == 5:
-        userid, time, msgType, senderName, body = splitData
+        userID, time, msgType, senderName, body = splitData
     elif len(splitData) == 3:
-        userid, msgType, body = splitData
+        userID, msgType, body = splitData
         time = ""
-        senderName = userid
+        senderName = userID
     else:
         core.log(f"DEBUG: unexpected number of data items (expected 5 or 3, got {str(len(splitData))}; data: f{data})")
         return "Unparseable message (bad format)"
