@@ -329,7 +329,7 @@ class Message():
             split (list): the split raw message
         """
         self.body = "|".join(split[4:]).strip('\n')
-        self._setSender()
+        self._setSender(split)
 
     def _handleQuery(self, split):
         """Handles query responses
