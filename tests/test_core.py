@@ -4,8 +4,6 @@
 
 # pylint: disable=line-too-long
 
-import pytest
-
 import core
 import config
 from dummies import DummyConnection
