@@ -14,6 +14,8 @@ class TestLogsearch():
     module = logsearch.Module()
 
     def testLogsearch(self):
+        """Tests the logsearch command
+        """
         message = dummies.DummyMessage(
             arguments=["~logsearch", "testroom", "testuser", "testquery"],
             sender=dummies.DummyUser(isAdmin=True),
