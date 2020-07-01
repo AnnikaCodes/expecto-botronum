@@ -32,13 +32,10 @@ def log(message):
     Arguments:
         message {string} -- the message to be logged, beginning with E:, W:, I:, or DEBUG:
     """
-    if config.loglevel > 2 or message[:2] == 'E:':
-        # Errors are always logged and everything in debug mode is logged.
-        print(message)
-    elif message[:2] == 'W:' and config.loglevel >= 1:
-        print(message)
-    elif message[:2] == 'I:' and config.loglevel >= 2:
-        print(message)
+    # Errors are always logged and warnings if logged go to stderr
+    if message[:2] == 'E:' or message[:2] == 'W:' and config.loglevel >= 1: return sys.stderr.write(f"{message}\n")
+    if message[:2] == 'I:' and config.loglevel >= 2: return print(message)
+    if config.loglevel >= 3: return print(message)
 
 def toID(string):
     """Converts a string into an ID
