@@ -239,11 +239,11 @@ class Message():
         ### It might be worth looking into a better way to format this
         ### tbh all of Message() is kludgy
         if self.type == 'challstr': self.challstr = "|".join(split[2:])
-        elif self.type in ['c:', 'c', 'chat']: self.__handleChat(split)
-        elif self.type in ['J', 'j', 'join']: self.__handleJoinLeave(split, isJoin = True)
-        elif self.type in ['L', 'l', 'leave']: self.__handleJoinLeave(split, isJoin = False)
-        elif self.type == 'pm': self.__handlePM(split)
-        elif self.type == 'queryresponse': self.__handleQuery(split)
+        elif self.type in ['c:', 'c', 'chat']: self._handleChat(split)
+        elif self.type in ['J', 'j', 'join']: self._handleJoinLeave(split, isJoin=True)
+        elif self.type in ['L', 'l', 'leave']: self._handleJoinLeave(split, isJoin=False)
+        elif self.type == 'pm': self._handlePM(split)
+        elif self.type == 'queryresponse': self._handleQuery(split)
         elif self.type == 'init': pass
         else: log(f"DEBUG: Message() of unknown type {self.type}: {raw}")
 
@@ -283,37 +283,60 @@ class Message():
                 if possibleRoom and self.connection.bot.can("html", possibleRoom):
                     return possibleRoom.say(f"/pminfobox {self.sender.id}," + html.replace('\n', ''))
 
-    def __handleChat(self, split):
+    def _handleChat(self, split):
+        """Handles messages of type chat
+
+        Args:
+            split (list): the split raw message
+        """
         hasTimestamp = (self.type == 'c:')
         self.type = 'chat'
-        self.__setRoom(split)
+        self._setRoom(split)
 
         currentSlice = 2
         if hasTimestamp:
             self.time = split[currentSlice]
             currentSlice += 1
 
-        username = split[currentSlice].strip()
+        username = split[currentSlice]
         currentSlice += 1
-        if username[0] in config.roomRanksInOrder:
-            rank = username[0]
-            username = toID("".join(username[1:]))
-            self.room.updateAuth({rank: [username]})
+        userid = username.strip()
+        if userid[0] in config.roomRanksInOrder:
+            rank = userid[0]
+            userid = toID("".join(userid[1:]))
+            self.room.updateAuth({rank: [userid]})
 
-        self.__setSender([None, None, username])
+        self._setSender([None, None, username])
         self.body = "|".join(split[currentSlice:]).strip('\n')
 
-    def __handleJoinLeave(self, split, isJoin = False):
+    def _handleJoinLeave(self, split, isJoin=False):
+        """Handles messages of type join and leave
+
+        Args:
+            split (list): the split raw message
+            isJoin (bool, optional): whether the message describes a join. Defaults to False.
+        """
         self.type = 'join' if isJoin else 'leave'
-        self.__setRoom(split)
-        self.__setSender(split)
+        self._setRoom(split)
+        self._setSender(split)
         if isJoin: return self.connection.userJoinedRoom(self.sender, self.room)
         return self.connection.userLeftRoom(self.sender, self.room)
 
-    def __handlePM(self, split):
-            self.body = "|".join(split[4:]).strip('\n')
+    def _handlePM(self, split):
+        """Handles messages of type PM
 
-    def __handleQuery(self, split):
+        Args:
+            split (list): the split raw message
+        """
+        self.body = "|".join(split[4:]).strip('\n')
+        self._setSender()
+
+    def _handleQuery(self, split):
+        """Handles query responses
+
+        Args:
+            split (list): the split raw message
+        """
         query = split[2]
         if query == 'roominfo':
             roomData = json.loads(split[3])
@@ -325,14 +348,24 @@ class Message():
                     if not userObject: userObject = User(toID(user), self.connection)
                     self.connection.userJoinedRoom(userObject, room)
 
-    def __setSender(self, split):
-            self.senderName = split[2]
-            self.sender = self.connection.getUser(toID(split[2]))
-            if not self.sender: self.sender = User(split[2], self.connection)
+    def _setSender(self, split):
+        """Sets the .sender attribute based on split[2]
 
-    def __setRoom(self, split):
-            roomid = split[0].strip('>').strip('\n')
-            self.room = connection.getRoomByID(roomid if roomid else 'lobby')
+        Args:
+            split (list): the split raw message
+        """
+        self.senderName = split[2]
+        self.sender = self.connection.getUser(toID(split[2]))
+        if not self.sender: self.sender = User(split[2], self.connection)
+
+    def _setRoom(self, split):
+        """Sets the .room attribute based on split[0]
+
+        Args:
+            split (list): the split raw message
+        """
+        roomid = split[0].strip('>').strip('\n')
+        self.room = self.connection.getRoomByID(roomid if roomid else 'lobby')
 
     def __str__(self):
         """String representation of the Message
