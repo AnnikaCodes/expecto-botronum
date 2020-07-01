@@ -85,6 +85,7 @@ class Chatlogger:
         if roomid and searchDir.is_dir():
             for logFilePath in searchDir.iterdir():
                 date = logFilePath.name.strip(".txt")
+                if not logFilePath.is_file(): continue
                 for line in logFilePath.open('r').readlines():
                     try:
                         split = line.lower().split('|',4)
@@ -118,7 +119,8 @@ class Chatlogger:
             senderName = userid
         else:
             core.log(f"DEBUG: unexpected number of data items (expected 5 or 3, got {str(len(splitData))}; data: f{data})")
-
+            return "Unparseable message (bad format)"
+            # TODO: figure out what to do about |html|, |raw|, etc
         try:
             time = f"[{str(datetime.utcfromtimestamp(int(time)).time())}] "
             if isHTML: time = f"<small>{html.escape(time)}</small>"
