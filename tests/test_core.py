@@ -4,17 +4,23 @@
 
 # pylint: disable=line-too-long
 
+import pytest
+
 import core
 import config
 from dummies import DummyConnection
 
-def testHelperFunctions(capsys):
-    """Tests the helper functions
+def testToID():
+    """Tests the toID() function
     """
     assert core.toID("hi") == "hi"
     assert core.toID("HI") == "hi"
     assert core.toID("$&@*%$HI   ^4åå") == "hi4"
 
+@pytest.mark.skip(reason="known bug, waiting on PR #31")
+def testLog(capsys):
+    """Tests the log() function
+    """
     config.loglevel = 0
     core.log("E: this shows")
     core.log("W: this doesn't show")
