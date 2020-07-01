@@ -1,5 +1,5 @@
-"""message_capture.py
-    helpers for testing messages
+"""dummies.py
+    helper classes for testing without a connection to Pokemon Showdown
     by Annika"""
 import core
 

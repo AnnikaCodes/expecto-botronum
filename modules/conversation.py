@@ -1,5 +1,5 @@
 """conversation.py
-    gives conversation-starting prompts
+    manages snippets to give conversation-starting prompts in chat
     by Annika"""
 
 import random

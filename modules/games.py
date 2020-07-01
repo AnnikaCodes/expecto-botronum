@@ -196,7 +196,7 @@ def isInt(string):
         string {str} -- the string
 
     Returns:
-        bool -- whether string is an integer or not
+        bool -- whether or not the string is an integer
     """
     # Inspired by this StackOverflow question
     # https://stackoverflow.com/questions/1265665/how-can-i-check-if-a-string-represents-an-int-without-using-try-except

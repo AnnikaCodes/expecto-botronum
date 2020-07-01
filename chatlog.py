@@ -1,4 +1,4 @@
-""" chatlog.py
+"""chatlog.py
     handles logging chat
     by Annika"""
 

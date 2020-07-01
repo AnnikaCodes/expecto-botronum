@@ -14,6 +14,7 @@ class TestJoinphrase():
     def testJoinphrase(self):
         """Tests adding and removing joinphrases through commands
         """
+        # Remove any previous `testroom2` data left in data.json
         for user in list(self.connection.getRoomByID("testroom2").joinphrases.keys()):
             self.connection.getRoomByID("testroom2").removeJoinphrase(user)
 

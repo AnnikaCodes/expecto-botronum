@@ -176,7 +176,7 @@ class User():
 
         Arguments:
             action {string} -- the action
-            (one of `broadcast`, `addfact`, `hostgame`, `searchlog`, `wall`, `html`, `manage`, or `admin`)
+                (one of `broadcast`, `addfact`, `hostgame`, `searchlog`, `wall`, `html`, `manage`, or `admin`)
             room {Room} -- the room where the action is taking
 
         Returns:
@@ -194,6 +194,7 @@ class User():
             (action == 'manage' and self.id in room.usersWithRankGEQ(config.manageRank)) or
             self.isAdmin)
 
+    #                       (reason: acronym)
     def PM(self, message): # pylint: disable=invalid-name
         """PMs the user the given message
 
@@ -509,9 +510,9 @@ class Connection():
         Returns:
             set -- the roomids for the user's rooms, or None if the user isn't found
         """
-        for i in self.userList:
-            if i and i.id == user.id:
-                return self.userList[i]
+        for possibleUser in self.userList:
+            if possibleUser and possibleUser.id == user.id:
+                return self.userList[possibleUser]
         return None
 
     def userJoinedRoom(self, user, room):

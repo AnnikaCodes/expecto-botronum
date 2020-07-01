@@ -1,5 +1,5 @@
 """admin.py
-    commands for bot administrators]
+    commands for bot administrators
     by Annika"""
 import importlib
 import sys
