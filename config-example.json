@@ -3,7 +3,7 @@
   "password": "",
   "websocketURL": "ws://sim.smogon.com:8000/showdown/websocket",
   "loglevel": 2,
-  "sysops": [],
+  "sysops": ["annika"],
   "broadcastRank": "+",
   "addfactRank": "+",
   "hostgameRank": "%",

@@ -1,10 +1,9 @@
+"""joinphrase.py
+    handles adding and removing joinphrases
+    by Annika"""
+
 import core
 import config
-
-################ joinphrase.py ##############
-## Handles adding and removing joinphrases ##
-## by Annika                               ##
-#############################################
 
 class Module:
     """Represents a module, which may contain several commands
@@ -25,7 +24,7 @@ class Module:
         userid = ""
         if message.room:
             room = message.room
-            if len(message.arguments) > 2: 
+            if len(message.arguments) > 2:
                 userid = core.toID(message.arguments[1])
                 phrase = ",".join(message.arguments[2:]).strip()
         elif len(message.arguments) > 3:
@@ -39,7 +38,7 @@ class Module:
                 f"Usage: ``{config.commandCharacter}addjoinphrase {'[room], ' if not message.room else ''}[user], [phrase]``. "
             )
         if not message.sender.can("manage", room): return message.respond("Permission denied.")
-        
+
         room.addJoinphrase(phrase, userid)
         return message.respond("Joinphrase successfully added!")
 
@@ -52,7 +51,7 @@ class Module:
         userid = ""
         if message.room:
             room = message.room
-            if len(message.arguments) > 1: 
+            if len(message.arguments) > 1:
                 userid = core.toID(message.arguments[1])
         elif len(message.arguments) > 2:
             room = message.connection.getRoomByName(message.arguments[1])
@@ -60,13 +59,15 @@ class Module:
         else:
             return message.respond("You must specify a room.")
         if not userid:
-            return message.respond(f"Usage: ``{config.commandCharacter}removejoinphrase {'[room], ' if not message.room else ''}[user]``. ")
+            return message.respond(
+                f"Usage: ``{config.commandCharacter}removejoinphrase {'[room], ' if not message.room else ''}[user]``. "
+            )
         if not message.sender.can("manage", room): return message.respond("Permission denied.")
-        
+
         room.removeJoinphrase(userid)
         return message.respond("Joinphrase successfully removed!")
 
-    
+
     def __str__(self):
         """String representation of the Module
 

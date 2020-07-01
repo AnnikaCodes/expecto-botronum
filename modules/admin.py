@@ -1,16 +1,14 @@
-import config
-import core
-
+"""admin.py
+    commands for bot administrators
+    by Annika"""
 import importlib
 import sys
 import subprocess
 import pathlib
 import psutil
 
-############# admin.py ##############
-## commands for bot administrators ##
-## by Annika                       ##
-#####################################
+import config
+import core
 
 GIT_COMMAND = 'git pull'
 
@@ -19,7 +17,7 @@ class Module:
     """
     def __init__(self):
         self.commands = {
-            "eval": self.eval, "do": self.do, "sayin": self.do, "load": self.handleModule,
+            "eval": self.eval, "do": self.runCommand, "sayin": self.runCommand, "load": self.handleModule,
             "loadmodule": self.handleModule, "unload": self.handleModule, "unloadmodule": self.handleModule,
             "hotpatch": self.handleModule, "modules": self.viewModules, "listmodules": self.viewModules,
             "vm": self.viewModules, "restart": self.kill, "kill": self.kill, "update": self.update, "git": self.update,
@@ -35,9 +33,9 @@ class Module:
         if message.sender.isAdmin and message.sender.id in config.sysops:
             expression = config.separator.join(message.arguments[1:])
             try:
-                response = str(eval(expression))
+                response = str(eval(expression)) # pylint: disable=eval-used
             except Exception as err:
-              response = str(err)
+                response = str(err)
         else:
             message.respond("Permission denied. This request has been logged.")
             core.log(f"W: admin.eval(): eval permission denied for userid: {message.sender.id}")
@@ -45,8 +43,8 @@ class Module:
         response = "!code " + ("\n" if "\n" not in response else "") + response
         message.respond(response)
 
-    def do(self, message):
-        """do: sends the given command to the given room 
+    def runCommand(self, message):
+        """runCommand: sends the given command to the given room
 
         Arguments:
             message {Message} -- the Message object that invoked the command
@@ -55,12 +53,11 @@ class Module:
             return message.respond(f"Usage: ``{config.commandCharacter}do <room>, <message>``.")
         room = message.connection.getRoomByName(message.arguments[1])
         if room:
-            if not message.sender.can("manage", room): 
+            if not message.sender.can("manage", room):
                 return message.respond("Permission denied.")
             command = ",".join(message.arguments[2:]).strip()
             return room.say(command)
-        else:
-            return message.respond(f"{message.arguments[1]} isn't a room I'm in.")
+        return message.respond(f"{message.arguments[1]} isn't a room I'm in.")
 
     def handleModule(self, message):
         """Handles loading, reloading, and hotpatching modules
@@ -79,7 +76,7 @@ class Module:
 
         if module == __name__ and action == 'unload':
             return message.respond(f"Don't unload the module that provides ``{message.arguments[0]}``.")
-        
+
         responses = []
         if action == 'unload': return message.respond(self.unload(message.connection, module))
         if action == 'load': return message.respond(self.load(message.connection, module))
@@ -89,15 +86,17 @@ class Module:
             message.connection.commands.update(mod.Module().commands)
             return message.respond(f"Successfully hotpatched the {module} module.")
         return [message.respond(response) for response in responses]
-    
-    
+
+
     def viewModules(self, message):
         """Lists the currently loaded modules
 
         Args:
             message (Message): the Message object that invoked the command
         """
-        return message.respond(f"Modules currently known to be loaded: {', '.join([f'``{module}``' for module in message.connection.modules])}")
+        return message.respond(
+            f"Modules currently known to be loaded: {', '.join([f'``{module}``' for module in message.connection.modules])}"
+        )
 
     def kill(self, message):
         """Kills the bot process
@@ -111,7 +110,7 @@ class Module:
             sys.exit()
             return message.respond("Something went wrong killing the bot process.")
         return message.respond("Permission denied.")
-    
+
     def memoryStats(self, message):
         """Gets info on memory usage
 
@@ -123,11 +122,11 @@ class Module:
 
         meminfoPath = pathlib.Path("/proc/meminfo")
         if meminfoPath.is_file():
-            for line in open('/proc/meminfo','r').readlines():
+            for line in open('/proc/meminfo', 'r').readlines():
                 if 'MemAvailable' in line: buf.append(f"{round(int(line.split(':')[1].split('kB')[0]) / 1024, 2)} MB available")
                 if 'MemFree' in line: buf.append(f"{round(int(line.split(':')[1].split('kB')[0]) / 1024, 2)} MB free")
                 if 'MemTotal' in line: buf.append(f"{round(int(line.split(':')[1].split('kB')[0]) / 1024, 2)} MB total")
-        
+
         buf.append(f"{round(psutil.Process().memory_info().rss / 1024 ** 2, 2)} MB used by the bot process")
         return message.respond(f"Memory stats: {', '.join(buf)}")
 
@@ -138,7 +137,7 @@ class Module:
             message (Message): the Message object that invoked the command
         """
         if not message.sender.isAdmin: return message.respond("Permission denied.")
-        output = subprocess.run(GIT_COMMAND.split(), stdout = subprocess.PIPE, stderr = subprocess.PIPE)
+        output = subprocess.run(GIT_COMMAND.split(), stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False)
         results = ""
         success = True
         if len(output.stderr) > 0:
@@ -149,12 +148,12 @@ class Module:
             results = output.stdout.decode('utf-8')
         if len(results) > 295: results = f"\n{results}"
         message.respond(f"!code {results}")
-        message.respond(
-            f"Pulled code! Use ``{config.commandCharacter}hotpatch`` to reload modules." if success 
-            else 
+        return message.respond(
+            f"Pulled code! Use ``{config.commandCharacter}hotpatch`` to reload modules." if success
+            else
             f"``{GIT_COMMAND}`` failed!")
 
-    def load(self, connection, module, force = False):
+    def load(self, connection, module, force=False):
         """Loads a module
 
         Args:
@@ -165,7 +164,7 @@ class Module:
         Returns:
             string: a description of what happened
         """
-        if module in connection.modules and not force: 
+        if module in connection.modules and not force:
             return f"The ``{module}`` module is already loaded -- did you mean to hotpatch it?"
 
         try:
@@ -177,7 +176,7 @@ class Module:
             core.log(f"I: admin.load(): {response}")
             return response
 
-    def unload(self, connection, module, force = False):
+    def unload(self, connection, module, force=False):
         """Unloads a module
 
         Args:
