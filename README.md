@@ -1,5 +1,8 @@
 # Expecto Botronum v3
+### ![tests](https://github.com/AnnikaCodes/expecto-botronum/workflows/tests/badge.svg)
 Expecto Botronum is a Pokémon Showdown bot written by Annika for the [Magic & Mayhem room](psim.us/mm).
+
+
 
 ## Commands
 | Usage | Description |
