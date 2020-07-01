@@ -238,69 +238,15 @@ class Message():
         ### Note: there's a lot of reused / copy+paste logic here
         ### It might be worth looking into a better way to format this
         ### tbh all of Message() is kludgy
-        if self.type == 'challstr':
-            self.challstr = "|".join(split[2:])
-        elif self.type in ['c:', 'c', 'chat']:
-            roomid = split[0].strip('>').strip('\n')
-            roomid = roomid if roomid else 'lobby'
-            hasTimestamp = (self.type == 'c:')
-            self.type = 'chat'
-            self.room = connection.getRoomByID(roomid)
+        if self.type == 'challstr': self.challstr = "|".join(split[2:])
+        elif self.type in ['c:', 'c', 'chat']: self._handleChat(split)
+        elif self.type in ['J', 'j', 'join']: self._handleJoinLeave(split, isJoin=True)
+        elif self.type in ['L', 'l', 'leave']: self._handleJoinLeave(split, isJoin=False)
+        elif self.type == 'pm': self._handlePM(split)
+        elif self.type == 'queryresponse': self._handleQuery(split)
+        elif self.type == 'init': pass
+        else: log(f"DEBUG: Message() of unknown type {self.type}: {raw}")
 
-            currentSlice = 2
-            if hasTimestamp:
-                self.time = split[currentSlice]
-                currentSlice += 1
-
-            username = split[currentSlice].strip()
-            self.senderName = username
-            currentSlice += 1
-            if username[0] in config.roomRanksInOrder:
-                rank = username[0]
-                username = toID("".join(username[1:]))
-                self.room.updateAuth({rank: [username]})
-            self.sender = self.connection.getUser(toID(username))
-            if not self.sender: self.sender = User(username, self.connection)
-
-            self.body = "|".join(split[currentSlice:]).strip('\n')
-        elif self.type in ['J', 'j', 'join']:
-            roomid = split[0].strip('>').strip('\n')
-            roomid = roomid if roomid else 'lobby'
-            self.type = 'join'
-            self.room = connection.getRoomByID(roomid)
-            self.senderName = split[2]
-            self.sender = self.connection.getUser(toID(split[2]))
-            if not self.sender: self.sender = User(split[2], self.connection)
-            self.connection.userJoinedRoom(self.sender, self.room)
-        elif self.type in ['L', 'l', 'leave']:
-            roomid = split[0].strip('>').strip('\n')
-            roomid = roomid if roomid else 'lobby'
-            self.type = 'leave'
-            self.room = connection.getRoomByID(roomid)
-            self.senderName = split[2]
-            self.sender = self.connection.getUser(toID(split[2]))
-            if not self.sender: self.sender = User(split[2], self.connection)
-            self.connection.userLeftRoom(self.sender, self.room)
-        elif self.type == 'pm':
-            self.senderName = split[2]
-            self.sender = self.connection.getUser(toID(split[2]))
-            if not self.sender: self.sender = User(split[2], self.connection)
-            self.body = "|".join(split[4:]).strip('\n')
-        elif self.type == 'queryresponse':
-            query = split[2]
-            if query == 'roominfo':
-                roomData = json.loads(split[3])
-                room = self.connection.getRoomByID(roomData['id']) if 'id' in roomData.keys() else None
-                if room and 'auth' in roomData.keys(): room.updateAuth(roomData['auth'])
-                if room and 'users' in roomData.keys():
-                    for user in roomData['users']:
-                        userObject = self.connection.getUser(toID(user))
-                        if not userObject: userObject = User(toID(user), self.connection)
-                        self.connection.userJoinedRoom(userObject, room)
-        elif self.type == 'init':
-            pass
-        else:
-            log(f"DEBUG: Message() of unknown type {self.type}: {raw}")
         if self.body:
             spaceSplit = self.body.split(' ', 1)
             self.arguments = [spaceSplit[0]]
@@ -337,6 +283,90 @@ class Message():
                 if possibleRoom and self.connection.bot.can("html", possibleRoom):
                     return possibleRoom.say(f"/pminfobox {self.sender.id}," + html.replace('\n', ''))
 
+    def _handleChat(self, split):
+        """Handles messages of type chat
+
+        Args:
+            split (list): the split raw message
+        """
+        hasTimestamp = (self.type == 'c:')
+        self.type = 'chat'
+        self._setRoom(split)
+
+        currentSlice = 2
+        if hasTimestamp:
+            self.time = split[currentSlice]
+            currentSlice += 1
+
+        username = split[currentSlice]
+        currentSlice += 1
+        userid = username.strip()
+        if userid[0] in config.roomRanksInOrder:
+            rank = userid[0]
+            userid = toID("".join(userid[1:]))
+            self.room.updateAuth({rank: [userid]})
+
+        self._setSender([None, None, username])
+        self.body = "|".join(split[currentSlice:]).strip('\n')
+
+    def _handleJoinLeave(self, split, isJoin=False):
+        """Handles messages of type join and leave
+
+        Args:
+            split (list): the split raw message
+            isJoin (bool, optional): whether the message describes a join. Defaults to False.
+        """
+        self.type = 'join' if isJoin else 'leave'
+        self._setRoom(split)
+        self._setSender(split)
+        if isJoin: return self.connection.userJoinedRoom(self.sender, self.room)
+        return self.connection.userLeftRoom(self.sender, self.room)
+
+    def _handlePM(self, split):
+        """Handles messages of type PM
+
+        Args:
+            split (list): the split raw message
+        """
+        self.body = "|".join(split[4:]).strip('\n')
+        self._setSender(split)
+
+    def _handleQuery(self, split):
+        """Handles query responses
+
+        Args:
+            split (list): the split raw message
+        """
+        query = split[2]
+        if query == 'roominfo':
+            roomData = json.loads(split[3])
+            room = self.connection.getRoomByID(roomData['id']) if 'id' in roomData.keys() else None
+            if room and 'auth' in roomData.keys(): room.updateAuth(roomData['auth'])
+            if room and 'users' in roomData.keys():
+                for user in roomData['users']:
+                    userObject = self.connection.getUser(toID(user))
+                    if not userObject: userObject = User(toID(user), self.connection)
+                    self.connection.userJoinedRoom(userObject, room)
+
+    def _setSender(self, split):
+        """Sets the .sender attribute based on split[2]
+
+        Args:
+            split (list): the split raw message
+        """
+        self.senderName = split[2]
+        self.sender = self.connection.getUser(toID(split[2]))
+        if not self.sender: self.sender = User(split[2], self.connection)
+
+    def _setRoom(self, split):
+        """Sets the .room attribute based on split[0]
+
+        Args:
+            split (list): the split raw message
+        """
+        roomid = split[0].strip('>').strip('\n')
+        self.room = self.connection.getRoomByID(roomid if roomid else 'lobby')
+
     def __str__(self):
         """String representation of the Message
 
@@ -346,7 +376,7 @@ class Message():
         buf = "Message"
         if self.body: buf += f" with content {self.body}"
         if self.sender: buf += f" from User({str(self.sender)})"
-        if self.senderName: buf += f"sent by {self.senderName}"
+        if self.senderName: buf += f" sent by {self.senderName}"
         if self.room: buf += f" in Room({str(self.room)})"
         if self.time: buf += f" at {str(self.time)}"
         if self.type: buf += f" of type {self.type}"
