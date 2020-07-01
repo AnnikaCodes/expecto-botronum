@@ -36,7 +36,8 @@ class DummyMessage(core.Message):
         self.senderName = senderName
         self.connection = connection
         self.response = None
-        self.HTMLResponse = None
+        #                          (because HTML is an acronym)
+        self.HTMLResponse = None # pylint: disable=invalid-name
 
     def respond(self, response):
         """Captures the response to a message
@@ -46,13 +47,13 @@ class DummyMessage(core.Message):
         """
         self.response = response
 
-    def respondHTML(self, response):
+    def respondHTML(self, html):
         """Captures the HTML response to a message
 
         Args:
-            response (string): the HTML
+            html (string): the HTML
         """
-        self.HTMLResponse = response
+        self.HTMLResponse = html
 
 class DummyUser(core.User):
     """A modified version of User to be used for offline testing
