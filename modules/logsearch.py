@@ -3,9 +3,9 @@
     by Annika"""
 
 import html
+import psclient
 
 import config
-import core
 
 # 102400 is the maximum size of a message to the PS! servers; 19 is the maximum length of a username.
 MAX_BUF_LEN = 102400 - 19 - len("/pminfobox ,") - len("</details>")
@@ -24,11 +24,12 @@ class Module:
         """
         if len(message.arguments) < 2:
             return message.respond(f"Usage: ``{config.commandCharacter}logsearch <room>, [optional user], [optional keyword]``.")
-        roomID = core.toID(message.arguments[1]).lower()
-        userID = core.toID(message.arguments[2]).lower() if len(message.arguments) > 2 else ""
+        if not message.connection.chatlogger: return message.respond("This bot does not currently have a chatlogger loaded.")
+        roomID = psclient.toID(message.arguments[1]).lower()
+        userID = psclient.toID(message.arguments[2]).lower() if len(message.arguments) > 2 else ""
         keyword = ','.join(message.arguments[3:]).strip().lower() if len(message.arguments) > 3 else ""
 
-        room = message.connection.getRoomByID(roomID)
+        room = message.connection.getRoom(roomID)
         if not room: return message.respond(f"Invalid room: {roomID}")
         if not message.sender.can("searchlog", room): return message.respond("Permission denied.")
 

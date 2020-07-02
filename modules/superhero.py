@@ -3,10 +3,10 @@
     by Annika"""
 
 import requests
+import psclient
 
 import config
 import data
-import core
 
 class Module:
     """Represents a module, which may contain several commands
@@ -21,7 +21,7 @@ class Module:
             message {Message} -- the Message object that invoked the command
         """
         superheroIDDictionary = data.get("superheroIDDictionary") or _initializeData()
-        superhero = core.toID(config.separator.join(message.arguments[1:]))
+        superhero = psclient.toID(config.separator.join(message.arguments[1:]))
         if superhero not in superheroIDDictionary:
             return message.respond(f"{superhero} isn't a superhero that can be looked up with the API.")
         superheroID = superheroIDDictionary[superhero]

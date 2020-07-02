@@ -4,16 +4,17 @@
 
 # pylint: disable=line-too-long
 
+import psclient
 import core
 import config
-from dummies import DummyConnection
+from dummies import DummyConnection, DummyUser
 
 def testToID():
     """Tests the toID() function
     """
-    assert core.toID("hi") == "hi"
-    assert core.toID("HI") == "hi"
-    assert core.toID("$&@*%$HI   ^4åå") == "hi4"
+    assert psclient.toID("hi") == "hi"
+    assert psclient.toID("HI") == "hi"
+    assert psclient.toID("$&@*%$HI   ^4åå") == "hi4"
 
 def testLog(capsys):
     """Tests the log() function
@@ -200,7 +201,7 @@ def testMessageQueryResponse():
     assert 'user1' in allUserIDs
     assert 'user2' in allUserIDs
 
-    auth = connection.getRoomByID("testroom").auth
+    auth = connection.getRoom("testroom").auth
     assert auth['#'] == {"annika", "awa", "cleo", "meicoo"}
     assert auth['*'] == {"expectobotronum", "kida"}
     assert auth['@'] == {"gwynt", "darth", "profsapling", "ravioliqueen", "miapi"}
@@ -245,12 +246,12 @@ def testUser():
     """Tests the User object
     """
     connection = DummyConnection()
-    user = core.User("&tEsT uSeR ~o///o~", connection)
+    user = DummyUser("&tEsT uSeR ~o///o~", connection)
     room = core.Room("testroom", connection)
 
     assert user.name == "&tEsT uSeR ~o///o~"
     assert user.id == "testuseroo"
-    assert not user.isAdmin
+    assert user.id not in config.sysops
 
     room.auth = {}
     assert not user.can("html", room)
@@ -267,13 +268,6 @@ def testUser():
     assert user.can("wall", room)
     assert not user.can("admin", room)
 
-    user.isAdmin = True
-    room.auth = {}
-    assert user.can("html", room)
-    assert user.can("wall", room)
-    assert user.can("admin", room)
-    assert user.can("manage", room)
-
     assert isinstance(str(user), str)
 
 ## Connection Object Tests
@@ -284,15 +278,15 @@ def testConnection():
 
     assert connection.commands
 
-    connection.userJoinedRoom(core.User("user1", connection), connection.getRoomByName("tE ST r]OOm"))
+    connection.userJoinedRoom(core.User("user1", connection), connection.getRoom("tE ST r]OOm"))
     assert connection.userList[connection.getUser("user1")] == {"testroom"}
     assert connection.getUserRooms(connection.getUser("user1")) == {"testroom"}
 
-    connection.userLeftRoom(connection.getUser("user1"), connection.getRoomByID("testroom"))
+    connection.userLeftRoom(connection.getUser("user1"), connection.getRoom("testroom"))
     assert connection.userList[connection.getUser("user1")] == set()
     assert connection.getUserRooms(connection.getUser("user1")) == set()
 
-    assert connection.getRoomByID("testroom").id == "testroom"
-    assert connection.getRoomByName("T e s tROO  &%# m").id == "testroom"
+    assert connection.getRoom("testroom").id == "testroom"
+    assert connection.getRoom("T e s tROO  &%# m").id == "testroom"
 
     assert isinstance(str(connection), str)

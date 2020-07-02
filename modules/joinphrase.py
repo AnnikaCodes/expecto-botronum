@@ -2,7 +2,7 @@
     handles adding and removing joinphrases
     by Annika"""
 
-import core
+import psclient
 import config
 
 class Module:
@@ -25,11 +25,11 @@ class Module:
         if message.room:
             room = message.room
             if len(message.arguments) > 2:
-                userid = core.toID(message.arguments[1])
+                userid = psclient.toID(message.arguments[1])
                 phrase = ",".join(message.arguments[2:]).strip()
         elif len(message.arguments) > 3:
-            room = message.connection.getRoomByName(message.arguments[1])
-            userid = core.toID(message.arguments[2])
+            room = message.connection.getRoom(message.arguments[1])
+            userid = psclient.toID(message.arguments[2])
             phrase = ",".join(message.arguments[3:])
         else:
             return message.respond("You must specify a room.")
@@ -52,10 +52,10 @@ class Module:
         if message.room:
             room = message.room
             if len(message.arguments) > 1:
-                userid = core.toID(message.arguments[1])
+                userid = psclient.toID(message.arguments[1])
         elif len(message.arguments) > 2:
-            room = message.connection.getRoomByName(message.arguments[1])
-            userid = core.toID(message.arguments[2])
+            room = message.connection.getRoom(message.arguments[1])
+            userid = psclient.toID(message.arguments[2])
         else:
             return message.respond("You must specify a room.")
         if not userid:

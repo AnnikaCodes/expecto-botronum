@@ -7,7 +7,7 @@ import sys
 import pathlib
 sys.path.append(str(pathlib.Path(__file__).joinpath("../..").resolve()) + '/')
 
-import chatlog # pylint: disable=wrong-import-position
+from psclient import chatlog # pylint: disable=wrong-import-position
 
 class TestChatlog:
     """Tests for the chatlog module

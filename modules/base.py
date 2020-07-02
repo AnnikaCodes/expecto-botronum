@@ -52,7 +52,7 @@ class Module:
         if len(message.arguments) not in range(1, 4):
             message.respond(f"Usage: ``{config.commandCharacter}timer <duration>, <optional message>``")
             return
-        response = "/wall " if message.type == 'pm' or message.connection.bot.can('wall', message.room) else ""
+        response = "/wall " if message.type == 'pm' or message.connection.this.can('wall', message.room) else ""
         response += message.arguments[2] if len(message.arguments) > 2 else f"Timer set by {message.sender.name} is up"
 
         try:

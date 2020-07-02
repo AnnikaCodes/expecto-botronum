@@ -1,6 +1,7 @@
 """dummies.py
     helper classes for testing without a connection to Pokemon Showdown
     by Annika"""
+import psclient
 import core
 
 # pylint: disable=super-init-not-called
@@ -8,8 +9,9 @@ import core
 class DummyConnection(core.Connection):
     """A modified version of Connection to be used for offline testing
     """
-    def __init__(self):
+    def __init__(self, logchat=False):
         super().__init__()
+        if logchat: self.chatlogger = psclient.chatlog.Chatlogger("chatlogging-test/")
         self.roomList = {
             core.Room("testroom", self), core.Room("testroom2", self),
             core.Room("testroom3", self), core.Room("lobby", self)
@@ -58,6 +60,12 @@ class DummyMessage(core.Message):
 class DummyUser(core.User):
     """A modified version of User to be used for offline testing
     """
-    def __init__(self, userid=None, isAdmin=False):
+    def __init__(self, name="", connection=None, userid=None, isAdmin=False):
         self.id = userid
-        self.isAdmin = isAdmin
+        self.admin = isAdmin
+        if connection: super().__init__(name, connection)
+
+    def can(self, action, room):
+        """For DummyUsers, can() takes into account the admin attribute
+        """
+        return self.admin or super().can(action, room)

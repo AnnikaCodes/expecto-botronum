@@ -3,10 +3,10 @@
     by Annika"""
 
 import random
+import psclient
 from pbwrap import Pastebin
 
 import data
-import core
 import config
 
 class Module:
@@ -35,7 +35,7 @@ class Module:
         if message.room:
             roomid = message.room.id
         elif len(message.arguments) > 1:
-            roomid = core.toID(message.arguments[1])
+            roomid = psclient.toID(message.arguments[1])
         else:
             return message.respond("You must specify a room.")
 
@@ -54,7 +54,7 @@ class Module:
             room = message.room
             snippet = ",".join(message.arguments[1:]).strip()
         elif len(message.arguments) > 2:
-            room = message.connection.getRoomByName(message.arguments[1])
+            room = message.connection.getRoom(message.arguments[1])
             snippet = ",".join(message.arguments[2:]).strip()
         else:
             return message.respond("You must specify a fact/topic (and a room if used in PMs).")
@@ -93,7 +93,7 @@ class Module:
         if message.room:
             room = message.room
         elif len(message.arguments) > 1:
-            room = message.connection.getRoomByName(message.arguments[1])
+            room = message.connection.getRoom(message.arguments[1])
         else:
             return message.respond("You must specify a room.")
 
@@ -113,7 +113,7 @@ class Module:
         if message.room:
             room = message.room
         elif len(message.arguments) > 1:
-            room = message.connection.getRoomByName(message.arguments[1])
+            room = message.connection.getRoom(message.arguments[1])
         else:
             return message.respond("You must specify a room.")
         if not message.sender.can("addfact", room): return message.respond("Permission denied.")

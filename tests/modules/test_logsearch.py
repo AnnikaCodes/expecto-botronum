@@ -19,7 +19,7 @@ class TestLogsearch():
         message = dummies.DummyMessage(
             arguments=["~logsearch", "testroom", "testuser", "testquery"],
             sender=dummies.DummyUser(isAdmin=True),
-            connection=dummies.DummyConnection()
+            connection=dummies.DummyConnection(logchat=True)
         )
         self.module.logsearch(message)
         assert not message.response
