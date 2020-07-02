@@ -24,7 +24,7 @@ def log(string):
     psclient.LOGLEVEL = config.loglevel
     return psclient.log(string)
 
-class User(psclient.User):
+class BotUser(psclient.User):
     """The original psclient.User class extended for the bot
     """
     def can(self, action, room):
@@ -50,7 +50,7 @@ class User(psclient.User):
             (action == 'admin' and self.id in config.sysops)
         )
 
-class Room(psclient.Room):
+class BotRoom(psclient.Room):
     """The original psclient.Room class from the ps-client package, extended for the bot to include joinphrase storage
     """
     def __init__(self, name, connection):
@@ -81,24 +81,11 @@ class Room(psclient.Room):
         jpData[self.id] = self.joinphrases
         data.store("joinphrases", jpData)
 
-class Message(psclient.Message):
+class BotMessage(psclient.Message):
     """The original psclient.Message class from the ps-client package, extended for the bot to include an arguments attribute
     """
-    def __init__(self, psclientMessage):
-        self.sender = User(psclientMessage.sender.name, psclientMessage.connection) if psclientMessage.sender else None
-        self.room = psclientMessage.room
-        self.body = psclientMessage.body
-        self.time = psclientMessage.time
-        self.type = psclientMessage.type
-        self.challstr = psclientMessage.challstr
-        self.senderName = psclientMessage.senderName
-        self.raw = psclientMessage.raw
-        self.connection = psclientMessage.connection
-        self.type = psclientMessage.type
-        self.arguments = None
-
-        del psclientMessage
-
+    def __init__(self, raw, connection):
+        super().__init__(raw, connection)
         # Expecto Botronum uses an arguments attribute to make commands easier, which is too specific for the ps-client package.
         if self.body:
             spaceSplit = self.body.split(' ', 1)
@@ -119,7 +106,7 @@ class Message(psclient.Message):
     def __str__(self):
         return super().__str__() + f" with arguments {self.arguments}" if self.arguments else ""
 
-class Connection(psclient.PSConnection):
+class BotConnection(psclient.PSConnection):
     """The original psclient.PSConnection class from the ps-client package, extended with bot-specific features
     """
     def __init__(self):
@@ -133,24 +120,24 @@ class Connection(psclient.PSConnection):
         )
         self.commands = {}
         self.modules = set()
-        self.this = User(self.this.name, self)
+        self.this = BotUser(self.this.name, self)
         for module in config.modules:
             # Note: if multiple modules have the same command then the later module will overwrite the earlier.
             try:
                 self.commands.update(importlib.import_module(module).Module().commands)
                 self.modules.add(module)
             except Exception as err:
-                log(f"E: core.Connection(): error loading module {module}: {str(err)}")
-        log(f"I: core.Connection(): Loaded the following commands: {', '.join(self.commands.keys())}")
+                log(f"E: core.BotConnection(): error loading module {module}: {str(err)}")
+        log(f"I: core.BotConnection(): Loaded the following commands: {', '.join(self.commands.keys())}")
 
     def login(self, challstr):
         """Logs in to Pokemon Showdown
         """
         super().login(challstr)
         for room in config.rooms:
-            Room(room, self)
+            BotRoom(room, self)
     def userJoinedRoom(self, user, room):
-        return super().userJoinedRoom(User(user.name, self), room)
+        return super().userJoinedRoom(BotUser(user.name, self), room)
 
     def __str__(self):
         """String representation, now with commands
@@ -160,17 +147,16 @@ class Connection(psclient.PSConnection):
 def handleMessage(connection, message):
     """Handles messages from the websocket
     """
-    message = Message(message)
     if message.type == 'join' and message.sender.id in message.room.joinphrases.keys():
         # Handle joinphrases
         message.room.say(message.room.joinphrases[message.sender.id])
     elif message.type in ['chat', 'pm'] and message.body[0] == config.commandCharacter:
         potentialCommand = message.body.split(' ')[0].strip(config.commandCharacter).lower()
         if potentialCommand in connection.commands:
-            connection.commands[potentialCommand](message) # Invoke the command
+            connection.commands[potentialCommand](BotMessage(message.raw, connection)) # Invoke the command
 
 if __name__ == "__main__":
-    conn = Connection()
+    conn = BotConnection()
     client = psclient.PSClient(conn)
     log("I: core.py: client connecting...")
     client.connect()
