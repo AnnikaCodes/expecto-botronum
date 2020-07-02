@@ -10,4 +10,5 @@ config.json
 # Logs, etc.
 logs/*
 tests/logs
+chatlogging-test/
 data.json
