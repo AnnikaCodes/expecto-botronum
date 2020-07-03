@@ -3,10 +3,10 @@
     by Annika"""
 
 import random
+import psclient
 
 import data
 import config
-import core
 
 TOUR_SETUP_COMMANDS = [
     '/tour autostart 5',
@@ -49,7 +49,7 @@ class Module:
         if message.room:
             roomID = message.room.id
         elif message.arguments and len(message.arguments) > 1:
-            roomID = core.toID(message.arguments[1])
+            roomID = psclient.toID(message.arguments[1])
         else:
             return message.respond("You must specify a room.")
 
@@ -73,7 +73,7 @@ class Module:
         room = message.room
 
         if not room and len(message.arguments) > 2:
-            room = message.connection.getRoomByName(message.arguments[1])
+            room = message.connection.getRoom(message.arguments[1])
             word = ",".join(message.arguments[2:])
         if not room:
             return message.respond("You must specify a valid room.")
@@ -103,7 +103,7 @@ class Module:
         room = message.room
 
         if not room and len(message.arguments) > 2:
-            room = message.connection.getRoomByName(message.arguments[1])
+            room = message.connection.getRoom(message.arguments[1])
             word = ",".join(message.arguments[2:])
         if not room:
             return message.respond("You must specify a valid room.")
@@ -129,7 +129,7 @@ class Module:
 
         if len(message.arguments) < 2:
             return message.respond(f"Usage: ``{config.commandCharacter}addpoints [user], [optional number of points]``.")
-        userid = core.toID(message.arguments[1])
+        userid = psclient.toID(message.arguments[1])
         points = 1
         if len(message.arguments) > 2 and isInt(message.arguments[2].strip()): points = int(message.arguments[2].strip())
 
@@ -150,7 +150,7 @@ class Module:
         roomid = message.room.id if message.room else None
         if not roomid:
             if len(message.arguments) < 2: return message.respond("You must specify a room.")
-            roomid = core.toID(message.arguments[1])
+            roomid = psclient.toID(message.arguments[1])
         if not roomid: return message.respond("You must specify a room.")
         if roomid not in self.minigamePoints.keys(): return message.respond("There are no scores.")
 

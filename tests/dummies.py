@@ -1,25 +1,27 @@
 """dummies.py
     helper classes for testing without a connection to Pokemon Showdown
     by Annika"""
+import psclient
 import core
 
 # pylint: disable=super-init-not-called
 
-class DummyConnection(core.Connection):
+class DummyConnection(core.BotConnection):
     """A modified version of Connection to be used for offline testing
     """
-    def __init__(self):
+    def __init__(self, logchat=False):
         super().__init__()
+        if logchat: self.chatlogger = psclient.chatlog.Chatlogger("chatlogging-test/")
         self.roomList = {
-            core.Room("testroom", self), core.Room("testroom2", self),
-            core.Room("testroom3", self), core.Room("lobby", self)
+            core.BotRoom("testroom", self), core.BotRoom("testroom2", self),
+            core.BotRoom("testroom3", self), core.BotRoom("lobby", self)
         }
 
     def send(self, message):
         """The send() method is disabled in DummyConnection
         """
 
-class DummyMessage(core.Message):
+class DummyMessage(core.BotMessage):
     """A modified version of Message to be used for offline testing
     """
     def __init__(
@@ -55,9 +57,15 @@ class DummyMessage(core.Message):
         """
         self.HTMLResponse = html
 
-class DummyUser(core.User):
+class DummyUser(core.BotUser):
     """A modified version of User to be used for offline testing
     """
-    def __init__(self, userid=None, isAdmin=False):
+    def __init__(self, name="", connection=None, userid=None, isAdmin=False):
         self.id = userid
-        self.isAdmin = isAdmin
+        self.admin = isAdmin
+        if connection: super().__init__(name, connection)
+
+    def can(self, action, room):
+        """For DummyUsers, can() takes into account the admin attribute
+        """
+        return self.admin or super().can(action, room)

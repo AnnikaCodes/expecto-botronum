@@ -6,6 +6,7 @@ import sys
 import subprocess
 import pathlib
 import psutil
+import psclient
 
 import config
 import core
@@ -30,7 +31,7 @@ class Module:
         Arguments:
             message {Message} -- the Message object that invoked the command
         """
-        if message.sender.isAdmin and message.sender.id in config.sysops:
+        if message.sender.id in config.sysops:
             expression = config.separator.join(message.arguments[1:])
             try:
                 response = str(eval(expression)) # pylint: disable=eval-used
@@ -51,7 +52,7 @@ class Module:
         """
         if not message.arguments or len(message.arguments) < 3:
             return message.respond(f"Usage: ``{config.commandCharacter}do <room>, <message>``.")
-        room = message.connection.getRoomByName(message.arguments[1])
+        room = message.connection.getRoom(message.arguments[1])
         if room:
             if not message.sender.can("manage", room):
                 return message.respond("Permission denied.")
@@ -65,10 +66,10 @@ class Module:
         Args:
             message (Message): the message that triggered the command
         """
-        if not message.sender.isAdmin: return message.respond("Permission denied.")
+        if not message.sender.id in config.sysops: return message.respond("Permission denied.")
         if not message.arguments or len(message.arguments) < 2:
             return message.respond(f"Usage: ``{message.arguments[0]} <module>``.")
-        module = core.toID(message.arguments[1])
+        module = psclient.toID(message.arguments[1])
         action = ''
         if 'load' in message.arguments[0]: action = 'load'
         if 'unload' in message.arguments[0]: action = 'unload'
@@ -104,7 +105,7 @@ class Module:
         Args:
             message (Message): the Message object that invoked the command
         """
-        if message.sender.isAdmin:
+        if message.sender.id in config.sysops:
             message.respond("Killing the bot process....")
             core.log(f"E: admin.kill(): killed by {message.senderName}")
             sys.exit()
@@ -117,7 +118,7 @@ class Module:
         Args:
             message (Message): the Message object that invoked the command
         """
-        if not message.sender.isAdmin: return message.respond("Permission denied.")
+        if not message.sender.id in config.sysops: return message.respond("Permission denied.")
         buf = []
 
         meminfoPath = pathlib.Path("/proc/meminfo")
@@ -136,7 +137,7 @@ class Module:
         Args:
             message (Message): the Message object that invoked the command
         """
-        if not message.sender.isAdmin: return message.respond("Permission denied.")
+        if not message.sender.id in config.sysops: return message.respond("Permission denied.")
         output = subprocess.run(GIT_COMMAND.split(), stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False)
         results = ""
         success = True

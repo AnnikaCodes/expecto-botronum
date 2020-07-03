@@ -44,7 +44,7 @@ class TestGames():
         message = dummies.DummyMessage(
             arguments=["~addpoints", "testuser"],
             sender=dummies.DummyUser(isAdmin=True),
-            room=self.connection.getRoomByID("testroom")
+            room=self.connection.getRoom("testroom")
         )
         self.module.addPoints(message)
         assert self.module.minigamePoints["testroom"]["testuser"] == 1
@@ -52,7 +52,7 @@ class TestGames():
         message = dummies.DummyMessage(
             arguments=["~addpoints", "testuser", "-2"],
             sender=dummies.DummyUser(isAdmin=True),
-            room=self.connection.getRoomByID("testroom")
+            room=self.connection.getRoom("testroom")
         )
         self.module.addPoints(message)
         assert self.module.minigamePoints["testroom"]["testuser"] == -1
