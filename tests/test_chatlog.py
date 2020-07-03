@@ -25,6 +25,7 @@ class TestChatlog:
         """Tests formatting data
         """
         sampleData = "annika|1591322849|chat|#Annika|hi!"
-        assert chatlog.formatData(sampleData, isHTML=False) == "[02:07:29] #Annika: hi!"
-        assert chatlog.formatData(sampleData, isHTML=True) == "<small>[02:07:29] </small><small>#</small><b>Annika</b>: hi!"
+        assert self.chatlogger.formatData(sampleData, isHTML=False) == "[02:07:29] #Annika: hi!"
+        assert self.chatlogger.formatData(sampleData, isHTML=True) == \
+            "<small>[02:07:29] </small><small>#</small><b>Annika</b>: hi!"
     # todo: figure out a way to test the rest of chatlog
