@@ -24,7 +24,7 @@ class Module:
         """
         if len(message.arguments) < 2:
             return message.respond(f"Usage: ``{config.commandCharacter}logsearch <room>, [optional user], [optional keyword]``.")
-        if not message.connection.chatlogger: return message.respond("This bot does not currently have a chatlogger loaded.")
+        if not message.connection.chatlogger: return message.respond("There is currently no chatlogger loaded.")
         roomID = psclient.toID(message.arguments[1]).lower()
         userID = psclient.toID(message.arguments[2]).lower() if len(message.arguments) > 2 else ""
         keyword = ','.join(message.arguments[3:]).strip().lower() if len(message.arguments) > 3 else ""

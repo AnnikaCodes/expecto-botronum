@@ -47,7 +47,7 @@ class BotUser(psclient.User):
             (action == 'wall' and self.id in room.usersWithRankGEQ('%')) or
             (action == 'html' and self.id in room.usersWithRankGEQ('*')) or
             (action == 'manage' and self.id in room.usersWithRankGEQ(config.manageRank)) or
-            (action == 'admin' and self.id in config.sysops)
+            self.id in config.sysops
         )
 
 class BotRoom(psclient.Room):
