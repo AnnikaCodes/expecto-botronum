@@ -138,7 +138,12 @@ class Module:
             message (Message): the Message object that invoked the command
         """
         if not message.sender.id in config.sysops: return message.respond("Permission denied.")
-        output: subprocess.CompletedProcess = subprocess.run(GIT_COMMAND.split(), stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False)
+        output: subprocess.CompletedProcess = subprocess.run(
+            GIT_COMMAND.split(),
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            check=False
+        )
         results: str = (output.stdout + output.stderr).decode('utf-8')
         if len(results) > 295: results = f"\n{results}"
         message.respond(f"!code {results}")
