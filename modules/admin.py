@@ -131,28 +131,18 @@ class Module:
         buf.append(f"{round(psutil.Process().memory_info().rss / 1024 ** 2, 2)} MB used by the bot process")
         return message.respond(f"Memory stats: {', '.join(buf)}")
 
-    def update(self, message):
+    def update(self, message: core.BotMessage) -> None:
         """Pulls latest code from git
 
         Args:
             message (Message): the Message object that invoked the command
         """
         if not message.sender.id in config.sysops: return message.respond("Permission denied.")
-        output = subprocess.run(GIT_COMMAND.split(), stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False)
-        results = ""
-        success = True
-        if len(output.stderr) > 0:
-            message.respond(f"``{GIT_COMMAND}`` failed!")
-            results = (output.stdout + output.stderr).decode('utf-8')
-            success = False
-        else:
-            results = output.stdout.decode('utf-8')
+        output: subprocess.CompletedProcess = subprocess.run(GIT_COMMAND.split(), stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False)
+        results: str = (output.stdout + output.stderr).decode('utf-8')
         if len(results) > 295: results = f"\n{results}"
         message.respond(f"!code {results}")
-        return message.respond(
-            f"Pulled code! Use ``{config.commandCharacter}hotpatch`` to reload modules." if success
-            else
-            f"``{GIT_COMMAND}`` failed!")
+        return message.respond(f"Pulled code! Use ``{config.commandCharacter}hotpatch`` to reload modules.")
 
     def load(self, connection, module, force=False):
         """Loads a module
