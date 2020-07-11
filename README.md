@@ -1,5 +1,8 @@
 # Expecto Botronum v3
+### ![tests](https://github.com/AnnikaCodes/expecto-botronum/workflows/tests/badge.svg)
 Expecto Botronum is a Pokémon Showdown bot written by Annika for the [Magic & Mayhem room](psim.us/mm).
+
+
 
 ## Commands
 | Usage | Description |
@@ -32,11 +35,12 @@ Expecto Botronum is a Pokémon Showdown bot written by Annika for the [Magic & M
 | `~showlb` | Shows the minigame scoreboard. Specify a room in PMs. |
 | `~addjoinphrase <user>, <phrase>` | Sets `<user>`'s joinphrase to `phrase`. This phrase will be said by the bot when the user joins the room. Specify a room in PMs. |
 | `~removejoinphrase <user>` | Removes `<user>`'s joinphrase. Specify a room in PMs. |
-| `~superhero <superhero>` | Shows information about a superhero from the Superhero API. |
+| `~joinhouse <house>` | Joins a house. |
+| `~checkhouse [user]` | Checks the house of a given user, or the sender if none is specified. |
 
-## Technical 
+## Technical
 Expecto Botronum is written in Python 3.x (specifically, Python 3.6). If you would like to contribute, feel free to work on one of the issues. To propose a feature, PM me on Discord (Annika#1562) or mention the feature in the channel for that purpose in the Magic & Mayhem discord.
 
 To run Expecto Botronum, simply clone the source code, install dependencies (with `pip install -r requirements.txt`), copy `config-example.json` to `config.json` and edit it as needed, and run `core.py`. You can also run the script `test.sh` (on Linux and Mac) to run the linter and tests, if you're so inclined.
 
-Further technical documentation is available in [v3.md](https://github.com/AnnikaCodes/expecto-botronum/blob/master/v3.md). 
+Further technical documentation is available in [v3.md](https://github.com/AnnikaCodes/expecto-botronum/blob/master/v3.md).

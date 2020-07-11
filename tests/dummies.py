@@ -1,33 +1,38 @@
 """dummies.py
     helper classes for testing without a connection to Pokemon Showdown
     by Annika"""
+
+from typing import Optional, List
+import psclient # type: ignore
 import core
 
 # pylint: disable=super-init-not-called
 
-class DummyConnection(core.Connection):
+class DummyConnection(core.BotConnection):
     """A modified version of Connection to be used for offline testing
     """
-    def __init__(self):
+    def __init__(self, logchat: bool = False) -> None:
         super().__init__()
+        if logchat: self.chatlogger = psclient.chatlog.Chatlogger("chatlogging-test/")
         self.roomList = {
-            core.Room("testroom", self), core.Room("testroom2", self),
-            core.Room("testroom3", self), core.Room("lobby", self)
+            core.BotRoom("testroom", self), core.BotRoom("testroom2", self),
+            core.BotRoom("testroom3", self), core.BotRoom("lobby", self)
         }
 
-    def send(self, message):
+    def send(self, message: core.BotMessage) -> None:
         """The send() method is disabled in DummyConnection
         """
 
-class DummyMessage(core.Message):
+class DummyMessage(core.BotMessage):
     """A modified version of Message to be used for offline testing
     """
     def __init__(
-        self, sender=None, arguments=None, room=None, body=None, time=None,
-        messageType=None, challstr=None, senderName=None, connection=DummyConnection()
-    ):
+        self, sender: str = None, arguments: List[str] = None, room: psclient.Room = None, body: str = None,
+        time: str = None, messageType: str = None, challstr: str = None, senderName: str = None,
+        connection: psclient.PSConnection = DummyConnection()
+    ) -> None:
         self.sender = sender
-        self.arguments = arguments
+        if arguments: self.arguments = arguments
         self.room = room
         self.body = body
         self.time = time
@@ -35,11 +40,11 @@ class DummyMessage(core.Message):
         self.challstr = challstr
         self.senderName = senderName
         self.connection = connection
-        self.response = None
+        self.response: Optional[str] = None
         #                          (because HTML is an acronym)
-        self.HTMLResponse = None # pylint: disable=invalid-name
+        self.HTMLResponse: Optional[str] = None # pylint: disable=invalid-name
 
-    def respond(self, response):
+    def respond(self, response: str) -> None:
         """Captures the response to a message
 
         Args:
@@ -47,7 +52,7 @@ class DummyMessage(core.Message):
         """
         self.response = response
 
-    def respondHTML(self, html):
+    def respondHTML(self, html: str) -> None:
         """Captures the HTML response to a message
 
         Args:
@@ -55,9 +60,20 @@ class DummyMessage(core.Message):
         """
         self.HTMLResponse = html
 
-class DummyUser(core.User):
+class DummyUser(core.BotUser):
     """A modified version of User to be used for offline testing
     """
-    def __init__(self, userid=None, isAdmin=False):
+    def __init__(self,
+        name: str = "",
+        connection: psclient.PSConnection = None,
+        userid: str = None,
+        isAdmin: bool = False
+    ) -> None:
         self.id = userid
-        self.isAdmin = isAdmin
+        self.admin = isAdmin
+        if connection: super().__init__(name, connection)
+
+    def can(self, action: str, room: psclient.Room) -> bool:
+        """For DummyUsers, can() takes into account the admin attribute
+        """
+        return self.admin or super().can(action, room)

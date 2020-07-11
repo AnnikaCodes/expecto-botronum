@@ -11,7 +11,7 @@ class TestGames():
     module = games.Module()
     connection = dummies.DummyConnection()
 
-    def testReversio(self):
+    def testReversio(self) -> None:
         """Tests the reversio commands
         """
         self.module.reversioWords = {"testroom": []}
@@ -36,7 +36,7 @@ class TestGames():
         self.module.removeReversioWord(message)
         assert len(self.module.reversioWords["testroom"]) == 0
 
-    def testMinigameLB(self):
+    def testMinigameLB(self) -> None:
         """Tests the minigame leaderboard functionality
         """
         assert len(self.module.minigamePoints.keys()) == 0
@@ -44,7 +44,7 @@ class TestGames():
         message = dummies.DummyMessage(
             arguments=["~addpoints", "testuser"],
             sender=dummies.DummyUser(isAdmin=True),
-            room=self.connection.getRoomByID("testroom")
+            room=self.connection.getRoom("testroom")
         )
         self.module.addPoints(message)
         assert self.module.minigamePoints["testroom"]["testuser"] == 1
@@ -52,12 +52,12 @@ class TestGames():
         message = dummies.DummyMessage(
             arguments=["~addpoints", "testuser", "-2"],
             sender=dummies.DummyUser(isAdmin=True),
-            room=self.connection.getRoomByID("testroom")
+            room=self.connection.getRoom("testroom")
         )
         self.module.addPoints(message)
         assert self.module.minigamePoints["testroom"]["testuser"] == -1
 
-    def testIsInt(self):
+    def testIsInt(self) -> None:
         """Tests the isInt() helper function provided by the games module
         """
         assert not games.isInt("a")

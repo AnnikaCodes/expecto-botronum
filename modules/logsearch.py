@@ -3,6 +3,7 @@
     by Annika"""
 
 import html
+import psclient # type: ignore
 
 import config
 import core
@@ -13,22 +14,23 @@ MAX_BUF_LEN = 102400 - 19 - len("/pminfobox ,") - len("</details>")
 class Module:
     """Represents a module, which may contain several commands
     """
-    def __init__(self):
+    def __init__(self) -> None:
         self.commands = {"logsearch": self.logsearch, "searchlogs": self.logsearch}
 
-    def logsearch(self, message):
+    def logsearch(self, message: core.BotMessage) -> None:
         """Searches logs
 
         Args:
-            message (Message): the Message object that invoked the command
+            message (message: core.BotMessage) -> None: the Message object that invoked the command
         """
         if len(message.arguments) < 2:
             return message.respond(f"Usage: ``{config.commandCharacter}logsearch <room>, [optional user], [optional keyword]``.")
-        roomID = core.toID(message.arguments[1]).lower()
-        userID = core.toID(message.arguments[2]).lower() if len(message.arguments) > 2 else ""
+        if not message.connection.chatlogger: return message.respond("There is currently no chatlogger loaded.")
+        roomID = psclient.toID(message.arguments[1]).lower()
+        userID = psclient.toID(message.arguments[2]).lower() if len(message.arguments) > 2 else ""
         keyword = ','.join(message.arguments[3:]).strip().lower() if len(message.arguments) > 3 else ""
 
-        room = message.connection.getRoomByID(roomID)
+        room = message.connection.getRoom(roomID)
         if not room: return message.respond(f"Invalid room: {roomID}")
         if not message.sender.can("searchlog", room): return message.respond("Permission denied.")
 
@@ -52,7 +54,7 @@ class Module:
         htmlBuf += "</details>"
         return message.respondHTML(htmlBuf)
 
-    def __str__(self):
+    def __str__(self) -> str:
         """String representation of the Module
 
         Returns:

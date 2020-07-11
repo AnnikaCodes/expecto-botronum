@@ -13,14 +13,14 @@ class TestLogsearch():
     """
     module = logsearch.Module()
 
-    def testLogsearch(self):
+    def testLogsearch(self) -> None:
         """Tests the logsearch command
         """
         message = dummies.DummyMessage(
             arguments=["~logsearch", "testroom", "testuser", "testquery"],
             sender=dummies.DummyUser(isAdmin=True),
-            connection=dummies.DummyConnection()
+            connection=dummies.DummyConnection(logchat=True)
         )
         self.module.logsearch(message)
         assert not message.response
-        assert len(message.HTMLResponse) > 1
+        assert message.HTMLResponse and len(message.HTMLResponse) > 1

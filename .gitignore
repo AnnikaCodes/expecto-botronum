@@ -6,8 +6,10 @@ config.json
 **/__pycache__
 *.pyc
 .pytest_cache
+.mypy_cache
 
 # Logs, etc.
 logs/*
 tests/logs
+chatlogging-test/
 data.json

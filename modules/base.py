@@ -3,15 +3,17 @@
     by Annika"""
 
 import threading
+
 import config
+import core
 
 class Module:
     """Represents a module, which may contain several commands
     """
-    def __init__(self):
+    def __init__(self) -> None:
         self.commands = {"ping": self.ping, "owo": self.owo, "uwu": self.uwu, "timer": self.timer}
 
-    def ping(self, message):
+    def ping(self, message: core.BotMessage) -> None:
         """Ping: replies "Pong!"
 
         Arguments:
@@ -19,7 +21,7 @@ class Module:
         """
         message.respond("Pong!")
 
-    def owo(self, message):
+    def owo(self, message: core.BotMessage) -> None:
         """owo: replaces vowels with owo faces
 
         Arguments:
@@ -31,7 +33,7 @@ class Module:
         message.respond(text)
 
 
-    def uwu(self, message):
+    def uwu(self, message: core.BotMessage) -> None:
         """uwu: turns English into weird anime language
 
         Arguments:
@@ -43,7 +45,7 @@ class Module:
             text = text.replace(key, uwuRules[key])
         message.respond(text)
 
-    def timer(self, message):
+    def timer(self, message: core.BotMessage) -> None:
         """timer: evaluates the given Python expression
 
         Arguments:
@@ -52,7 +54,7 @@ class Module:
         if len(message.arguments) not in range(1, 4):
             message.respond(f"Usage: ``{config.commandCharacter}timer <duration>, <optional message>``")
             return
-        response = "/wall " if message.type == 'pm' or message.connection.bot.can('wall', message.room) else ""
+        response = "/wall " if message.type == 'pm' or message.connection.this.can('wall', message.room) else ""
         response += message.arguments[2] if len(message.arguments) > 2 else f"Timer set by {message.sender.name} is up"
 
         try:
@@ -62,7 +64,7 @@ class Module:
             return
         threading.Timer(duration, message.respond, args=[response]).start()
 
-    def __str__(self):
+    def __str__(self) -> str:
         """String representation of the Module
 
         Returns:

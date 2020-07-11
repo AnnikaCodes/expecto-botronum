@@ -2,26 +2,28 @@
     contains commands for interacting with the Superhero API
     by Annika"""
 
+from typing import Dict
 import requests
+import psclient # type: ignore
 
+import core
 import config
 import data
-import core
 
 class Module:
     """Represents a module, which may contain several commands
     """
-    def __init__(self):
+    def __init__(self) -> None:
         self.commands = {"superhero": self.superhero, "hero": self.superhero}
 
-    def superhero(self, message):
+    def superhero(self, message: core.BotMessage) -> None:
         """Gets information on a superhero from the Superhero API
 
         Arguments:
             message {Message} -- the Message object that invoked the command
         """
         superheroIDDictionary = data.get("superheroIDDictionary") or _initializeData()
-        superhero = core.toID(config.separator.join(message.arguments[1:]))
+        superhero = psclient.toID(config.separator.join(message.arguments[1:]))
         if superhero not in superheroIDDictionary:
             return message.respond(f"{superhero} isn't a superhero that can be looked up with the API.")
         superheroID = superheroIDDictionary[superhero]
@@ -78,7 +80,7 @@ class Module:
 
         return message.respondHTML(html)
 
-    def __str__(self):
+    def __str__(self) -> str:
         """String representation of the Module
 
         Returns:
@@ -86,7 +88,7 @@ class Module:
         """
         return f"Superhero module: interacts with the Superhero API. Commands: {', '.join(self.commands.keys())}"
 
-def _initializeData():
+def _initializeData() -> Dict[str, int]:
     """Initializes (or updates) the "superheroIDDictionary" data variable
 
     Returns:

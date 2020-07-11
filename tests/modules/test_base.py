@@ -10,21 +10,21 @@ class TestBase():
     """
     module = base.Module()
 
-    def testPing(self):
+    def testPing(self) -> None:
         """Tests the ping command
         """
         message = DummyMessage()
         self.module.ping(message)
         assert message.response == "Pong!"
 
-    def testOwo(self):
+    def testOwo(self) -> None:
         """Tests the owo command
         """
         message = DummyMessage(arguments=["~owo", "I Am a TEST for", " the OWO command."])
         self.module.owo(message)
         assert message.response == "IwI AwAm awa TEwEST fowor, thewe OwOWOwO cowommawand."
 
-    def testUwu(self):
+    def testUwu(self) -> None:
         """Tests the uwu command
         """
         # Test message courtesy of Mia
@@ -42,7 +42,7 @@ class TestBase():
         self.module.uwu(message)
         assert message.response == passResponse
 
-    def testTimer(self):
+    def testTimer(self) -> None:
         """Tests the timer command
         """
         message = DummyMessage(arguments=['~timer', "0.01", "message"])

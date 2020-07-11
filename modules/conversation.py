@@ -3,16 +3,17 @@
     by Annika"""
 
 import random
-from pbwrap import Pastebin
+import psclient # type: ignore
+from pbwrap import Pastebin # type: ignore
 
 import data
-import core
 import config
+import core
 
 class Module:
     """Represents a module, which may contain several commands
     """
-    def __init__(self):
+    def __init__(self) -> None:
         self.commands = {
             "fact": self.showSnippet, "topic": self.showSnippet, "addfact": self.manageSnippet,
             "addtopic": self.manageSnippet, "deletefact": self.manageSnippet, "removefact": self.manageSnippet,
@@ -24,7 +25,7 @@ class Module:
         self.factList = data.get("factList")
         self.topicList = data.get("topicList")
 
-    def showSnippet(self, message):
+    def showSnippet(self, message: core.BotMessage) -> None:
         """Shows a fact or topic in chat
 
         Arguments:
@@ -35,7 +36,7 @@ class Module:
         if message.room:
             roomid = message.room.id
         elif len(message.arguments) > 1:
-            roomid = core.toID(message.arguments[1])
+            roomid = psclient.toID(message.arguments[1])
         else:
             return message.respond("You must specify a room.")
 
@@ -44,7 +45,7 @@ class Module:
 
         return message.respond(random.choice(snippetList[roomid]))
 
-    def manageSnippet(self, message):
+    def manageSnippet(self, message: core.BotMessage) -> None:
         """Removes or adds a fact or topic
 
         Arguments:
@@ -54,7 +55,7 @@ class Module:
             room = message.room
             snippet = ",".join(message.arguments[1:]).strip()
         elif len(message.arguments) > 2:
-            room = message.connection.getRoomByName(message.arguments[1])
+            room = message.connection.getRoom(message.arguments[1])
             snippet = ",".join(message.arguments[2:]).strip()
         else:
             return message.respond("You must specify a fact/topic (and a room if used in PMs).")
@@ -82,7 +83,7 @@ class Module:
         self.topicList = snippetList
         return data.store("topicList", self.topicList)
 
-    def countSnippets(self, message):
+    def countSnippets(self, message: core.BotMessage) -> None:
         """Counts the number of snippets
 
         Arguments:
@@ -93,7 +94,7 @@ class Module:
         if message.room:
             room = message.room
         elif len(message.arguments) > 1:
-            room = message.connection.getRoomByName(message.arguments[1])
+            room = message.connection.getRoom(message.arguments[1])
         else:
             return message.respond("You must specify a room.")
 
@@ -102,7 +103,7 @@ class Module:
         return message.respond(f"There {'is ' if num == 1 else 'are '} {str(num)} \
             {'fact' if isFact else 'topic'}{'' if num == 1 else 's'} for the room {room.id}.")
 
-    def exportSnippets(self, message):
+    def exportSnippets(self, message: core.BotMessage) -> None:
         """Exports the snippets to Pastebin
 
         Arguments:
@@ -113,7 +114,7 @@ class Module:
         if message.room:
             room = message.room
         elif len(message.arguments) > 1:
-            room = message.connection.getRoomByName(message.arguments[1])
+            room = message.connection.getRoom(message.arguments[1])
         else:
             return message.respond("You must specify a room.")
         if not message.sender.can("addfact", room): return message.respond("Permission denied.")
@@ -127,7 +128,7 @@ class Module:
             f"{'Facts' if isFact else 'Topics'} for room {room.id}" # title
         )))
 
-    def __str__(self):
+    def __str__(self) -> str:
         """String representation of the Module
 
         Returns:

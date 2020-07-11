@@ -2,19 +2,20 @@
     handles adding and removing joinphrases
     by Annika"""
 
-import core
+import psclient # type: ignore
 import config
+import core
 
 class Module:
     """Represents a module, which may contain several commands
     """
-    def __init__(self):
-        self.commands = {
+    def __init__(self) -> None:
+        self.commands: dict = {
             "addjoinphrase": self.addJP, "addjp": self.addJP, "removejoinphrase": self.deleteJP, "removejp": self.deleteJP,
             "deletejoinphrase": self.deleteJP, "deletejp": self.deleteJP
         }
 
-    def addJP(self, message):
+    def addJP(self, message: core.BotMessage) -> None:
         """Adds a joinphrase for a user
 
         Arguments:
@@ -25,11 +26,11 @@ class Module:
         if message.room:
             room = message.room
             if len(message.arguments) > 2:
-                userid = core.toID(message.arguments[1])
+                userid = psclient.toID(message.arguments[1])
                 phrase = ",".join(message.arguments[2:]).strip()
         elif len(message.arguments) > 3:
-            room = message.connection.getRoomByName(message.arguments[1])
-            userid = core.toID(message.arguments[2])
+            room = message.connection.getRoom(message.arguments[1])
+            userid = psclient.toID(message.arguments[2])
             phrase = ",".join(message.arguments[3:])
         else:
             return message.respond("You must specify a room.")
@@ -42,7 +43,7 @@ class Module:
         room.addJoinphrase(phrase, userid)
         return message.respond("Joinphrase successfully added!")
 
-    def deleteJP(self, message):
+    def deleteJP(self, message: core.BotMessage) -> None:
         """Removes a joinphrase for a user
 
         Arguments:
@@ -52,10 +53,10 @@ class Module:
         if message.room:
             room = message.room
             if len(message.arguments) > 1:
-                userid = core.toID(message.arguments[1])
+                userid = psclient.toID(message.arguments[1])
         elif len(message.arguments) > 2:
-            room = message.connection.getRoomByName(message.arguments[1])
-            userid = core.toID(message.arguments[2])
+            room = message.connection.getRoom(message.arguments[1])
+            userid = psclient.toID(message.arguments[2])
         else:
             return message.respond("You must specify a room.")
         if not userid:
@@ -68,7 +69,7 @@ class Module:
         return message.respond("Joinphrase successfully removed!")
 
 
-    def __str__(self):
+    def __str__(self) -> str:
         """String representation of the Module
 
         Returns:
