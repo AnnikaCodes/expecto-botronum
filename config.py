@@ -10,11 +10,11 @@ CONFIG_VARS = ['username', 'password', 'websocketURL', 'loglevel', 'sysops', 'br
     'addfactRank', 'hostgameRank', 'searchlogRank', 'manageRank', 'roomRanksInOrder', 'rooms', 'separator', 'modules',
     'commandCharacter', 'superheroAPIKey', 'pastebinAPIKey', 'logchat']
 
-def loadConfig():
+def loadConfig() -> list:
     """Loads configuration from CONFIG_PATH
 
     Returns:
-        [tuple] -- the CONFIG_VARS as loaded from CONFIG_PATH
+        [list] -- the CONFIG_VARS as loaded from CONFIG_PATH
     """
     configData = json.load(open(CONFIG_PATH, 'r'))
     returnValue = []
