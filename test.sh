@@ -12,7 +12,7 @@ MYPYPATH="$MYPYPATH:stubs/" mypy *.py */*.py */*/*.py --disallow-untyped-calls \
     --warn-unreachable
 TYPE_CHECK_SUCCESS=$?
 echo "Running tests..."
-pytest .
+pytest tests/
 TEST_SUCCESS=$?
 
 if [ $LINT_SUCCESS == 0 ] && [ $TEST_SUCCESS == 0 ] && [ $TYPE_CHECK_SUCCESS == 0 ]; then
