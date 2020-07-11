@@ -13,3 +13,7 @@ logs/*
 tests/logs
 chatlogging-test/
 data.json
+
+# Private code
+modules/private/*
+tests/modules/private/*

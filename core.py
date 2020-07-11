@@ -15,7 +15,9 @@ import data
 ## add modules dir to the path
 basePath = pathlib.Path('.')
 modulesPath = basePath.joinpath('modules').absolute().resolve()
+privateModulesPath = modulesPath.joinpath('private').absolute().resolve()
 if str(modulesPath) not in sys.path: sys.path.append(str(modulesPath))
+if str(privateModulesPath) not in sys.path: sys.path.append(str(privateModulesPath))
 
 def log(string: str) -> None:
     """Bootstrapped off of psclient.log(), but using our own loglevel
