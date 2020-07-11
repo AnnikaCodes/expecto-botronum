@@ -9,7 +9,7 @@ class TestAdmin():
     """Test the admin module
     """
     module = admin.Module()
-    def testEval(self):
+    def testEval(self) -> None:
         """Tests the eval command
         """
         message = dummies.DummyMessage(
@@ -17,9 +17,9 @@ class TestAdmin():
             sender=dummies.DummyUser(isAdmin=True, userid='annika')
         )
         self.module.eval(message)
-        assert message.response.strip("!code ").strip('\n').strip('`') == f"{(2 + 2**2) / 2}"
+        assert message.response and message.response.strip("!code ").strip('\n').strip('`') == f"{(2 + 2**2) / 2}"
 
-    def testModuleHandling(self):
+    def testModuleHandling(self) -> None:
         """Tests the module loading/unloading methods (not commands)
         """
         connection = dummies.DummyConnection()

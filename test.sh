@@ -4,10 +4,9 @@ echo "Linting code..."
 pylint *.py */*.py */*/*.py --disable=R,fixme || pylint-exit -wfail -efail -cfail $?
 LINT_SUCCESS=$?
 echo "Checking types..."
-mypy *.py */*.py */*/*.py --disallow-untyped-calls \
+MYPYPATH="$MYPYPATH:stubs/" mypy *.py */*.py */*/*.py --disallow-untyped-calls \
     --disallow-untyped-defs \
     --disallow-incomplete-defs \
-    --disallow-untyped-decorators \
     --warn-redundant-casts \
     --warn-unused-ignores \
     --warn-unreachable
@@ -33,6 +32,9 @@ elif [ $LINT_SUCCESS == 0 ]; then
     exit 2
 elif [ $TEST_SUCCESS == 0 ]; then
     echo "Tests passed, but linting and type checking failed."
+    exit 2
+elif [ $TYPE_CHECK_SUCCESS == 0 ]; then
+    echo "Type checking passed, but linting and tests failed."
     exit 2
 else
     echo "Everything failed, but you didn't!"

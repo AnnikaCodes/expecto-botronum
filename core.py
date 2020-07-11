@@ -6,7 +6,7 @@
 import pathlib
 import sys
 import importlib
-from typing import Dict, Any
+from typing import Dict, Any, List
 
 import psclient # type: ignore
 
@@ -55,7 +55,7 @@ class BotUser(psclient.User):
 class BotRoom(psclient.Room):
     """The original psclient.Room class from the ps-client package, extended for the bot to include joinphrase storage
     """
-    def __init__(self, name: str, connection: psclient.Connection):
+    def __init__(self, name: str, connection: psclient.PSConnection):
         super().__init__(name, connection)
         jpData = data.get("joinphrases")
         self.joinphrases = jpData[self.id] if jpData and self.id in jpData.keys() else {}
@@ -84,12 +84,12 @@ class BotRoom(psclient.Room):
 class BotMessage(psclient.Message):
     """The original psclient.Message class from the ps-client package, extended for the bot to include an arguments attribute
     """
-    def __init__(self, raw: str, connection: psclient.Connection):
+    def __init__(self, raw: str, connection: psclient.PSConnection):
         super().__init__(raw, connection)
         # Expecto Botronum uses an arguments attribute to make commands easier, which is too specific for the ps-client package.
         if self.body:
             spaceSplit: list = self.body.split(' ', 1)
-            self.arguments = [spaceSplit[0]]
+            self.arguments: List[str] = [spaceSplit[0]]
             if len(spaceSplit) > 1: self.arguments += spaceSplit[1].split(config.separator)
 
     def respond(self, response: str) -> None:

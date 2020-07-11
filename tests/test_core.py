@@ -3,20 +3,22 @@
     by Annika"""
 
 # pylint: disable=line-too-long
+from typing import Any
+import pytest # type: ignore # pylint: disable=unused-import
 
-import psclient
+import psclient # type: ignore
 import core
 import config
 from dummies import DummyConnection, DummyUser
 
-def testToID():
+def testToID() -> None:
     """Tests the toID() function
     """
     assert psclient.toID("hi") == "hi"
     assert psclient.toID("HI") == "hi"
     assert psclient.toID("$&@*%$HI   ^4åå") == "hi4"
 
-def testLog(capsys):
+def testLog(capsys: Any) -> None:
     """Tests the log() function
     """
     config.loglevel = 0
@@ -60,7 +62,7 @@ def testLog(capsys):
     assert capture.err == "E: this shows\nW: this shows\n"
 
 ## Tests for Message objects ##
-def testMessageChallstr():
+def testMessageChallstr() -> None:
     """Tests the ability of Message objects to handle challstrs
     """
     message = core.BotMessage(
@@ -69,7 +71,7 @@ def testMessageChallstr():
     )
     assert message.challstr == "4|314159265358979323846264338327950288419716939937510582097494459230781640628620899862803482534211706798214808651328230664709384460955058223172535940812848111745028410270193852110555964462294895493038196442881097566593344612847564823"
 
-def testMessageChat():
+def testMessageChat() -> None:
     """Tests the ability of Message objects to parse chat messages including strange characters, from the Lobby
     """
     message = core.BotMessage(
@@ -86,7 +88,7 @@ def testMessageChat():
     assert message.challstr is None
     assert isinstance(str(message), str)
 
-def testMessageChatCommand():
+def testMessageChatCommand() -> None:
     """Tests the ability of Message objects to handle commands sent to rooms, with arguments
     """
     message = core.BotMessage(
@@ -104,7 +106,7 @@ def testMessageChatCommand():
     assert message.challstr is None
 
 
-def testMessageJoin():
+def testMessageJoin() -> None:
     """Tests the ability of Message objects to handle join messages
     """
     connection = DummyConnection()
@@ -132,7 +134,7 @@ def testMessageJoin():
     assert message.type == "join"
     assert 'testroom3' in connection.getUserRooms(connection.getUser('annika'))
 
-def testMessageLeave():
+def testMessageLeave() -> None:
     """Tests the ability of Message objects to handle leave messages
     """
     connection = DummyConnection()
@@ -169,7 +171,7 @@ def testMessageLeave():
     assert message.type == "leave"
     assert 'testroom' not in connection.getUserRooms(connection.getUser('annika'))
 
-def testMessagePM():
+def testMessagePM() -> None:
     """Tests the ability of Message objects to handle PM messages and commands
     """
     message = core.BotMessage(
@@ -185,7 +187,7 @@ def testMessagePM():
     assert message.type == 'pm'
     assert message.challstr is None
 
-def testMessageQueryResponse():
+def testMessageQueryResponse() -> None:
     """Tests the ability of Message objects to handle query responses
     """
     connection = DummyConnection()
@@ -215,7 +217,7 @@ class TestRoom:
     connection = DummyConnection()
     room = core.BotRoom("testroom", connection)
 
-    def testRoomAuth(self):
+    def testRoomAuth(self) -> None:
         """Tests the ability of Room objects to handle updating and checking auth
         """
         assert self.room.auth == {}
@@ -232,7 +234,7 @@ class TestRoom:
 
         assert isinstance(str(self.room), str)
 
-    def testRoomJoinphrases(self):
+    def testRoomJoinphrases(self) -> None:
         """Tests the joinphrase storage of Room objects
         """
         assert self.room.joinphrases == {}
@@ -242,7 +244,7 @@ class TestRoom:
         assert self.room.joinphrases == {}
 
 ## User Object Tests ##
-def testUser():
+def testUser() -> None:
     """Tests the User object
     """
     connection = DummyConnection()
@@ -271,7 +273,7 @@ def testUser():
     assert isinstance(str(user), str)
 
 ## Connection Object Tests
-def testConnection():
+def testConnection() -> None:
     """tests the Connection object
     """
     connection = DummyConnection()

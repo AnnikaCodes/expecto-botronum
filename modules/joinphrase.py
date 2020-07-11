@@ -2,19 +2,20 @@
     handles adding and removing joinphrases
     by Annika"""
 
-import psclient
+import psclient # type: ignore
 import config
+import core
 
 class Module:
     """Represents a module, which may contain several commands
     """
-    def __init__(self):
-        self.commands = {
+    def __init__(self) -> None:
+        self.commands: dict = {
             "addjoinphrase": self.addJP, "addjp": self.addJP, "removejoinphrase": self.deleteJP, "removejp": self.deleteJP,
             "deletejoinphrase": self.deleteJP, "deletejp": self.deleteJP
         }
 
-    def addJP(self, message):
+    def addJP(self, message: core.BotMessage) -> None:
         """Adds a joinphrase for a user
 
         Arguments:
@@ -42,7 +43,7 @@ class Module:
         room.addJoinphrase(phrase, userid)
         return message.respond("Joinphrase successfully added!")
 
-    def deleteJP(self, message):
+    def deleteJP(self, message: core.BotMessage) -> None:
         """Removes a joinphrase for a user
 
         Arguments:
@@ -68,7 +69,7 @@ class Module:
         return message.respond("Joinphrase successfully removed!")
 
 
-    def __str__(self):
+    def __str__(self) -> str:
         """String representation of the Module
 
         Returns:

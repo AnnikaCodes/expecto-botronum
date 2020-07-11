@@ -11,7 +11,7 @@ class TestJoinphrase():
     module = joinphrase.Module()
     connection = dummies.DummyConnection()
 
-    def testJoinphrase(self):
+    def testJoinphrase(self) -> None:
         """Tests adding and removing joinphrases through commands
         """
         # Remove any previous `testroom2` data left in data.json

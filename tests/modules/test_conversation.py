@@ -12,13 +12,13 @@ class TestConversation():
     """
     module = conversation.Module()
 
-    def testCountSnippets(self):
+    def testCountSnippets(self) -> None:
         """Tests the snippet-counting command
         """
         message = dummies.DummyMessage(arguments=["~countfacts", "testroom"])
         self.module.countSnippets(message)
-        assert "0" in message.response
+        assert message.response and "0" in message.response
 
         message = dummies.DummyMessage(arguments=["~counttopics", "testroom"])
         self.module.countSnippets(message)
-        assert "0" in message.response
+        assert message.response and "0" in message.response

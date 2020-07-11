@@ -2,7 +2,7 @@
     tests for superhero
     by Annika"""
 
-import pytest
+import pytest # type: ignore
 
 import dummies
 import superhero
@@ -14,7 +14,7 @@ class TestSuperhero():
     module = superhero.Module()
 
     @pytest.mark.xfail(reason="will fail due to a known bug described in issue #32")
-    def testInitializeData(self):
+    def testInitializeData(self) -> None:
         # pylint: disable=protected-access
         """Tests initializing data for the Superhero API
         """
@@ -22,14 +22,14 @@ class TestSuperhero():
         assert len(data.keys()) == data[list(data.keys())[-1]]
 
     @pytest.mark.skipif(len(config.superheroAPIKey) < 1, reason="no Superhero API key found")
-    def testSuperhero(self):
+    def testSuperhero(self) -> None:
         """Tests the superhero command
         """
         # This might have issues since it relies on the API responses not changing, but there's not a great way to test this.
         message = dummies.DummyMessage(arguments=["~superhero", "t H\\ orå"])
         self.module.superhero(message)
         assert not message.response
-        assert "Thor" in message.HTMLResponse
+        assert message.HTMLResponse and "Thor" in message.HTMLResponse
         assert "Loki (step-brother)" in message.HTMLResponse
         assert "Asgardian" in message.HTMLResponse
         assert "King of Asgard" in message.HTMLResponse

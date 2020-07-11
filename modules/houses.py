@@ -6,7 +6,7 @@
 
 from typing import Dict, Any, List
 
-import psclient
+import psclient # type: ignore
 
 import core
 import config
@@ -27,7 +27,7 @@ def getUserHouses(userid: str) -> List[str]:
 class Module:
     """Represents a module, which may contain several commands
     """
-    def __init__(self):
+    def __init__(self) -> None:
         self.commands: Dict[str, Any] = {
             "checkhouse": self.checkHouse, "house": self.checkHouse, "joinhouse": self.joinHouse, "join": self.joinHouse,
             "createhouse": self.createHouse, "newhouse": self.createHouse
@@ -37,7 +37,7 @@ class Module:
         """Checks what house a user is in
 
         Arguments:
-            message (core.BotMessage): the Message object that invoked the command
+            message (core.Botmessage: core.BotMessage) -> None: the Message object that invoked the command
         """
         user: str = ','.join(message.arguments[1:]) if len(message.arguments) > 1 else message.senderName
         houses: List[str] = getUserHouses(psclient.toID(user))
@@ -48,7 +48,7 @@ class Module:
         """Joins a house
 
         Args:
-            message (core.BotMessage): the message that invoked the command
+            message (core.Botmessage: core.BotMessage) -> None: the message that invoked the command
         """
         if not message.sender.id: return message.respond("Only users can join houses.") # Shouldn't happen
         if len(message.arguments) < 2: return message.respond(f"Usage: ``{config.commandCharacter}joinhouse <house>``")
@@ -70,7 +70,7 @@ class Module:
         """Creates a new house
 
         Args:
-            message (core.BotMessage): the message that invoked the command
+            message (core.Botmessage: core.BotMessage) -> None: the message that invoked the command
         """
         if message.sender.id not in config.sysops:
             return message.respond(

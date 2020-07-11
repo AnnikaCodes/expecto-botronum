@@ -7,21 +7,21 @@ import sys
 import pathlib
 sys.path.append(str(pathlib.Path(__file__).joinpath("../..").resolve()) + '/')
 
-from psclient import chatlog # pylint: disable=wrong-import-position
+from psclient import chatlog # type: ignore # pylint: disable=wrong-import-position
 
 class TestChatlog:
     """Tests for the chatlog module
     """
     chatlogger = chatlog.Chatlogger('tests/logs/')
 
-    def testChatlogger(self):
+    def testChatlogger(self) -> None:
         """Tests the basic chatlogger functions
         """
         assert str(self.chatlogger.path.resolve().relative_to(pathlib.Path('.').resolve())) == 'tests/logs'
         today = datetime.now().date()
         assert str(pathlib.Path(self.chatlogger.getFile("testroom", "a").name).resolve()).split('/')[-1] == f"{today}.txt"
 
-    def testFormatData(self):
+    def testFormatData(self) -> None:
         """Tests formatting data
         """
         sampleData = "annika|1591322849|chat|#Annika|hi!"

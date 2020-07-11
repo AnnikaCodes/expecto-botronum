@@ -2,11 +2,13 @@
     helps host games
     by Annika"""
 
+from typing import Dict
 import random
-import psclient
+import psclient # type: ignore
 
 import data
 import config
+import core
 
 TOUR_SETUP_COMMANDS = [
     '/tour autostart 5',
@@ -24,7 +26,7 @@ UNO_COMMANDS = [
 class Module:
     """Represents a module, which may contain several commands
     """
-    def __init__(self):
+    def __init__(self) -> None:
         self.commands = {
             "reverse": self.reverse, "wallrev": self.reverse, "addreversioword": self.addReversioWord,
             "removereversioword": self.removeReversioWord, "rmreversioword": self.removeReversioWord,
@@ -38,9 +40,9 @@ class Module:
             self.reversioWords = {}
             data.store("reversioWords", {})
 
-        self.minigamePoints = {}
+        self.minigamePoints: Dict[str, dict] = {}
 
-    def reverse(self, message):
+    def reverse(self, message: core.BotMessage) -> None:
         """Sends a reversed phrase for the Reversio game.
 
         Arguments:
@@ -59,7 +61,7 @@ class Module:
         response += random.choice(self.reversioWords[roomID]).lower()[::-1].strip()
         return message.respond(response)
 
-    def addReversioWord(self, message):
+    def addReversioWord(self, message: core.BotMessage) -> None:
         """Adds a word to the reversio database.
 
         Arguments:
@@ -89,7 +91,7 @@ class Module:
 
         return message.respond("Permission denied.")
 
-    def removeReversioWord(self, message):
+    def removeReversioWord(self, message: core.BotMessage) -> None:
         """Removes a word from the reversio database.
 
         Arguments:
@@ -118,7 +120,7 @@ class Module:
 
         return message.respond("Permission denied.")
 
-    def addPoints(self, message):
+    def addPoints(self, message: core.BotMessage) -> None:
         """Adds points to the minigame leaderboard
 
         Arguments:
@@ -141,7 +143,7 @@ class Module:
 
         return message.respond("Points added!")
 
-    def showLB(self, message):
+    def showLB(self, message: core.BotMessage) -> None:
         """Displays the minigame leaderboard
 
         Arguments:
@@ -159,7 +161,7 @@ class Module:
         formattedPoints = ", ".join([f"{key} (**{points[key]}**)" for key in sortedUsers])
         return message.respond(f"**Scores**: {formattedPoints}" if formattedPoints else "There are no scores.")
 
-    def startGame(self, message):
+    def startGame(self, message: core.BotMessage) -> None:
         """Starts a tournament or game of UNO
 
         Arguments:
@@ -181,7 +183,7 @@ class Module:
         for command in commands:
             message.room.say(command)
 
-    def __str__(self):
+    def __str__(self) -> str:
         """String representation of the Module
 
         Returns:
@@ -189,7 +191,7 @@ class Module:
         """
         return f"Games module: assists with the hosting of games. Commands: {', '.join(self.commands.keys())}"
 
-def isInt(string):
+def isInt(string: str) -> bool:
     """Returns True if a string represents an integer and False otherwise.
 
     Arguments:

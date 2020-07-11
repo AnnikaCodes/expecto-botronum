@@ -2,19 +2,21 @@
     contains commands for interacting with the Superhero API
     by Annika"""
 
+from typing import Dict
 import requests
-import psclient
+import psclient # type: ignore
 
+import core
 import config
 import data
 
 class Module:
     """Represents a module, which may contain several commands
     """
-    def __init__(self):
+    def __init__(self) -> None:
         self.commands = {"superhero": self.superhero, "hero": self.superhero}
 
-    def superhero(self, message):
+    def superhero(self, message: core.BotMessage) -> None:
         """Gets information on a superhero from the Superhero API
 
         Arguments:
@@ -78,7 +80,7 @@ class Module:
 
         return message.respondHTML(html)
 
-    def __str__(self):
+    def __str__(self) -> str:
         """String representation of the Module
 
         Returns:
@@ -86,7 +88,7 @@ class Module:
         """
         return f"Superhero module: interacts with the Superhero API. Commands: {', '.join(self.commands.keys())}"
 
-def _initializeData():
+def _initializeData() -> Dict[str, int]:
     """Initializes (or updates) the "superheroIDDictionary" data variable
 
     Returns:

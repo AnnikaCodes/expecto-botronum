@@ -5,8 +5,10 @@ import importlib
 import sys
 import subprocess
 import pathlib
-import psutil
-import psclient
+from typing import Dict, Any
+
+import psutil # type: ignore
+import psclient # type: ignore
 
 import config
 import core
@@ -16,8 +18,8 @@ GIT_COMMAND = 'git pull'
 class Module:
     """Represents a module, which may contain several commands
     """
-    def __init__(self):
-        self.commands = {
+    def __init__(self) -> None:
+        self.commands: Dict[str, Any] = {
             "eval": self.eval, "do": self.runCommand, "sayin": self.runCommand, "load": self.handleModule,
             "loadmodule": self.handleModule, "unload": self.handleModule, "unloadmodule": self.handleModule,
             "hotpatch": self.handleModule, "modules": self.viewModules, "listmodules": self.viewModules,
@@ -25,16 +27,16 @@ class Module:
             "memory": self.memoryStats, "free": self.memoryStats
         }
 
-    def eval(self, message):
+    def eval(self, message: core.BotMessage) -> None:
         """eval: evaluates the given Python expression
 
         Arguments:
             message {Message} -- the Message object that invoked the command
         """
         if message.sender.id in config.sysops:
-            expression = config.separator.join(message.arguments[1:])
+            expression: str = config.separator.join(message.arguments[1:])
             try:
-                response = str(eval(expression)) # pylint: disable=eval-used
+                response: str = str(eval(expression)) # pylint: disable=eval-used
             except Exception as err:
                 response = str(err)
         else:
@@ -44,7 +46,7 @@ class Module:
         response = "!code " + ("\n" if "\n" not in response else "") + response
         message.respond(response)
 
-    def runCommand(self, message):
+    def runCommand(self, message: core.BotMessage) -> None:
         """runCommand: sends the given command to the given room
 
         Arguments:
@@ -60,11 +62,11 @@ class Module:
             return room.say(command)
         return message.respond(f"{message.arguments[1]} isn't a room I'm in.")
 
-    def handleModule(self, message):
+    def handleModule(self, message: core.BotMessage) -> None:
         """Handles loading, reloading, and hotpatching modules
 
         Args:
-            message (Message): the message that triggered the command
+            message (message: core.BotMessage) -> None: the message that triggered the command
         """
         if not message.sender.id in config.sysops: return message.respond("Permission denied.")
         if not message.arguments or len(message.arguments) < 2:
@@ -78,45 +80,43 @@ class Module:
         if module == __name__ and action == 'unload':
             return message.respond(f"Don't unload the module that provides ``{message.arguments[0]}``.")
 
-        responses = []
         if action == 'unload': return message.respond(self.unload(message.connection, module))
         if action == 'load': return message.respond(self.load(message.connection, module))
         if action == 'hotpatch':
             mod = importlib.import_module(module)
             importlib.reload(mod)
-            message.connection.commands.update(mod.Module().commands)
+            message.connection.commands.update(mod.Module().commands) # type: ignore
             return message.respond(f"Successfully hotpatched the {module} module.")
-        return [message.respond(response) for response in responses]
+        return message.respond("Something went wrong -- no action detected!")
 
 
-    def viewModules(self, message):
+    def viewModules(self, message: core.BotMessage) -> None:
         """Lists the currently loaded modules
 
         Args:
-            message (Message): the Message object that invoked the command
+            message (message: core.BotMessage) -> None: the Message object that invoked the command
         """
         return message.respond(
             f"Modules currently known to be loaded: {', '.join([f'``{module}``' for module in message.connection.modules])}"
         )
 
-    def kill(self, message):
+    def kill(self, message: core.BotMessage) -> None:
         """Kills the bot process
 
         Args:
-            message (Message): the Message object that invoked the command
+            message (message: core.BotMessage) -> None: the Message object that invoked the command
         """
         if message.sender.id in config.sysops:
             message.respond("Killing the bot process....")
             core.log(f"E: admin.kill(): killed by {message.senderName}")
             sys.exit()
-            return message.respond("Something went wrong killing the bot process.")
         return message.respond("Permission denied.")
 
-    def memoryStats(self, message):
+    def memoryStats(self, message: core.BotMessage) -> None:
         """Gets info on memory usage
 
         Args:
-            message (Message): the Message object that invoked the command
+            message (message: core.BotMessage) -> None: the Message object that invoked the command
         """
         if not message.sender.id in config.sysops: return message.respond("Permission denied.")
         buf = []
@@ -135,7 +135,7 @@ class Module:
         """Pulls latest code from git
 
         Args:
-            message (Message): the Message object that invoked the command
+            message (message: core.BotMessage) -> None: the Message object that invoked the command
         """
         if not message.sender.id in config.sysops: return message.respond("Permission denied.")
         output: subprocess.CompletedProcess = subprocess.run(
@@ -149,7 +149,7 @@ class Module:
         message.respond(f"!code {results}")
         return message.respond(f"Pulled code! Use ``{config.commandCharacter}hotpatch`` to reload modules.")
 
-    def load(self, connection, module, force=False):
+    def load(self, connection: psclient.PSConnection, module: str, force: bool = False) -> str:
         """Loads a module
 
         Args:
@@ -164,7 +164,7 @@ class Module:
             return f"The ``{module}`` module is already loaded -- did you mean to hotpatch it?"
 
         try:
-            connection.commands.update(importlib.import_module(module).Module().commands)
+            connection.commands.update(importlib.import_module(module).Module().commands) # type: ignore
             connection.modules.add(module)
             return f"Successfully loaded the ``{module}`` module."
         except Exception as err:
@@ -172,7 +172,7 @@ class Module:
             core.log(f"I: admin.load(): {response}")
             return response
 
-    def unload(self, connection, module, force=False):
+    def unload(self, connection: psclient.PSConnection, module: str, force: bool = False) -> str:
         """Unloads a module
 
         Args:
@@ -187,7 +187,7 @@ class Module:
             return f"The ``{module}`` module isn't loaded."
 
         try:
-            for command in importlib.import_module(module).Module().commands.keys():
+            for command in importlib.import_module(module).Module().commands.keys(): # type: ignore
                 del connection.commands[command]
             connection.modules.remove(module)
             return f"Successfully unloaded the ``{module}`` module."
@@ -197,7 +197,7 @@ class Module:
             return response
 
 
-    def __str__(self):
+    def __str__(self) -> str:
         """String representation of the Module
 
         Returns:

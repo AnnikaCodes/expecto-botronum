@@ -3,9 +3,10 @@
     by Annika"""
 
 import html
-import psclient
+import psclient # type: ignore
 
 import config
+import core
 
 # 102400 is the maximum size of a message to the PS! servers; 19 is the maximum length of a username.
 MAX_BUF_LEN = 102400 - 19 - len("/pminfobox ,") - len("</details>")
@@ -13,14 +14,14 @@ MAX_BUF_LEN = 102400 - 19 - len("/pminfobox ,") - len("</details>")
 class Module:
     """Represents a module, which may contain several commands
     """
-    def __init__(self):
+    def __init__(self) -> None:
         self.commands = {"logsearch": self.logsearch, "searchlogs": self.logsearch}
 
-    def logsearch(self, message):
+    def logsearch(self, message: core.BotMessage) -> None:
         """Searches logs
 
         Args:
-            message (Message): the Message object that invoked the command
+            message (message: core.BotMessage) -> None: the Message object that invoked the command
         """
         if len(message.arguments) < 2:
             return message.respond(f"Usage: ``{config.commandCharacter}logsearch <room>, [optional user], [optional keyword]``.")
@@ -53,7 +54,7 @@ class Module:
         htmlBuf += "</details>"
         return message.respondHTML(htmlBuf)
 
-    def __str__(self):
+    def __str__(self) -> str:
         """String representation of the Module
 
         Returns:

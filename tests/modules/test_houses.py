@@ -13,7 +13,7 @@ class TestHouses():
     """
     module = houses.Module()
 
-    def testHousesExist(self):
+    def testHousesExist(self) -> None:
         """Tests the snippet-counting command
         """
         assert len(self.module.commands) > 3

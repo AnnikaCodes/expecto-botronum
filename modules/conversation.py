@@ -3,16 +3,17 @@
     by Annika"""
 
 import random
-import psclient
-from pbwrap import Pastebin
+import psclient # type: ignore
+from pbwrap import Pastebin # type: ignore
 
 import data
 import config
+import core
 
 class Module:
     """Represents a module, which may contain several commands
     """
-    def __init__(self):
+    def __init__(self) -> None:
         self.commands = {
             "fact": self.showSnippet, "topic": self.showSnippet, "addfact": self.manageSnippet,
             "addtopic": self.manageSnippet, "deletefact": self.manageSnippet, "removefact": self.manageSnippet,
@@ -24,7 +25,7 @@ class Module:
         self.factList = data.get("factList")
         self.topicList = data.get("topicList")
 
-    def showSnippet(self, message):
+    def showSnippet(self, message: core.BotMessage) -> None:
         """Shows a fact or topic in chat
 
         Arguments:
@@ -44,7 +45,7 @@ class Module:
 
         return message.respond(random.choice(snippetList[roomid]))
 
-    def manageSnippet(self, message):
+    def manageSnippet(self, message: core.BotMessage) -> None:
         """Removes or adds a fact or topic
 
         Arguments:
@@ -82,7 +83,7 @@ class Module:
         self.topicList = snippetList
         return data.store("topicList", self.topicList)
 
-    def countSnippets(self, message):
+    def countSnippets(self, message: core.BotMessage) -> None:
         """Counts the number of snippets
 
         Arguments:
@@ -102,7 +103,7 @@ class Module:
         return message.respond(f"There {'is ' if num == 1 else 'are '} {str(num)} \
             {'fact' if isFact else 'topic'}{'' if num == 1 else 's'} for the room {room.id}.")
 
-    def exportSnippets(self, message):
+    def exportSnippets(self, message: core.BotMessage) -> None:
         """Exports the snippets to Pastebin
 
         Arguments:
@@ -127,7 +128,7 @@ class Module:
             f"{'Facts' if isFact else 'Topics'} for room {room.id}" # title
         )))
 
-    def __str__(self):
+    def __str__(self) -> str:
         """String representation of the Module
 
         Returns:
