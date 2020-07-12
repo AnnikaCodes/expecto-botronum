@@ -1,5 +1,5 @@
 # expecto-botronum/core.py
-ps-client >= 0.0.4
+ps-client >= 0.0.5
 
 # expecto-botronum/modules/conversation.py: 5
 pbwrap >= 1.2.0
