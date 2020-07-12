@@ -43,7 +43,8 @@ class Module:
 
         htmlBuf = f"<details><summary>{summary}</summary>"
         for day in days:
-            attemptedBuf = f'<details style="margin-left: 5px;"><summary>{day}</summary><div style="margin-left: 10px;">'
+            daySummary = f"{day} ({len(resultsDict[day])} match{'es' if len(resultsDict[day]) != 1 else ''})"
+            attemptedBuf = f'<details style="margin-left: 5px;"><summary>{daySummary}</summary><div style="margin-left: 10px;">'
             attemptedBuf += "<br />".join([
                 message.connection.chatlogger.formatData(result, isHTML=True) for result in resultsDict[day]
             ])
