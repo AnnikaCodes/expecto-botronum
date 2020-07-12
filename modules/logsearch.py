@@ -2,6 +2,7 @@
     handles searching chat logs
     by Annika"""
 
+from typing import Dict, List
 import html
 import psclient # type: ignore
 
@@ -34,13 +35,14 @@ class Module:
         if not room: return message.respond(f"Invalid room: {roomID}")
         if not message.sender.can("searchlog", room): return message.respond("Permission denied.")
 
-        resultsDict = message.connection.chatlogger.search(roomID=roomID, userID=userID, keyword=keyword)
-
+        resultsDict: Dict[str, List[str]] = message.connection.chatlogger.search(roomID=roomID, userID=userID, keyword=keyword)
+        days: List[str] = list(resultsDict.keys())
+        days.sort(reverse=True)
         summary = f"Chatlogs in {html.escape(roomID)} from {html.escape(userID) if userID else 'any user'}"
         if keyword: summary += f" matching the keyword <code>{html.escape(keyword)}</code>"
 
         htmlBuf = f"<details><summary>{summary}</summary>"
-        for day in resultsDict.keys():
+        for day in days:
             attemptedBuf = f'<details style="margin-left: 5px;"><summary>{day}</summary><div style="margin-left: 10px;">'
             attemptedBuf += "<br />".join([
                 message.connection.chatlogger.formatData(result, isHTML=True) for result in resultsDict[day]
