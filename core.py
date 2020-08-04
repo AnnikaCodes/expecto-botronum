@@ -5,13 +5,18 @@
 
 import pathlib
 import sys
+import time
 import importlib
+from queue import Queue
 from typing import Dict, Any, List
 
 import psclient # type: ignore
 
 import config
 import data
+
+JOINPHRASE_COOLDOWN = 60 * 60 * 60 # 60 minutes
+
 ## add modules dir to the path
 basePath = pathlib.Path('.')
 modulesPath = basePath.joinpath('modules').absolute().resolve()
@@ -61,6 +66,7 @@ class BotRoom(psclient.Room):
         super().__init__(name, connection)
         jpData = data.get("joinphrases")
         self.joinphrases = jpData[self.id] if jpData and self.id in jpData.keys() else {}
+        self.lastJoinphraseTimes: Dict[str, float] = {}
 
     def addJoinphrase(self, joinphrase: str, userid: str) -> None:
         """Adds a joinphrase for the given user ID in the room
@@ -82,6 +88,22 @@ class BotRoom(psclient.Room):
         jpData: dict = data.get("joinphrases") or {} # there might be a race condition here; I'm not sure
         jpData[self.id] = self.joinphrases
         data.store("joinphrases", jpData)
+
+    def runJoinphrase(self, userid: str) -> bool:
+        """Handles joinphrases for a particular user
+
+        Args:
+            userid (str): the user's ID
+
+        Returns:
+            bool: True if a joinphrase was sent and False otherwise
+        """
+        if userid not in self.joinphrases.keys(): return False
+        if userid in self.lastJoinphraseTimes and self.lastJoinphraseTimes[userid] > time.time() - JOINPHRASE_COOLDOWN:
+            return False
+        self.say(f"(__{userid}__) {self.joinphrases[userid]}")
+        self.lastJoinphraseTimes[userid] = time.time()
+        return True
 
 class BotMessage(psclient.Message):
     """The original psclient.Message class from the ps-client package, extended for the bot to include an arguments attribute
@@ -123,6 +145,7 @@ class BotConnection(psclient.PSConnection):
         self.commands: Dict[str, Any] = {}
         self.modules: set = set()
         self.this: BotUser = BotUser(self.this.name, self)
+        self.AIQueue: Queue = Queue()
         for module in config.modules:
             # Note: if multiple modules have the same command then the later module will overwrite the earlier.
             try:
@@ -157,6 +180,7 @@ def handleMessage(connection: BotConnection, message: psclient.Message) -> None:
         potentialCommand: str = message.body.split(' ')[0].strip(config.commandCharacter).lower()
         if potentialCommand in connection.commands:
             connection.commands[potentialCommand](BotMessage(message.raw, connection)) # Invoke the command
+    if message.type == 'chat': connection.AIQueue.put(message)
 
 if __name__ == "__main__":
     conn: BotConnection = BotConnection()
