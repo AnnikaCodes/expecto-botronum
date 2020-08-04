@@ -145,7 +145,6 @@ class BotConnection(psclient.PSConnection):
         self.commands: Dict[str, Any] = {}
         self.modules: set = set()
         self.this: BotUser = BotUser(self.this.name, self)
-        self.AIQueue: Queue = Queue()
         for module in config.modules:
             # Note: if multiple modules have the same command then the later module will overwrite the earlier.
             try:
@@ -173,14 +172,13 @@ class BotConnection(psclient.PSConnection):
 def handleMessage(connection: BotConnection, message: psclient.Message) -> None:
     """Handles messages from the websocket
     """
-    if message.type == 'join' and message.sender.id in message.room.joinphrases.keys():
+    if message.type == 'join':
         # Handle joinphrases
-        message.room.say(message.room.joinphrases[message.sender.id])
+        message.room.handleJoinphrase(message.sender.id)
     elif message.type in ['chat', 'pm'] and message.body[0] == config.commandCharacter:
         potentialCommand: str = message.body.split(' ')[0].strip(config.commandCharacter).lower()
         if potentialCommand in connection.commands:
             connection.commands[potentialCommand](BotMessage(message.raw, connection)) # Invoke the command
-    if message.type == 'chat': connection.AIQueue.put(message)
 
 if __name__ == "__main__":
     conn: BotConnection = BotConnection()
