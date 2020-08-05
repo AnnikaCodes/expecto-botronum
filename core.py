@@ -7,7 +7,6 @@ import pathlib
 import sys
 import time
 import importlib
-from queue import Queue
 from typing import Dict, Any, List
 
 import psclient # type: ignore
@@ -174,7 +173,7 @@ def handleMessage(connection: BotConnection, message: psclient.Message) -> None:
     """
     if message.type == 'join':
         # Handle joinphrases
-        message.room.handleJoinphrase(message.sender.id)
+        message.room.runJoinphrase(message.sender.id)
     elif message.type in ['chat', 'pm'] and message.body[0] == config.commandCharacter:
         potentialCommand: str = message.body.split(' ')[0].strip(config.commandCharacter).lower()
         if potentialCommand in connection.commands:
