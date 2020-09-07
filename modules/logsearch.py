@@ -139,6 +139,7 @@ class Module:
         for result in dayResults:
             for line in resultsDict[result]:
                 userid = line.split('|')[0]
+                if not userid: continue
                 if userid not in users:
                     users[userid] = 1
                 else:
