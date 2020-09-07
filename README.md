@@ -16,6 +16,8 @@ Expecto Botronum is a Pokémon Showdown bot written by Annika for the [Magic & M
 | `~do <room>, <message>` | Sends a message to a room. |
 | `~timer <duration>, [optional message]` | Sets a timer. |
 | `~logsearch <room>, [optional user], [optional keyword]` | Searches chatlogs. Requires % or higher in the room whose logs are being searched. |
+| `~topusers <room>, [optional number of days]` | Provides a list of the top 50 users by linecount in a room. Requires % or higher in the room. |
+| `~linecount <user>, <room>, [optional number of days]` | Gets a user's linecount in a room and a breakdown by day. Requires % or higher in the room. |
 | `~fact` | Shows a random fact from the room's fact database. Specify a room in PMs. |
 | `~addfact <fact>` | Adds the fact to the fact database. Specify a room in PMs. |
 | `~deletefact <fact>` | Deletes the fact from the fact database. Specify a room in PMs. |

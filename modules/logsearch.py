@@ -2,8 +2,13 @@
     handles searching chat logs
     by Annika"""
 
+## TODO: Convert this to a database
+## SQLite? Postgres? idk, but flat files suck
+
 from typing import Dict, List
 import html
+from datetime import datetime
+
 import psclient # type: ignore
 
 import config
@@ -11,12 +16,16 @@ import core
 
 # 102400 is the maximum size of a message to the PS! servers; 19 is the maximum length of a username.
 MAX_BUF_LEN = 102400 - 19 - len("/pminfobox ,") - len("</details>")
+TOPUSERS = 50
 
 class Module:
     """Represents a module, which may contain several commands
     """
     def __init__(self) -> None:
-        self.commands = {"logsearch": self.logsearch, "searchlogs": self.logsearch}
+        self.commands = {
+            "logsearch": self.logsearch, "searchlogs": self.logsearch,
+            "linecount": self.linecount, "topusers": self.topusers
+        }
 
     def logsearch(self, message: core.BotMessage) -> None:
         """Searches logs
@@ -55,6 +64,92 @@ class Module:
                 break
 
         htmlBuf += "</details>"
+        return message.respondHTML(htmlBuf)
+
+    def linecount(self, message: core.BotMessage) -> None:
+        """Gets a user's linecount
+
+        Args:
+            message (message: core.BotMessage) -> None: the Message object that invoked the command
+        """
+        if len(message.arguments) < 3:
+            return message.respond(f"Usage: ``{config.commandCharacter}linecount <user>, <room>, [optional number of days]``.")
+
+        userID = psclient.toID(message.arguments[1])
+        roomID = psclient.toID(message.arguments[2])
+        try:
+            days = int(message.arguments[3])
+        except (IndexError, ValueError):
+            days = 30
+
+        room = message.connection.getRoom(roomID)
+        if not message.connection.chatlogger: return message.respond("There is currently no chatlogger loaded.")
+        if not room: return message.respond(f"Invalid room: {roomID}")
+        if not message.sender.can("searchlog", room): return message.respond("Permission denied.")
+
+        resultsDict: Dict[str, List[str]] = message.connection.chatlogger.search(roomID=roomID, userID=userID)
+        dayResults: List[str] = list(resultsDict.keys())
+        dayResults.sort(reverse=True)
+
+        # TODO: make this less hacky and do it properly in ps-client
+        oldestDay = str(datetime.fromtimestamp((datetime.now().timestamp() - days * 24 * 60 * 60)).date())
+        dayResults = [result for result in dayResults if result >= oldestDay]
+
+        count = 0
+        details = []
+        for result in dayResults:
+            dayCount = len(resultsDict[result])
+            count += dayCount
+            details.append(f"<li>{result} — <strong>{dayCount}</strong> lines</li>")
+
+        htmlBuf = f"The user <strong><code>{userID}</code></strong> had <strong>{count}</strong> lines \
+            in the room {roomID} in the past {days} days!"
+        htmlBuf += f"<details><summary>Linecounts per day</summary><ul>{''.join(details)}</ul></details>"
+        return message.respondHTML(htmlBuf)
+
+    def topusers(self, message: core.BotMessage) -> None:
+        """Gets the top users of a room
+
+        Args:
+            message (message: core.BotMessage) -> None: the Message object that invoked the command
+        """
+        if len(message.arguments) < 2:
+            return message.respond(f"Usage: ``{config.commandCharacter}topusers <room>, [optional number of days]``.")
+
+        roomID = psclient.toID(message.arguments[1])
+        try:
+            days = int(message.arguments[2])
+        except (IndexError, ValueError):
+            days = 30
+
+        room = message.connection.getRoom(roomID)
+        if not message.connection.chatlogger: return message.respond("There is currently no chatlogger loaded.")
+        if not room: return message.respond(f"Invalid room: {roomID}")
+        if not message.sender.can("searchlog", room): return message.respond("Permission denied.")
+
+        resultsDict: Dict[str, List[str]] = message.connection.chatlogger.search(roomID=roomID)
+        dayResults: List[str] = list(resultsDict.keys())
+        dayResults.sort(reverse=True)
+
+        # TODO: make this less hacky and do it properly in ps-client
+        oldestDay = str(datetime.fromtimestamp((datetime.now().timestamp() - days * 24 * 60 * 60)).date())
+        dayResults = [result for result in dayResults if result >= oldestDay]
+
+        users = {}
+        for result in dayResults:
+            for line in resultsDict[result]:
+                userid = line.split('|')[0]
+                if userid not in users:
+                    users[userid] = 1
+                else:
+                    users[userid] += 1
+
+        sortedUsers = sorted(users, key=users.__getitem__, reverse=True)
+
+        htmlBuf = f"<details><summary>Top {TOPUSERS} users in the room {roomID} in the past {days} days</summary><ul>"
+        for user in sortedUsers:
+            htmlBuf += f"<li><strong>{user}</strong> — {users[user]} lines</li>"
+        htmlBuf += "</ul></details>"
         return message.respondHTML(htmlBuf)
 
     def __str__(self) -> str:
