@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 """core.py
     core functionality of Expecto Botronum
     by Annika"""
