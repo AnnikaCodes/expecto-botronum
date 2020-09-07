@@ -147,7 +147,10 @@ class Module:
         sortedUsers = sorted(users, key=users.__getitem__, reverse=True)
 
         htmlBuf = f"<details><summary>Top {TOPUSERS} users in the room {roomID} in the past {days} days</summary><ul>"
+        i = 0
         for user in sortedUsers:
+            i += 1
+            if i > TOPUSERS: break
             htmlBuf += f"<li><strong>{user}</strong> — {users[user]} lines</li>"
         htmlBuf += "</ul></details>"
         return message.respondHTML(htmlBuf)
