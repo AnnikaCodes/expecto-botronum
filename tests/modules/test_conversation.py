@@ -22,3 +22,7 @@ class TestConversation():
         message = dummies.DummyMessage(arguments=["~counttopics", "testroom"])
         self.module.countSnippets(message)
         assert message.response and "0" in message.response
+
+        message = dummies.DummyMessage(arguments=["~countquotes", "testroom"])
+        self.module.countSnippets(message)
+        assert message.response and "0" in message.response

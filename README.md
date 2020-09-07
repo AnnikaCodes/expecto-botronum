@@ -26,6 +26,11 @@ Expecto Botronum is a Pokémon Showdown bot written by Annika for the [Magic & M
 | `~deletetopic <topic>` | Deletes the topic from the topic database. Specify a room in PMs. |
 | `~counttopics` | Gives the number of topics in the topic database. Specify a room in PMs. |
 | `~listtopics` | Provides a Pastebin link of the topics for that room. Specify a room in PMs. |
+| `~quote` | Shows a random quote from the room's quote database. Specify a room in PMs. |
+| `~addquote <quote>` | Adds the quote to the quote database. Specify a room in PMs. |
+| `~deletequote <quote>` | Deletes the quote from the quote database. Specify a room in PMs. |
+| `~countquotes` | Gives the number of quotes in the quote database. Specify a room in PMs. |
+| `~listquotes` | Provides a Pastebin link of the quotes for that room. Specify a room in PMs. |
 | `~uno` | Starts a game of UNO. |
 | `~tour <format>` | Starts a single elimination tournament in the given `format`. |
 | `~reverse` | Provides a random Reversio phrase from the room's database. Specify a room in PMs. |
