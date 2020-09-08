@@ -67,9 +67,8 @@ class BotRoom(psclient.Room):
         jpData = data.get("joinphrases")
         self.joinphrases = jpData[self.id] if jpData and self.id in jpData.keys() else {}
         self.lastJoinphraseTimes: Dict[str, float] = {}
-
         repeats = data.get('repeats')
-        if self.id in repeats:
+        if repeats and self.id in repeats and repeats[self.id]:
             for repeat in repeats[self.id]:
                 self.runRepeat(repeat)
 
