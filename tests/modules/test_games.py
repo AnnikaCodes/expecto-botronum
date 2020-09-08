@@ -18,19 +18,19 @@ class TestGames():
         assert self.module.reversioWords["testroom"] == []
 
         message = dummies.DummyMessage(
-            arguments=["~addreversioword", "testroom", "Test Word"],
+            arguments=["-addreversioword", "testroom", "Test Word"],
             sender=dummies.DummyUser(isAdmin=True)
         )
         self.module.addReversioWord(message)
         assert len(self.module.reversioWords["testroom"]) == 1
         assert self.module.reversioWords["testroom"][0].lower().strip() == "test word"
 
-        message = dummies.DummyMessage(arguments=["~reverse", "testroom"])
+        message = dummies.DummyMessage(arguments=["-reverse", "testroom"])
         self.module.reverse(message)
         assert message.response == "/wall drow tset"
 
         message = dummies.DummyMessage(
-            arguments=["~rmreversioword", "testroom", "Test Word"],
+            arguments=["-rmreversioword", "testroom", "Test Word"],
             sender=dummies.DummyUser(isAdmin=True)
         )
         self.module.removeReversioWord(message)
@@ -42,7 +42,7 @@ class TestGames():
         assert len(self.module.minigamePoints.keys()) == 0
 
         message = dummies.DummyMessage(
-            arguments=["~addpoints", "testuser"],
+            arguments=["-addpoints", "testuser"],
             sender=dummies.DummyUser(isAdmin=True),
             room=self.connection.getRoom("testroom")
         )
@@ -50,7 +50,7 @@ class TestGames():
         assert self.module.minigamePoints["testroom"]["testuser"] == 1
 
         message = dummies.DummyMessage(
-            arguments=["~addpoints", "testuser", "-2"],
+            arguments=["-addpoints", "testuser", "-2"],
             sender=dummies.DummyUser(isAdmin=True),
             room=self.connection.getRoom("testroom")
         )

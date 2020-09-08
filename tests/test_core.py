@@ -4,7 +4,7 @@
 
 # pylint: disable=line-too-long
 from typing import Any
-import pytest # pylint: disable=unused-import
+import pytest # type: ignore
 
 import psclient # type: ignore
 import core
@@ -93,14 +93,14 @@ def testMessageChatCommand() -> None:
     """
     message = core.BotMessage(
         """>testroom
-|c:|1593475694|#Ann/ika ^_^|~somecommand argument1,argumENT2||withpipes, argumént3""",
+|c:|1593475694|#Ann/ika ^_^|-somecommand argument1,argumENT2||withpipes, argumént3""",
         DummyConnection()
     )
     assert message.senderName == "#Ann/ika ^_^"
     assert message.sender.id == "annika"
-    assert message.arguments == ["~somecommand", "argument1", "argumENT2||withpipes", " argumént3"]
+    assert message.arguments == ["-somecommand", "argument1", "argumENT2||withpipes", " argumént3"]
     assert message.room.id == "testroom"
-    assert message.body == "~somecommand argument1,argumENT2||withpipes, argumént3"
+    assert message.body == "-somecommand argument1,argumENT2||withpipes, argumént3"
     assert message.time == "1593475694"
     assert message.type == 'chat'
     assert message.challstr is None
@@ -175,14 +175,14 @@ def testMessagePM() -> None:
     """Tests the ability of Message objects to handle PM messages and commands
     """
     message = core.BotMessage(
-        "|pm|+aNNika ^_^|Expecto Botronum|~somecommand argument1,argumENT2||withpipes, argumént3",
+        "|pm|+aNNika ^_^|Expecto Botronum|-somecommand argument1,argumENT2||withpipes, argumént3",
         DummyConnection()
     )
     assert message.senderName == "+aNNika ^_^"
     assert message.sender.id == "annika"
-    assert message.arguments == ["~somecommand", "argument1", "argumENT2||withpipes", " argumént3"]
+    assert message.arguments == ["-somecommand", "argument1", "argumENT2||withpipes", " argumént3"]
     assert message.room is None
-    assert message.body == "~somecommand argument1,argumENT2||withpipes, argumént3"
+    assert message.body == "-somecommand argument1,argumENT2||withpipes, argumént3"
     assert message.time is None
     assert message.type == 'pm'
     assert message.challstr is None

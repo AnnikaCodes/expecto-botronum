@@ -13,7 +13,7 @@ class TestAdmin():
         """Tests the eval command
         """
         message = dummies.DummyMessage(
-            arguments=["~eval", "(2 + 2**2) / 2"],
+            arguments=["-eval", "(2 + 2**2) / 2"],
             sender=dummies.DummyUser(isAdmin=True, userid='annika')
         )
         self.module.eval(message)

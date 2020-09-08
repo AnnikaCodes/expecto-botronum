@@ -2,7 +2,7 @@
     tests for superhero
     by Annika"""
 
-import pytest
+import pytest # type: ignore
 
 import dummies
 import superhero
@@ -26,7 +26,7 @@ class TestSuperhero():
         """Tests the superhero command
         """
         # This might have issues since it relies on the API responses not changing, but there's not a great way to test this.
-        message = dummies.DummyMessage(arguments=["~superhero", "t H\\ orå"])
+        message = dummies.DummyMessage(arguments=["-superhero", "t H\\ orå"])
         self.module.superhero(message)
         assert not message.response
         assert message.HTMLResponse and "Thor" in message.HTMLResponse

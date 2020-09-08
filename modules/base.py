@@ -11,7 +11,10 @@ class Module:
     """Represents a module, which may contain several commands
     """
     def __init__(self) -> None:
-        self.commands = {"ping": self.ping, "owo": self.owo, "uwu": self.uwu, "timer": self.timer}
+        self.commands = {
+            "ping": self.ping, "owo": self.owo, "uwu": self.uwu, "timer": self.timer,
+            "help": self.help, "commands": self.help, "guide": self.help
+        }
 
     def ping(self, message: core.BotMessage) -> None:
         """Ping: replies "Pong!"
@@ -63,6 +66,14 @@ class Module:
             message.respond(f"{message.arguments[1]} isn't a valid duration")
             return
         threading.Timer(duration, message.respond, args=[response]).start()
+
+    def help(self, message: core.BotMessage) -> None:
+        """Help
+
+        Arguments:
+            message {Message} -- the Message object that invoked the command
+        """
+        return message.respond(f"Expecto Botronum guide: https://github.com/AnnikaCodes/expecto-botronum/blob/master/README.md#commands")
 
     def __str__(self) -> str:
         """String representation of the Module

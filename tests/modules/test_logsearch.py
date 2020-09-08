@@ -17,7 +17,7 @@ class TestLogsearch():
         """Tests the logsearch command
         """
         message = dummies.DummyMessage(
-            arguments=["~logsearch", "testroom", "testuser", "testquery"],
+            arguments=["-logsearch", "testroom", "testuser", "testquery"],
             sender=dummies.DummyUser(isAdmin=True),
             connection=dummies.DummyConnection(logchat=True)
         )

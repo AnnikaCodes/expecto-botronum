@@ -12,8 +12,8 @@
   "roomRanksInOrder": ["+", "%", "@", "*", "#"],
   "rooms": ["magicmayhem", "lobby"],
   "separator": ",",
-  "modules": ["base", "admin"],
-  "commandCharacter": "~",
+  "modules": ["houses", "base", "conversation", "games", "joinphrase", "superhero", "admin", "logsearch"],
+  "commandCharacter": "-",
   "superheroAPIKey": "",
   "pastebinAPIKey": "",
   "logchat": false

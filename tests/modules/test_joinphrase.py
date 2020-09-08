@@ -20,7 +20,7 @@ class TestJoinphrase():
 
         assert len(self.connection.getRoom("testroom2").joinphrases) == 0
         message = dummies.DummyMessage(
-            arguments=["~addjp", "testroom2", "Test User", "Join pHRase &&||"],
+            arguments=["-addjp", "testroom2", "Test User", "Join pHRase &&||"],
             sender=dummies.DummyUser(isAdmin=True),
             connection=self.connection
         ) # Adding in PMs
@@ -29,7 +29,7 @@ class TestJoinphrase():
         assert self.connection.getRoom("testroom2").joinphrases["testuser"] == "Join pHRase &&||"
 
         message = dummies.DummyMessage(
-            arguments=["~removejp", "testroom2", "Test User"],
+            arguments=["-removejp", "testroom2", "Test User"],
             sender=dummies.DummyUser(isAdmin=True),
             connection=self.connection
         ) # Removing in PMs
@@ -37,7 +37,7 @@ class TestJoinphrase():
         assert len(self.connection.getRoom("testroom2").joinphrases) == 0
 
         message = dummies.DummyMessage(
-            arguments=["~addjp", "Test User", "Join pHRase &&||"],
+            arguments=["-addjp", "Test User", "Join pHRase &&||"],
             sender=dummies.DummyUser(isAdmin=True),
             room=self.connection.getRoom("testroom2")
         ) # Adding in a room
@@ -46,7 +46,7 @@ class TestJoinphrase():
         assert self.connection.getRoom("testroom2").joinphrases["testuser"] == "Join pHRase &&||"
 
         message = dummies.DummyMessage(
-            arguments=["~removejp", "Test User"],
+            arguments=["-removejp", "Test User"],
             sender=dummies.DummyUser(isAdmin=True),
             room=self.connection.getRoom("testroom2")
         ) # Removing in a room
