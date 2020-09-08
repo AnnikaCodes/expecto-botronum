@@ -198,7 +198,7 @@ def handleMessage(connection: BotConnection, message: psclient.Message) -> None:
         potentialCommand: str = message.body.split(' ')[0].strip(config.commandCharacter).lower()
         if potentialCommand in connection.commands:
             connection.commands[potentialCommand](BotMessage(message.raw, connection)) # Invoke the command
-    elif message.type == 'pm':
+    elif message.type == 'pm' and message.sender.id != connection.this.id:
         BotMessage(message.raw, connection).respond(
             "Hi! I'm a computer program written by Annika, not a real person. " +
             "If you need a staff member, PM someone else (with %, @, or # before their name), or " +
