@@ -3,6 +3,7 @@
     by Annika"""
 
 import random
+import re
 import psclient # type: ignore
 from pbwrap import Pastebin # type: ignore
 
@@ -74,6 +75,7 @@ class Module:
             return message.respond("You must specify a fact/topic/quote (and a room if used in PMs).")
 
         if not message.sender.can("addfact", room): return message.respond("Permission denied.")
+        if not re.match(r'[a-zA-Z0-9]', snippet): snippet = " " + snippet
 
         kind = 'Fact'
         snippetList = self.factList
