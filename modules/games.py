@@ -31,8 +31,9 @@ class Module:
             "reverse": self.reverse, "wallrev": self.reverse, "addreversioword": self.addReversioWord,
             "removereversioword": self.removeReversioWord, "rmreversioword": self.removeReversioWord,
             "addpoint": self.addPoints, "addpoints": self.addPoints, "deletereversioword": self.removeReversioWord,
-            "showpoints": self.showLB, "lb": self.showLB, "showlb": self.showLB, "tour": self.startGame,
-            "tournament": self.startGame, "uno": self.startGame
+            "showpoints": self.showLB, "lb": self.showLB, "showlb": self.showLB,
+            "resetlb": self.resetLB, "lbreset": self.resetLB, "clearlb": self.resetLB, "lbclear": self.resetLB,
+            "tour": self.startGame, "tournament": self.startGame, "uno": self.startGame
         }
 
         self.reversioWords = data.get("reversioWords")
@@ -160,6 +161,26 @@ class Module:
         sortedUsers = sorted(points, key=points.get, reverse=True)
         formattedPoints = ", ".join([f"{key} (**{points[key]}**)" for key in sortedUsers])
         return message.respond(f"**Scores**: {formattedPoints}" if formattedPoints else "There are no scores.")
+
+    def resetLB(self, message: core.BotMessage) -> None:
+        """Resets the minigame leaderboard
+
+        Arguments:
+            message {Message} -- the Message object that invoked the command
+        """
+        room = message.room
+        if not room:
+            if len(message.arguments) < 2: return message.respond("You must specify a room.")
+            room = message.connection.getRoom(message.arguments[1])
+        if not room: return message.respond("You must specify a room.")
+
+        if not message.sender.can("hostgame", message.room): return message.respond("Permission denied.")
+        if room.id not in self.minigamePoints.keys():
+            return message.respond(f"There are no scores in the leaderboard for the room '{room.id}'.")
+
+        del self.minigamePoints[room.id]
+        return message.respond("Cleared the minigame leaderboard!")
+
 
     def startGame(self, message: core.BotMessage) -> None:
         """Starts a tournament or game of UNO

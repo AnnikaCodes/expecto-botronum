@@ -43,6 +43,7 @@ Expecto Botronum is a Pokémon Showdown bot written by Annika for the [Magic & M
 | `-removereversioword <word>` | Removes a Reversio phrase from the room's database. Specify a room in PMs. |
 | `-addpoints <user>, [n]` | Adds `n` points (or 1 if no `n` is given) to the given `user`'s minigame score for that room. |
 | `-showlb` | Shows the minigame scoreboard. Specify a room in PMs. |
+| `-resetlb` | Resets the minigame scoreboard. Specify a room in PMs. |
 | `-addjoinphrase <user>, <phrase>` | Sets `<user>`'s joinphrase to `phrase`. This phrase will be said by the bot when the user joins the room. Specify a room in PMs. |
 | `-removejoinphrase <user>` | Removes `<user>`'s joinphrase. Specify a room in PMs. |
 | `-joinhouse <house>` | Joins a house. |
