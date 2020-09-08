@@ -7,6 +7,7 @@ import pathlib
 import sys
 import time
 import importlib
+import threading
 from typing import Dict, Any, List
 
 import psclient # type: ignore
@@ -67,6 +68,11 @@ class BotRoom(psclient.Room):
         self.joinphrases = jpData[self.id] if jpData and self.id in jpData.keys() else {}
         self.lastJoinphraseTimes: Dict[str, float] = {}
 
+        repeats = data.get('repeats')
+        if self.id in repeats:
+            for repeat in repeats[self.id]:
+                self.runRepeat(repeat)
+
     def addJoinphrase(self, joinphrase: str, userid: str) -> None:
         """Adds a joinphrase for the given user ID in the room
         Arguments:
@@ -103,6 +109,21 @@ class BotRoom(psclient.Room):
         self.say(f"(__{userid}__) {self.joinphrases[userid]}")
         self.lastJoinphraseTimes[userid] = time.time()
         return True
+
+    def runRepeat(self, repeat: Dict[str, int]) -> None:
+        """Runs a repeat in the room
+
+        Args:
+            repeat (Dict[str, int]): [description]
+        """
+        def runner(msg: str, interval: int) -> None:
+            repeats = data.get('repeats')
+            if not repeats or self.id not in repeats or msg not in [list(r.keys())[0] for r in repeats[self.id]]: return
+            self.say(msg)
+            threading.Timer(interval * 60, runner, args=[msg, interval]).start()
+
+        message = list(repeat.keys())[0]
+        runner(message, repeat[message])
 
 class BotMessage(psclient.Message):
     """The original psclient.Message class from the ps-client package, extended for the bot to include an arguments attribute

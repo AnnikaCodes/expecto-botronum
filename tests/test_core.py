@@ -4,7 +4,6 @@
 
 # pylint: disable=line-too-long
 from typing import Any
-import pytest # type: ignore
 
 import psclient # type: ignore
 import core
