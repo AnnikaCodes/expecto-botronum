@@ -280,7 +280,7 @@ class Automod:
         elif self.points[message.room.id][message.sender.id] >= WARN_THRESHOLD:
             self.punish("warn", message.room, message.sender.id, reason)
         elif self.points[message.room.id][message.sender.id] >= VERBALWARN_THRESHOLD:
-            message.room.say(f"{message.sender.name}, {reason}")
+            message.room.say(f"{message.sender.name}, {reason}.")
 
     def punish(self, punishment: str, room: BotRoom, userid: str, reason: str) -> None:
         """Automatically punishes a user
