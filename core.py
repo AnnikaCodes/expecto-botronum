@@ -174,6 +174,16 @@ class BotMessage(psclient.Message):
         elif self.sender and not self.room:
             self.sender.PM(response)
 
+    def respondHTML(self, html: str) -> None:
+        """Responds with HTML
+
+        Args:
+            html (str): the HTML code
+        """
+        if self.room and self.connection.this.can("html", self.room):
+            return self.room.say(f"/addhtmlbox {html}")
+        return super().respondHTML(html)
+
     def __str__(self) -> str:
         return super().__str__() + f" with arguments {self.arguments}" if self.arguments else ""
 
