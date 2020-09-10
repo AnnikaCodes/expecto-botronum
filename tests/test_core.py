@@ -6,9 +6,10 @@
 from typing import Any
 
 import psclient # type: ignore
+
+from dummies import DummyConnection, DummyUser
 import core
 import config
-from dummies import DummyConnection, DummyUser
 
 def testToID() -> None:
     """Tests the toID() function

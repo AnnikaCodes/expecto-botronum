@@ -21,6 +21,9 @@ Expecto Botronum is a Pokémon Showdown bot written by Annika for the [Magic & M
 | `-logsearch <room>, [optional user], [optional keyword]` | Searches chatlogs. Requires % or higher in the room whose logs are being searched. |
 | `-topusers <room>, [optional number of days]` | Provides a list of the top 50 users by linecount in a room. Requires % or higher in the room. |
 | `-linecount <user>, <room>, [optional number of days]` | Gets a user's linecount in a room and a breakdown by day. Requires % or higher in the room. |
+| `-enablemoderation [optional room], <feature>` | Enables an automatic moderation feature in a room. Currently, features are `bold`, `caps`, and `flooding`. Requires % or higher in the room. |
+| `-disablemoderation [optional room], <feature>` | Disable an automatic moderation feature in a room. Currently, features are `bold`, `caps`, and `flooding`. Requires % or higher in the room. |
+| `-viewmoderation [optional room]` | View automatic moderation settings. You must specify a room in PMs. Requires % or higher. |
 | `-fact` | Shows a random fact from the room's fact database. Specify a room in PMs. |
 | `-addfact <fact>` | Adds the fact to the fact database. Specify a room in PMs. |
 | `-deletefact <fact>` | Deletes the fact from the fact database. Specify a room in PMs. |
@@ -39,7 +42,7 @@ Expecto Botronum is a Pokémon Showdown bot written by Annika for the [Magic & M
 | `-uno` | Starts a game of UNO. |
 | `-tour <format>` | Starts a single elimination tournament in the given `format`. |
 | `-reverse` | Provides a random Reversio phrase from the room's database. Specify a room in PMs. |
-| `-addreversioword <word>` | Adds a Reversio phrase to the room's database. Specify a room in PMs.
+| `-addreversioword <word>` | Adds a Reversio phrase to the room's database. Specify a room in PMs. |
 | `-removereversioword <word>` | Removes a Reversio phrase from the room's database. Specify a room in PMs. |
 | `-addpoints <user>, [n]` | Adds `n` points (or 1 if no `n` is given) to the given `user`'s minigame score for that room. |
 | `-showlb` | Shows the minigame scoreboard. Specify a room in PMs. |

@@ -58,9 +58,7 @@ class Module:
         Args:
             message (core.BotMessage): the Message object that invoked the command
         """
-        room = message.room
-        if not room and len(message.arguments) > 1:
-            room = message.connection.getRoom(message.arguments[1])
+        room = message.connection.getRoom(message.arguments[1]) if len(message.arguments) > 1 else message.room
         if not room:
             return message.respond("You must specify a valid room when using this command in PMs.")
 
