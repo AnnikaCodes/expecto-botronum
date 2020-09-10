@@ -40,9 +40,8 @@ class Module:
         aliases = aliases if isinstance(aliases, str) else ", ".join(aliases)
         relatives = relatives  if isinstance(relatives, str) else ", ".join(relatives)
 
+        message.respond(f"!show {APIResponse['image']['url']}")
         html = f"""
-            <img src="{APIResponse['image']['url']}" width="1" height="1" style='height: 15%; width: 15%; object-fit: scale-down; padding-right: 15px; float: left'>
-
             <details><summary>{APIResponse['name']}</summary><details><summary>Stats</summary>
             <b>Intelligence:</b> {APIResponse['powerstats']['intelligence']}<br>
             <b>Strength:</b> {APIResponse['powerstats']['strength']}<br>

@@ -28,7 +28,8 @@ class TestSuperhero():
         # This might have issues since it relies on the API responses not changing, but there's not a great way to test this.
         message = dummies.DummyMessage(arguments=["-superhero", "t H\\ orå"])
         self.module.superhero(message)
-        assert not message.response
+        start = '!show https://'
+        assert message.response and message.response[:len(start)] == start
         assert message.HTMLResponse and "Thor" in message.HTMLResponse
         assert "Loki (step-brother)" in message.HTMLResponse
         assert "Asgardian" in message.HTMLResponse
