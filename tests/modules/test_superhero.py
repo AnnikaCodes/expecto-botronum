@@ -2,8 +2,7 @@
     tests for superhero
     by Annika"""
 
-#
-import pytest # type: ignore
+import pytest
 
 import dummies
 import superhero
