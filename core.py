@@ -15,6 +15,7 @@ import psclient # type: ignore
 
 import config
 import data
+from translations import translate
 
 JOINPHRASE_COOLDOWN = 60 * 60 * 60 # 60 minutes
 
@@ -259,21 +260,21 @@ class Automod:
             if not self.points[message.room.id].get(message.sender.id):
                 self.points[message.room.id][message.sender.id] = 0
             self.points[message.room.id][message.sender.id] += 1
-            return self.runPunish(message, "do not abuse bold formatting")
+            return self.runPunish(message, translate(message.room, "do not abuse bold formatting"))
 
         # Automatically moderate for caps
         if message.room.moderation.get('caps') and CAPS_REGEX.match(message.body):
             if not self.points[message.room.id].get(message.sender.id):
                 self.points[message.room.id][message.sender.id] = 0
             self.points[message.room.id][message.sender.id] += 1
-            return self.runPunish(message, "do not abuse capital letters")
+            return self.runPunish(message, translate(message.room, "do not abuse capital letters"))
 
         # Automatically moderate for flooding
         if message.room.moderation.get('flooding') and self.flooders[message.room.id][1] > 3:
             if not self.points[message.room.id].get(message.sender.id):
                 self.points[message.room.id][message.sender.id] = 0
             self.points[message.room.id][message.sender.id] += 1
-            return self.runPunish(message, "do not flood the chat")
+            return self.runPunish(message, translate(message.room, "do not flood the chat"))
 
     def runPunish(self, message: BotMessage, reason: str) -> None:
         """Checks a user's points and moderates as needed
