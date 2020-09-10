@@ -3,12 +3,13 @@
     core functionality of Expecto Botronum
     by Annika"""
 
+import re
 import pathlib
 import sys
 import time
 import importlib
 import threading
-from typing import Dict, Any, List
+from typing import Dict, Tuple, List, Any
 
 import psclient # type: ignore
 
@@ -16,6 +17,14 @@ import config
 import data
 
 JOINPHRASE_COOLDOWN = 60 * 60 * 60 # 60 minutes
+
+BOLD_REGEX = re.compile(r'(.*)(\*\*)([^\s])(.*)(\*\*)(.*)')
+CAPS_REGEX = re.compile(r'(.*)([A-Z]{5,})|([A-Z]{3,}(.*)[A-Z]{3,})(.*)')
+
+VERBALWARN_THRESHOLD = 1
+WARN_THRESHOLD = 2
+MUTE_THRESHOLD = 3
+HOURMUTE_THRESHOLD = 4
 
 ## add modules dir to the path
 basePath = pathlib.Path('.')
@@ -67,10 +76,17 @@ class BotRoom(psclient.Room):
         jpData = data.get("joinphrases")
         self.joinphrases = jpData[self.id] if jpData and self.id in jpData.keys() else {}
         self.lastJoinphraseTimes: Dict[str, float] = {}
-        repeats = data.get('repeats')
+
+        repeats = data.get("repeats")
         if repeats and self.id in repeats and repeats[self.id]:
             for repeat in repeats[self.id]:
                 self.runRepeat(repeat)
+
+        moderation = data.get("moderation")
+        if moderation and self.id in moderation:
+            self.moderation = moderation.get(self.id)
+        else:
+            self.moderation = None
 
     def addJoinphrase(self, joinphrase: str, userid: str) -> None:
         """Adds a joinphrase for the given user ID in the room
@@ -124,6 +140,18 @@ class BotRoom(psclient.Room):
         message = list(repeat.keys())[0]
         runner(message, repeat[message])
 
+    def setModerationType(self, moderationType: str, isEnabled: bool) -> None:
+        """Enables a type of automated moderation in the room
+
+        Args:
+            t (str): the moderation type, e.g. bold
+        """
+        if not self.moderation: self.moderation = {}
+        self.moderation[moderationType] = isEnabled
+        moderation = data.get("moderation") or {}
+        moderation[self.id] = self.moderation
+        data.store("moderation", moderation)
+
 class BotMessage(psclient.Message):
     """The original psclient.Message class from the ps-client package, extended for the bot to include an arguments attribute
     """
@@ -164,6 +192,7 @@ class BotConnection(psclient.PSConnection):
         self.commands: Dict[str, Any] = {}
         self.modules: set = set()
         self.this: BotUser = BotUser(self.this.name, self)
+
         for module in config.modules:
             # Note: if multiple modules have the same command then the later module will overwrite the earlier.
             try:
@@ -188,9 +217,86 @@ class BotConnection(psclient.PSConnection):
         """
         return super().__str__() + f"with commands {', '.join(self.commands.keys())}" if self.commands else ""
 
+VALID_AUTOMOD_TYPES = ['bold', 'caps', 'flooding']
+
+class Automod:
+    """Handles automatic moderation"""
+    def __init__(self) -> None:
+        # Dict[roomid, Dict[userid, punishment points]]
+        self.points: Dict[str, Dict[str, int]] = {}
+        # Dict[roomid, Tuple[userid, lines]]
+        self.flooders: Dict[str, Tuple[str, int]] = {}
+
+    def filterMessage(self, message: BotMessage) -> None:
+        """Filters incoming messages and moderates on them if necessary
+
+        Args:
+            message (BotMessage): the message that is being filtered
+        """
+        if not message.sender or not message.room or not message.room.moderation: return
+        if message.sender.can('broadcast', message.room): return
+        if not self.points.get(message.room.id):
+            self.points[message.room.id] = {}
+
+        flooder = self.flooders.get(message.room.id)
+        if not flooder or len(flooder) < 2 or flooder[0] != message.sender.id:
+            self.flooders[message.room.id] = (message.sender.id, 1)
+        else:
+            self.flooders[message.room.id] = (message.sender.id, flooder[1] + 1)
+
+        # Automatically moderate for bold
+        if message.room.moderation.get('bold') and BOLD_REGEX.match(message.body):
+            if not self.points[message.room.id].get(message.sender.id):
+                self.points[message.room.id][message.sender.id] = 0
+            self.points[message.room.id][message.sender.id] += 1
+            return self.runPunish(message, "do not abuse bold formatting")
+
+        # Automatically moderate for caps
+        if message.room.moderation.get('caps') and CAPS_REGEX.match(message.body):
+            if not self.points[message.room.id].get(message.sender.id):
+                self.points[message.room.id][message.sender.id] = 0
+            self.points[message.room.id][message.sender.id] += 1
+            return self.runPunish(message, "do not abuse capital letters")
+
+        # Automatically moderate for flooding
+        if message.room.moderation.get('flooding') and self.flooders[message.room.id][1] > 3:
+            if not self.points[message.room.id].get(message.sender.id):
+                self.points[message.room.id][message.sender.id] = 0
+            self.points[message.room.id][message.sender.id] += 1
+            return self.runPunish(message, "do not flood the chat")
+
+    def runPunish(self, message: BotMessage, reason: str) -> None:
+        """Checks a user's points and moderates as needed
+
+        Args:
+            message (BotMessage): the message invoking this
+            reason (str): the reason
+        """
+        if self.points[message.room.id][message.sender.id] >= HOURMUTE_THRESHOLD:
+            self.points[message.room.id][message.sender.id] = 1
+            self.punish("hourmute", message.room, message.sender.id, reason)
+        elif self.points[message.room.id][message.sender.id] >= MUTE_THRESHOLD:
+            self.punish("mute", message.room, message.sender.id, reason)
+        elif self.points[message.room.id][message.sender.id] >= WARN_THRESHOLD:
+            self.punish("warn", message.room, message.sender.id, reason)
+        elif self.points[message.room.id][message.sender.id] >= VERBALWARN_THRESHOLD:
+            message.room.say(f"{message.sender.name}, {reason}")
+
+    def punish(self, punishment: str, room: BotRoom, userid: str, reason: str) -> None:
+        """Automatically punishes a user
+
+        Args:
+            userid (str): the user ID to be muted
+            reason (str): the reason for the mute
+        """
+        room.say(f"/{punishment} {userid}, automated moderation: {reason}")
+        if punishment != 'roomban': room.say(f"/hidealtstext {userid}")
+
+
 def handleMessage(connection: BotConnection, message: psclient.Message) -> None:
     """Handles messages from the websocket
     """
+    automod.filterMessage(message)
     if message.type == 'join':
         # Handle joinphrases
         message.room.runJoinphrase(message.sender.id)
@@ -209,5 +315,6 @@ def handleMessage(connection: BotConnection, message: psclient.Message) -> None:
 if __name__ == "__main__":
     conn: BotConnection = BotConnection()
     client: psclient.PSClient = psclient.PSClient(conn)
+    automod = Automod()
     log("I: core.py: client connecting...")
     client.connect()

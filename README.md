@@ -39,7 +39,7 @@ Expecto Botronum is a Pokémon Showdown bot written by Annika for the [Magic & M
 | `-uno` | Starts a game of UNO. |
 | `-tour <format>` | Starts a single elimination tournament in the given `format`. |
 | `-reverse` | Provides a random Reversio phrase from the room's database. Specify a room in PMs. |
-| `-addreversioword <word>` | Adds a Reversio phrase to the room's database. Specify a room in PMs. |
+| `-addreversioword <word>` | Adds a Reversio phrase to the room's database. Specify a room in PMs.
 | `-removereversioword <word>` | Removes a Reversio phrase from the room's database. Specify a room in PMs. |
 | `-addpoints <user>, [n]` | Adds `n` points (or 1 if no `n` is given) to the given `user`'s minigame score for that room. |
 | `-showlb` | Shows the minigame scoreboard. Specify a room in PMs. |
