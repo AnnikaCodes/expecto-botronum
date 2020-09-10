@@ -245,15 +245,16 @@ class Automod:
             message (BotMessage): the message that is being filtered
         """
         if not message.sender or not message.room or not message.room.moderation: return
-        if message.sender.can('broadcast', message.room): return
         if not self.points.get(message.room.id):
             self.points[message.room.id] = {}
 
         flooder = self.flooders.get(message.room.id)
-        if not flooder or len(flooder) < 2 or flooder[0] != message.sender.id:
-            self.flooders[message.room.id] = (message.sender.id, 1)
-        else:
+        if flooder and len(flooder) >= 2 and message.sender.id == flooder[0]:
             self.flooders[message.room.id] = (message.sender.id, flooder[1] + 1)
+        else:
+            self.flooders[message.room.id] = (message.sender.id, 0)
+
+        if message.sender.can('broadcast', message.room): return
 
         # Automatically moderate for bold
         if message.room.moderation.get('bold') and BOLD_REGEX.match(message.body):
