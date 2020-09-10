@@ -12,6 +12,8 @@ import psclient # type: ignore
 
 import config
 import core
+import data # pylint: disable=unused-import
+import translations # pylint: disable=unused-import
 
 GIT_COMMAND = 'git pull'
 

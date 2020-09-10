@@ -1,7 +1,7 @@
 """Translations for Expecto Botronum"""
 
 from typing import Union, Dict
-import psclient
+import psclient # type: ignore
 
 def getLanguageID(roomid: str) -> str:
     """Gets a language
