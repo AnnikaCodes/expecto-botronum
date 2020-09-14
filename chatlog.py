@@ -89,8 +89,8 @@ class Chatlogger:
         return (
             int(time),
             str(message.sender.id) if message.sender else None,
-            str(message.type),
             str(message.senderName) if message.senderName else None,
+            str(message.type),
             psclient.toID(room) if room else None,
             str(message.body) if message.body else None
         )
