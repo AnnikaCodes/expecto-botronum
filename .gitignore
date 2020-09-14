@@ -12,6 +12,7 @@ config.json
 logs/*
 tests/logs
 chatlogging-test/
+*.db*
 data.json
 
 # Private code

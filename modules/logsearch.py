@@ -44,7 +44,7 @@ class Module:
         if not room: return message.respond(f"Invalid room: {roomID}")
         if not message.sender.can("searchlog", room): return message.respond("Permission denied.")
 
-        resultsDict: Dict[str, List[str]] = message.connection.chatlogger.search(roomID=roomID, userID=userID, keyword=keyword)
+        resultsDict: Dict[str, List[str]] = message.connection.chatlogger.search(roomID, userID=userID, keywords=[keyword])
         days: List[str] = list(resultsDict.keys())
         days.sort(reverse=True)
         summary = f"Chatlogs in {html.escape(roomID)} from {html.escape(userID) if userID else 'any user'}"
@@ -87,13 +87,14 @@ class Module:
         if not room: return message.respond(f"Invalid room: {roomID}")
         if not message.sender.can("searchlog", room): return message.respond("Permission denied.")
 
-        resultsDict: Dict[str, List[str]] = message.connection.chatlogger.search(roomID=roomID, userID=userID)
+        resultsDict: Dict[str, List[str]] = message.connection.chatlogger.search(
+            roomID,
+            userID=userID,
+            oldest=datetime.now().timestamp() - days * 24 * 60 * 60
+        )
         dayResults: List[str] = list(resultsDict.keys())
         dayResults.sort(reverse=True)
 
-        # TODO: make this less hacky and do it properly in ps-client
-        oldestDay = str(datetime.fromtimestamp((datetime.now().timestamp() - days * 24 * 60 * 60)).date())
-        dayResults = [result for result in dayResults if result >= oldestDay]
 
         count = 0
         details = []
@@ -102,8 +103,8 @@ class Module:
             count += dayCount
             details.append(f"<li>{result} — <strong>{dayCount}</strong> lines</li>")
 
-        htmlBuf = f"The user <strong><code>{userID}</code></strong> had <strong>{count}</strong> lines \
-            in the room {roomID} in the past {days} days!"
+        htmlBuf = f"The user <strong><code>{userID}</code></strong> had <strong>{count}</strong> lines"
+        htmlBuf += f" in the room {roomID} in the past {days} days!"
         htmlBuf += f"<details><summary>Linecounts per day</summary><ul>{''.join(details)}</ul></details>"
         return message.respondHTML(htmlBuf)
 
@@ -127,16 +128,15 @@ class Module:
         if not room: return message.respond(f"Invalid room: {roomID}")
         if not message.sender.can("searchlog", room): return message.respond("Permission denied.")
 
-        resultsDict: Dict[str, List[str]] = message.connection.chatlogger.search(roomID=roomID)
+        resultsDict: Dict[str, List[str]] = message.connection.chatlogger.search(
+            roomID,
+            oldest=datetime.now().timestamp() - days * 24 * 60 * 60
+        )
         dayResults: List[str] = list(resultsDict.keys())
         dayResults.sort(reverse=True)
 
-        # TODO: make this less hacky and do it properly in ps-client
-        oldestDay = str(datetime.fromtimestamp((datetime.now().timestamp() - days * 24 * 60 * 60)).date())
-        dayResults = [result for result in dayResults if result >= oldestDay]
-
         users = {}
-        for result in dayResults:
+        for result in resultsDict:
             for line in resultsDict[result]:
                 userid = line.split('|')[0]
                 if not userid: continue

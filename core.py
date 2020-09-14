@@ -14,6 +14,7 @@ from typing import Dict, Tuple, List, Any
 import psclient # type: ignore
 
 import config
+import chatlog
 import data
 from translations import translate
 
@@ -197,7 +198,7 @@ class BotConnection(psclient.PSConnection):
             config.password,
             onParsedMessage=handleMessage,
             url=config.websocketURL,
-            chatlogger=psclient.chatlog.Chatlogger("logs/") if config.logchat else None,
+            chatlogger=chatlog.Chatlogger("logs.db") if config.logchat else None,
             loglevel=config.loglevel
         )
         self.commands: Dict[str, Any] = {}
