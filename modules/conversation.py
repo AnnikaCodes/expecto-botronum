@@ -16,7 +16,7 @@ class Module:
     """
     def __init__(self) -> None:
         self.commands = {
-            "fact": self.showSnippet, "topic": self.showSnippet, "quote": self.showSnippet,
+            "fact": self.showSnippet, "facc": self.showSnippet, "topic": self.showSnippet, "quote": self.showSnippet,
             "addfact": self.manageSnippet, "addtopic": self.manageSnippet, "addquote": self.manageSnippet,
             "deletefact": self.manageSnippet, "removefact": self.manageSnippet,
             "deletetopic": self.manageSnippet, "removetopic": self.manageSnippet,
