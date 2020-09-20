@@ -137,7 +137,9 @@ class BotRoom(psclient.Room):
             repeats = data.get('repeats')
             if not repeats or self.id not in repeats or msg not in [list(r.keys())[0] for r in repeats[self.id]]: return
             self.say(msg)
-            threading.Timer(interval * 60, runner, args=[msg, interval]).start()
+            t = threading.Timer(interval * 60, runner, args=[msg, interval])
+            t.daemon = True
+            t.start()
 
         message = list(repeat.keys())[0]
         runner(message, repeat[message])

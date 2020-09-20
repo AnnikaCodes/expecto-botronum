@@ -69,7 +69,9 @@ class Module:
         except ValueError:
             message.respond(f"{message.arguments[1]} isn't a valid duration")
             return
-        threading.Timer(duration, message.respond, args=[response]).start()
+        t = threading.Timer(duration, message.respond, args=[response])
+        t.daemon = True
+        t.start()
 
     def repeat(self, message: core.BotMessage) -> None:
         """repeat: repeats a message
