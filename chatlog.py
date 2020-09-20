@@ -57,7 +57,7 @@ class Chatlogger:
 
         for keyword in (keywords or []):
             query += " AND lower(body) LIKE '%' || ? || '%'"
-            args.append(keyword)
+            args.append(keyword.lower())
 
         query += ' AND timestamp > ? ORDER BY timestamp DESC'
         args.append(oldest)
@@ -69,8 +69,24 @@ class Chatlogger:
             if date not in results: results[date] = []
             results[date].append(f"{userid}|{timestamp}|{kind}|{username}|{body}")
 
-        print(query)
         return results
+
+    def getLinecount(self, userID: str, roomID: str, days=30) -> int:
+        """Gets a user's linecount in a room
+
+        Args:
+            userID (str): the ID of the user
+            roomID (str): the ID of the room
+            days (int, optional): the number of days of logs to search for. Defaults to 30.
+
+        Returns:
+            int: [description]
+        """
+        maxTimestamp = datetime.now().timestamp() - days * 24 * 60 * 60
+        return self.SQL.execute(
+            'SELECT count(log_id) FROM logs WHERE userid = ? AND roomid = ? AND timestamp > ?',
+            [userID, roomID, maxTimestamp]
+        ).fetchone()[0]
 
     def messageToList(self, room: Union[str, None], message: psclient.Message) -> tuple:
         """Formats a message for logging in the data format (timestamp, userid, username, kind, roomid, body)

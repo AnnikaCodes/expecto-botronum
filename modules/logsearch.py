@@ -87,6 +87,9 @@ class Module:
         if not room: return message.respond(f"Invalid room: {roomID}")
         if not message.sender.can("searchlog", room): return message.respond("Permission denied.")
 
+        count = message.connection.chatlogger.getLinecount(userID, roomID, days=days)
+        message.respond(f"The user '{userID}' had {count} lines in the room {roomID} in the past {days} days!")
+
         resultsDict: Dict[str, List[str]] = message.connection.chatlogger.search(
             roomID,
             userID=userID,
@@ -96,17 +99,12 @@ class Module:
         dayResults.sort(reverse=True)
 
 
-        count = 0
         details = []
         for result in dayResults:
             dayCount = len(resultsDict[result])
-            count += dayCount
             details.append(f"<li>{result} — <strong>{dayCount}</strong> lines</li>")
 
-        htmlBuf = f"The user <strong><code>{userID}</code></strong> had <strong>{count}</strong> lines"
-        htmlBuf += f" in the room {roomID} in the past {days} days!"
-        htmlBuf += f"<details><summary>Linecounts per day</summary><ul>{''.join(details)}</ul></details>"
-        return message.respondHTML(htmlBuf)
+        return message.respondHTML(f"<details><summary>Linecounts per day</summary><ul>{''.join(details)}</ul></details>")
 
     def topusers(self, message: core.BotMessage) -> None:
         """Gets the top users of a room
