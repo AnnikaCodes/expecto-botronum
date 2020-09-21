@@ -35,7 +35,7 @@ class Module:
             message {Message} -- the Message object that invoked the command
         """
         text = config.separator.join(message.arguments[1:])
-        for vowel in list("AaEeIiOoUu"):
+        for vowel in list("AaEeIiOoUuYy"):
             text = text.replace(vowel, f"{vowel}w{vowel}")
         message.respond(text)
 
