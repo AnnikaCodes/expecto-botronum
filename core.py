@@ -220,6 +220,7 @@ class BotConnection(psclient.PSConnection):
         """Logs in to Pokemon Showdown
         """
         super().login(challstr)
+        self.send('|/avatar 50')
         for room in config.rooms:
             BotRoom(room, self)
 
