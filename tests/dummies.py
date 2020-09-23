@@ -5,6 +5,7 @@
 from typing import Optional, List
 import psclient # type: ignore
 import core
+import chatlog
 
 # pylint: disable=super-init-not-called
 
@@ -13,7 +14,12 @@ class DummyConnection(core.BotConnection):
     """
     def __init__(self, logchat: bool = False) -> None:
         super().__init__()
-        if logchat: self.chatlogger = psclient.chatlog.Chatlogger("chatlogging-test/")
+        if logchat:
+            self.chatlogger = chatlog.Chatlogger(":memory:")
+            #try:
+            self.chatlogger.SQL.executescript(open('log-schema.sql').read())
+            # except:
+            #     pass
         self.roomList = {
             core.BotRoom("testroom", self), core.BotRoom("testroom2", self),
             core.BotRoom("testroom3", self), core.BotRoom("lobby", self)

@@ -18,7 +18,8 @@ CREATE TABLE IF NOT EXISTS logs (
 CREATE INDEX IF NOT EXISTS log_index_1 ON logs(timestamp);
 CREATE INDEX IF NOT EXISTS log_index_2 ON logs(userid, timestamp);
 CREATE INDEX IF NOT EXISTS log_index_3 ON logs(userid, roomid, timestamp);
-CREATE INDEX IF NOT EXISTS log_index_4 ON logs(roomid, timestamp);
 CREATE INDEX IF NOT EXISTS log_index_5 ON logs(type, userid, roomid, timestamp);
+
+SELECT userid as h, count(log_id) FROM logs WHERE h = userid;
 
 PRAGMA journal_mode=WAL;

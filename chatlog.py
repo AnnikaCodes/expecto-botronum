@@ -4,11 +4,11 @@
 
 import sqlite3
 from datetime import datetime
-from typing import Union
+from typing import Dict, List, Union
 import html
 import pytz
 
-import psclient
+import psclient # type: ignore
 
 TYPES_TO_LOG = ['chat', 'pm']
 
@@ -18,13 +18,13 @@ class Chatlogger:
         Args:
             path (string): the path to the log database
     """
-    def __init__(self, path):
+    def __init__(self, path: str) -> None:
         """Creates a new Chatlogger"""
 
         self.dbConnection = sqlite3.connect(path)
         self.SQL = self.dbConnection.cursor() # (acronym) pylint: disable=invalid-name
 
-    def handleMessage(self, message):
+    def handleMessage(self, message: psclient.Message) -> None:
         """Handles logging a message to chatlogs
 
         Args:
@@ -34,7 +34,10 @@ class Chatlogger:
         room = message.room.id if message.room else None
         self.insert(self.messageToList(room, message))
 
-    def search(self, roomID, userID="", oldest=0, keywords=None):
+    def search(
+        self, roomID: str, userID: str = "",
+        oldest: int = 0, keywords: Union[None, List[str]] = None
+    ) -> Dict[str, List[str]]:
         """Searches chatlogs
 
         Args:
@@ -47,9 +50,9 @@ class Chatlogger:
             dictionary: a dictionary of matched messages
             (formatted as ``{date (string): [userid|time|type|senderName|body] (list of day's results)}``)
         """
-        results = {}
+        results: Dict[str, List[str]] = {}
         query = 'SELECT * FROM logs WHERE roomid = ?'
-        args = [roomID]
+        args: List[Union[int, str]] = [roomID]
 
         if userID:
             query += ' AND userid = ?'
@@ -71,7 +74,7 @@ class Chatlogger:
 
         return results
 
-    def getLinecount(self, userID: str, roomID: str, days=30) -> int:
+    def getLinecount(self, userID: str, roomID: str, days: int = 30) -> int:
         """Gets a user's linecount in a room
 
         Args:
@@ -120,7 +123,7 @@ class Chatlogger:
         self.SQL.execute("INSERT INTO logs (timestamp, userid, username, type, roomid, body) VALUES (?, ?, ?, ?, ?, ?)", message)
         self.dbConnection.commit()
 
-    def formatData(self, data, isHTML=False):
+    def formatData(self, data: str, isHTML: bool = False) -> str:
         """Formats data to text
 
         Args:
@@ -166,5 +169,5 @@ class Chatlogger:
         if msgType == 'leave': return f"{time}{sender} left"
         return "Unparseable message"
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"Chatlogger logging to a SQLite database ({str(self.dbConnection)})"
