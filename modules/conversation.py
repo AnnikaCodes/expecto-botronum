@@ -49,6 +49,8 @@ class Module:
 
         if message.room:
             roomid = message.room.id
+            if roomid == 'trivia' and kind == 'quotes':
+                return message.respond('This command is disabled in the Trivia room.')
         elif len(message.arguments) > 1:
             roomid = psclient.toID(message.arguments[1])
         else:
