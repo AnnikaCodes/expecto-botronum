@@ -4,12 +4,13 @@
 
 import random
 import re
-import psclient # type: ignore
 from pbwrap import Pastebin # type: ignore
+import psclient # type: ignore
 
 import data
 import config
 import core
+import translations
 
 class Module:
     """Represents a module, which may contain several commands
@@ -95,10 +96,10 @@ class Module:
 
         if snippet not in snippetList[room.id] and isAddition:
             snippetList[room.id].append(snippet)
-            message.respond(f"{kind} was successfully added!")
+            message.respond(translations.translate(room, f"{kind} was successfully added!"))
         elif snippet in snippetList[room.id] and not isAddition:
             snippetList[room.id].remove(snippet)
-            message.respond(f"{kind} was successfully removed!")
+            message.respond(translations.translate(room, f"{kind} was successfully removed!"))
         else:
             return message.respond(f"That {kind} is {'already' if isAddition else 'not'} in the room's list!")
 

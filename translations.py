@@ -48,5 +48,7 @@ STRINGS: Dict[str, Dict[str, str]] = {
         "do not abuse bold formatting": "missbrauche keine Fettschrift",
         "do not abuse capital letters": "missbrauche keine Großschrift",
         "do not flood the chat": "betreibe kein Chatflooding",
+        "Quote was successfully added!": "Zitat wurde erfolgreich hinzugefügt!",
+        "Quote was successfully removed!": "Zitat wurde erfolgreich gelöscht!",
     }
 }
