@@ -275,7 +275,7 @@ class Automod:
             return self.runPunish(message, translate(message.room, "do not abuse capital letters"))
 
         # Automatically moderate for flooding
-        if message.room.moderation.get('flooding') and self.flooders[message.room.id][1] > 3:
+        if message.room.moderation.get('flooding') and self.flooders[message.room.id][1] > 4:
             if not self.points[message.room.id].get(message.sender.id):
                 self.points[message.room.id][message.sender.id] = 0
             self.points[message.room.id][message.sender.id] += 1
