@@ -23,7 +23,7 @@ class Module:
     """
     def __init__(self) -> None:
         self.commands = {
-            "logsearch": self.logsearch, "searchlogs": self.logsearch,
+            "logsearch": self.logsearch, "searchlogs": self.logsearch, "sl": self.logsearch,
             "linecount": self.linecount, "topusers": self.topusers
         }
 
@@ -125,6 +125,7 @@ class Module:
         if not message.connection.chatlogger: return message.respond("There is currently no chatlogger loaded.")
         if not room: return message.respond(f"Invalid room: {roomID}")
         if not message.sender.can("searchlog", room): return message.respond("Permission denied.")
+        message.respond("Please wait; fetching userstats...")
 
         resultsDict: Dict[str, List[str]] = message.connection.chatlogger.search(
             roomID,
