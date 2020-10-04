@@ -4,7 +4,8 @@
 import importlib
 import sys
 import subprocess
-import re
+# disabled because I like using regex in -eval
+import re # pylint: disable=unused-import
 import pathlib
 from typing import Dict, Any
 
