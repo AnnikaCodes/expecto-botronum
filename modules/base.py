@@ -2,6 +2,7 @@
     contains the base module
     by Annika"""
 
+import re
 import threading
 from typing import List, Dict
 
@@ -17,7 +18,8 @@ class Module:
             "ping": self.ping, "owo": self.owo, "uwu": self.uwu, "timer": self.timer,
             "help": self.help, "commands": self.help, "guide": self.help,
             "repeat": self.repeat, "addrepeat": self.repeat, "rmrpt": self.removeRepeat, "removerepeat": self.removeRepeat,
-            "listrepeats": self.listRepeats, "repeatlist": self.listRepeats
+            "listrepeats": self.listRepeats, "repeatlist": self.listRepeats,
+            "audio": self.audio, "music": self.audio,
         }
 
     def ping(self, message: core.BotMessage) -> None:
@@ -157,6 +159,22 @@ class Module:
         print(htmlBuf)
         return message.respondHTML(htmlBuf)
 
+    def audio(self, message: core.BotMessage) -> None:
+        """audio: displays audio in the room
+
+        Arguments:
+            message {Message} -- the Message object that invoked the command
+        """
+        if len(message.arguments) < 2:
+            return message.respond(f"Usage: ``{ config.commandCharacter}audio <URL to audio file>``.")
+
+        url = message.arguments[1].strip().lower()
+        if not re.match(r'^https?:\/\/(.*?)\.[a-z]{2,}/(.*?)\.(mp[34]|wav|ogg)$', url):
+            return message.respond(
+                "You must specify a valid URL beginning with ``http://`` or ``https://``; the URL must refer to an audio file."
+            )
+
+        return message.respondHTML(f'<audio controls src="{url}"></audio>')
 
     def help(self, message: core.BotMessage) -> None:
         """Help
