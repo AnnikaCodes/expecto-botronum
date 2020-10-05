@@ -18,3 +18,9 @@ data.json
 # Private code
 modules/private/*
 tests/modules/private/*
+
+# Rust artifacts
+debug/
+target/
+Cargo.lock
+**/*.rs.bk
