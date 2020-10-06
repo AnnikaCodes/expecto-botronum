@@ -2,9 +2,6 @@
     handles searching chat logs
     by Annika"""
 
-## TODO: Convert this to a database
-## SQLite? Postgres? idk, but flat files suck
-
 from typing import Dict, List
 import html
 from datetime import datetime
@@ -50,12 +47,12 @@ class Module:
         summary = f"Chatlogs in {html.escape(roomID)} from {html.escape(userID) if userID else 'any user'}"
         if keyword: summary += f" matching the keyword <code>{html.escape(keyword)}</code>"
 
-        htmlBuf = f"<details><summary>{summary}</summary>"
+        html = [f"<details><summary>{summary}</summary>"]
         for day in days:
             daySummary = f"{day} ({len(resultsDict[day])} match{'es' if len(resultsDict[day]) != 1 else ''})"
-            attemptedBuf = f'<details style="margin-left: 5px;"><summary>{daySummary}</summary><div style="margin-left: 10px;">'
+            html.append(f'<details style="margin-left: 5px;"><summary>{daySummary}</summary><div style="margin-left: 10px;">')
             attemptedBuf += "<br />".join([
-                message.connection.chatlogger.formatData(result, isHTML=True) for result in resultsDict[day]
+                message.connection.chatlogger.formatData(result, isHTML=True)
             ])
             attemptedBuf += "</div></details>"
             if len(htmlBuf) + len(attemptedBuf) < MAX_BUF_LEN:
