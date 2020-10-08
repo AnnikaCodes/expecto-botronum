@@ -4,6 +4,7 @@
 /// Written by Annika
 
 use std::time::{SystemTime, UNIX_EPOCH};
+use std::collections::HashMap;
 
 use chrono::prelude::NaiveDateTime;
 use rusqlite::{Connection, params};
@@ -113,7 +114,6 @@ pub fn search(
 
     let mut statement = conn.prepare(&query_str)?;
 
-    let mut messages_so_far = 0;
     // See https://github.com/hoodie/concatenation_benchmarks-rs for information on
     // string concatenation performance in Rust.
     // TL;DR .join()ing arrays or using push_str with a set-capacity String are best
@@ -169,7 +169,9 @@ pub fn search(
             current_day = mdy;
         }
     }
-    html.push_str("</div></details>");
+    if !current_day.is_empty() {
+        html.push_str("</div></details>");
+    }
     Ok(html)
 }
 
@@ -179,6 +181,22 @@ pub fn get_linecount(conn: &Connection, user_id: &str, room_id: &str, days: Opti
     let max_timestamp = unix_time() - (days * 24 * 60 * 60) as i64;
     let mut statement = conn.prepare("SELECT count(log_id) FROM logs WHERE userid = ? AND roomid = ? AND timestamp > ?")?;
     statement.query_row(params![user_id, room_id, max_timestamp], |row| row.get(0))
+}
+
+/// Gets the users with the highest linecount in a room
+/// Returns a Result<HashMap<user ID, linecount>>
+pub fn get_topusers(
+    conn: &Connection, room_id: &str, days: Option<i32>, num_users: Option<i32>
+) -> Result<HashMap<String, i32>, rusqlite::Error> {
+    Ok(HashMap::new())
+}
+
+/// Gets the users with the highest linecount in a room and formats them as HTML
+/// Returns a Result<HashMap<user ID, linecount>>
+pub fn get_topusers_html(
+    conn: &Connection, room_id: &str, days: Option<i32>, num_users: Option<i32>
+) -> Result<String, rusqlite::Error> {
+    Ok("".to_owned())
 }
 
 #[cfg(test)]
@@ -212,6 +230,39 @@ mod tests {
         connection
     }
 
+    fn add_test_data(conn: &Connection, current_time: i32) -> Result<(), rusqlite::Error> {
+        log_message(conn, "test", LogEntry {
+            body: String::from("Test Message One"),
+            kind: String::from("chat"),
+            sender_id: String::from("annika"),
+            sender_name: String::from("@Annika"),
+            time: current_time,
+        })?;
+        log_message(conn, "test", LogEntry {
+            body: String::from("Test Message Two"),
+            kind: String::from("chat"),
+            sender_id: String::from("annika"),
+            sender_name: String::from("@Annika"),
+            time: current_time,
+        })?;
+        log_message(conn, "test", LogEntry {
+            body: String::from("Test Message Three"),
+            kind: String::from("chat"),
+            sender_id: String::from("annika"),
+            sender_name: String::from("@Annika"),
+            time: current_time - 15 * 30 * 60 * 60, // 15 days ago
+        })?;
+        log_message(conn, "test", LogEntry {
+            body: String::from("Test Message Four"),
+            kind: String::from("chat"),
+            sender_id: String::from("heartofetheria"),
+            sender_name: String::from("Heart of Etheria"),
+            time: current_time - 15 * 30 * 60 * 60, // 15 days ago
+        })?;
+
+        Ok(())
+    }
+
     #[test]
     fn insertion_test() -> Result<(), rusqlite::Error> {
         let conn = get_connection();
@@ -240,68 +291,87 @@ mod tests {
     #[test]
     fn search_test() -> Result<(), rusqlite::Error> {
         let conn = get_connection();
-
-        log_message(&conn, "test", LogEntry {
-            body: String::from("Test Message One"),
-            kind: String::from("chat"),
-            sender_id: String::from("annika"),
-            sender_name: String::from("@Annika"),
-            time: 1,
-        })?;
-        log_message(&conn, "test", LogEntry {
-            body: String::from("Test Message Two"),
-            kind: String::from("chat"),
-            sender_id: String::from("annika"),
-            sender_name: String::from("@Annika"),
-            time: 1,
-        })?;
-        log_message(&conn, "someotherroom", LogEntry {
-            body: String::from("Test One"),
-            kind: String::from("chat"),
-            sender_id: String::from("heartofetheria"),
-            sender_name: String::from("Heart of Etheria"),
-            time: 100,
-        })?;
-        log_message(&conn, "test", LogEntry {
-            body: String::from("Test Two"),
-            kind: String::from("chat"),
-            sender_id: String::from("heartofetheria"),
-            sender_name: String::from("Heart of Etheria"),
-            time: 100,
-        })?;
-
-        let mut statement = conn.prepare("SELECT * FROM logs").unwrap();
-        let mut rows = statement.query(rusqlite::NO_PARAMS).unwrap();
-        while let Some(row) = rows.next()? {
-            println!("{:?} {:?}", row.get::<usize, String>(2)?, row.get::<usize, String>(5)?);
-        };
+        add_test_data(&conn, 1602131140)?;
 
         // Check that it can search by user ID and format regular users
-        let mut results = search(&conn, "test", Some("heartofetheria"), Some(0), None, Some(1000))?;
-        assert_eq!(results, "<details style=\"margin-left: 5px;\"><summary><b> 1-Jan-1970</b></summary><div style=\"margin-left: 10px;\"><small>[00:01:40] </small><b>Heart of Etheria</b>: Test Two</div></details>");
+        let mut results = search(&conn, "test", Some("heartofetheria"), None, None, None)?;
+        // 19 Sep = 15 days ago as per add_test_data()
+        assert_eq!(results, "<details style=\"margin-left: 5px;\"><summary><b>19-Sep-2020</b></summary><div style=\"margin-left: 10px;\"><small>[10:25:40] </small><b>Heart of Etheria</b>: Test Message Four</div></details>");
 
         // Check that it can format auth correctly
-        results = search(&conn, "test", Some("annika"), Some(0), None, Some(1000))?;
-        assert_eq!(results, "<details style=\"margin-left: 5px;\"><summary><b> 1-Jan-1970</b></summary><div style=\"margin-left: 10px;\"><small>[00:00:01] </small><small>@</small><b>Annika</b>: Test Message One<small>[00:00:01] </small><small>@</small><b>Annika</b>: Test Message Two</div></details>");
+        results = search(&conn, "test", Some("annika"), Some(0), None, Some(1))?;
+        assert_eq!(results, "<details style=\"margin-left: 5px;\"><summary><b> 8-Oct-2020</b></summary><div style=\"margin-left: 10px;\"><small>[04:25:40] </small><small>@</small><b>Annika</b>: Test Message One</div></details>");
 
         // Check that it can search by time
-        results = search(&conn, "test", None, Some(50), None, Some(1000))?;
-        println!("{}", results);
-        assert_eq!(results.contains("Test Two"), true);
-        assert_eq!(results.contains("Test Message One"), false);
-        assert_eq!(results.contains("Test Message Two"), false);
+        results = search(&conn, "test", None, Some(1602131140 - 100), None, Some(1000))?;
+        assert_eq!(results.contains("Test Message One"), true);
+        assert_eq!(results.contains("Test Message Two"), true);
+        assert_eq!(results.contains("Test Message Three"), false);
+        assert_eq!(results.contains("Test Message Four"), false);
 
         // Check that it can limit the number of messages returned
         results = search(&conn, "test", None, None, None, Some(1))?;
-        assert_eq!(results.contains("Test Two"), true);
-        assert_eq!(results.contains("Test Message One"), false);
+        assert_eq!(results.contains("Test Message One"), true);
         assert_eq!(results.contains("Test Message Two"), false);
+        assert_eq!(results.contains("Test Message Three"), false);
+        assert_eq!(results.contains("Test Message Four"), false);
 
         // Check that it can search by a (case-insensitive) keyword
         results = search(&conn, "test", None, None, Some(vec!["tWo"]), None)?;
-        assert_eq!(results.contains("Test Two"), true);
         assert_eq!(results.contains("Test Message One"), false);
         assert_eq!(results.contains("Test Message Two"), true);
+        assert_eq!(results.contains("Test Message Three"), false);
+        assert_eq!(results.contains("Test Message Four"), false);
+
+        Ok(())
+    }
+
+    #[test]
+    fn linecount_test() -> Result<(), rusqlite::Error> {
+        let conn = get_connection();
+        add_test_data(&conn, unix_time() as i32)?;
+
+        // Test that it works
+        assert_eq!(get_linecount(&conn, "annika", "test", None), Ok(3));
+        assert_eq!(get_linecount(&conn, "heartofetheria", "test", None), Ok(1));
+
+        // Test that it limits the number of days
+        assert_eq!(get_linecount(&conn, "annika", "test", Some(10)), Ok(2));
+        assert_eq!(get_linecount(&conn, "heartofetheria", "test", Some(10)), Ok(0));
+
+        Ok(())
+    }
+
+    #[test]
+    fn topusers_test() -> Result<(), rusqlite::Error> {
+        let conn = get_connection();
+        add_test_data(&conn, unix_time() as i32)?;
+
+        // test that it works
+        let mut topusers = get_topusers(&conn, "test", None, None)?;
+        assert_eq!(topusers.get("annika"), Some(&3));
+        assert_eq!(topusers.get("heartofetheria"), Some(&1));
+
+        // test that it limits by day
+        topusers = get_topusers(&conn, "test", Some(1), None)?;
+        assert_eq!(topusers.get("annika"), Some(&2));
+        assert_eq!(topusers.get("heartofetheria"), None);
+
+        // test that it limits by number of users
+        topusers = get_topusers(&conn, "test", None, Some(1))?;
+        assert_eq!(topusers.get("annika"), Some(&3));
+        assert_eq!(topusers.get("heartofetheria"), None);
+
+        Ok(())
+    }
+
+    #[test]
+    fn topusers_html_test() -> Result<(), rusqlite::Error> {
+        let conn = get_connection();
+        add_test_data(&conn, unix_time() as i32)?;
+
+        let html = get_topusers_html(&conn, "test", None, None)?;
+        assert_eq!(html, r#"<details><summary>Top users in the room test</summary><ul><li><strong>annika</strong> — 3 lines</li><li><strong>heartofetheria</strong> — 1 line</li></ul></details>"#);
 
         Ok(())
     }
