@@ -7,8 +7,10 @@ use std::time::{SystemTime, UNIX_EPOCH};
 use std::collections::HashMap;
 
 use chrono::prelude::NaiveDateTime;
+use fallible_iterator::FallibleIterator;
 use rusqlite::{Connection, params};
 
+const SECONDS_PER_DAY: i32 = 24 * 60 * 60;
 
 #[derive(Debug)]
 enum SQLParameter {
@@ -178,25 +180,79 @@ pub fn search(
 pub fn get_linecount(conn: &Connection, user_id: &str, room_id: &str, days: Option<i32>) -> Result<i32, rusqlite::Error> {
     let days = days.unwrap_or(30);
 
-    let max_timestamp = unix_time() - (days * 24 * 60 * 60) as i64;
+    let max_timestamp = unix_time() - (days * SECONDS_PER_DAY) as i64;
     let mut statement = conn.prepare("SELECT count(log_id) FROM logs WHERE userid = ? AND roomid = ? AND timestamp > ?")?;
     statement.query_row(params![user_id, room_id, max_timestamp], |row| row.get(0))
 }
 
 /// Gets the users with the highest linecount in a room
 /// Returns a Result<HashMap<user ID, linecount>>
+///
+/// * num_users - number of users to fetch, defaults to 30
+/// * days - number of days to look at, defaults to 30
 pub fn get_topusers(
     conn: &Connection, room_id: &str, days: Option<i32>, num_users: Option<i32>
 ) -> Result<HashMap<String, i32>, rusqlite::Error> {
-    Ok(HashMap::new())
+    let mut statement = conn.prepare(&[
+        // I love SQL
+        "SELECT userid, count((SELECT body FROM logs WHERE roomid = ? AND userid = userid)) as count FROM logs",
+        " WHERE roomid = ? AND timestamp > ? GROUP BY userid ORDER BY count DESC LIMIT ?",
+    ].join(""))?;
+
+    let mut rows = statement.query(params!(
+        room_id,
+        room_id,
+        unix_time() as i32 - days.unwrap_or(30) * SECONDS_PER_DAY,
+        num_users.unwrap_or(30),
+    ))?;
+
+    let mut results = HashMap::<String, i32>::new();
+    while let Some(row) = rows.next()? {
+        let userid: String = row.get(0)?;
+        let linecount: i32 = row.get(1)?;
+        println!("{} {}", userid, linecount);
+
+        results.insert(userid, linecount);
+    };
+    Ok(results)
 }
 
 /// Gets the users with the highest linecount in a room and formats them as HTML
 /// Returns a Result<HashMap<user ID, linecount>>
+///
+/// * num_users - number of users to fetch, defaults to 30
+/// * days - number of days to look at, defaults to 30
 pub fn get_topusers_html(
     conn: &Connection, room_id: &str, days: Option<i32>, num_users: Option<i32>
 ) -> Result<String, rusqlite::Error> {
-    Ok("".to_owned())
+    let mut statement = conn.prepare(&[
+        // I love SQL
+        "SELECT userid, count((SELECT body FROM logs WHERE roomid = ? AND userid = userid)) as count FROM logs",
+        " WHERE roomid = ? AND timestamp > ? GROUP BY userid ORDER BY count DESC LIMIT ?",
+    ].join(""))?;
+
+    let rows = statement.query(params!(
+        room_id,
+        room_id,
+        unix_time() as i32 - days.unwrap_or(30) * SECONDS_PER_DAY,
+        num_users.unwrap_or(30),
+    ))?;
+
+    Ok([
+        "<details><summary>Top users in the room ",
+        room_id,
+        "</summary><ul>",
+        &rows.map(|row| {
+            Ok([
+                "<li><strong>",
+                &row.get::<usize, String>(0)?,
+                "</strong> — ",
+                &row.get::<usize, i32>(1)?.to_string(),
+                " lines</li>",
+            ].join(""))
+        }).fold(String::with_capacity(1000), |accumulator, string| Ok(accumulator + &string))?,
+        "</ul></details>",
+    ].join(""))
 }
 
 #[cfg(test)]
@@ -371,7 +427,9 @@ mod tests {
         add_test_data(&conn, unix_time() as i32)?;
 
         let html = get_topusers_html(&conn, "test", None, None)?;
-        assert_eq!(html, r#"<details><summary>Top users in the room test</summary><ul><li><strong>annika</strong> — 3 lines</li><li><strong>heartofetheria</strong> — 1 line</li></ul></details>"#);
+        println!("{}", html);
+        println!(r#"<details><summary>Top users in the room test</summary><ul><li><strong>annika</strong> — 3 lines</li><li><strong>heartofetheria</strong> — 1 lines</li></ul></details>"#);
+        assert_eq!(html, r#"<details><summary>Top users in the room test</summary><ul><li><strong>annika</strong> — 3 lines</li><li><strong>heartofetheria</strong> — 1 lines</li></ul></details>"#);
 
         Ok(())
     }
