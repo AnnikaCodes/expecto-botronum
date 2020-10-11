@@ -24,4 +24,4 @@ jobs:
     - name: Run test script
       run: |
         cp config-example.json config.json
-        bash test.sh
+        bash scripts/test.sh

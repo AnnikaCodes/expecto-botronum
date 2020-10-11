@@ -158,7 +158,8 @@ class Module:
         if roomid not in self.minigamePoints.keys(): return message.respond("There are no scores.")
 
         points = self.minigamePoints[roomid]
-        sortedUsers = sorted(points, key=points.get, reverse=True)
+        # TODO: investigate mypy errors
+        sortedUsers = sorted(points, key=points.get, reverse=True) # type: ignore
         formattedPoints = ", ".join([f"{key} (**{points[key]}**)" for key in sortedUsers])
         return message.respond(f"**Scores**: {formattedPoints}" if formattedPoints else "There are no scores.")
 

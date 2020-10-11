@@ -1,0 +1,22 @@
+[package]
+name = "expecto-botronum"
+version = "0.1.0"
+authors = ["Annika <annika0uwu@gmail.com>"]
+edition = "2018"
+
+[lib]
+name = "rust_chatlogger"
+crate-type = ["cdylib"]
+
+[dependencies]
+rusqlite = "0.24.0"
+chrono = "0.4.19"
+html-escape = "0.2.6"
+fallible-iterator = "0.2.0"
+
+[dependencies.pyo3]
+version = "0.11.1"
+
+[features]
+extension-module = ["pyo3/extension-module"]
+default = ["extension-module"]
