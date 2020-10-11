@@ -10,7 +10,7 @@ use chrono::prelude::NaiveDateTime;
 use fallible_iterator::FallibleIterator;
 use rusqlite::{Connection, params};
 
-const SECONDS_PER_DAY: i32 = 24 * 60 * 60;
+pub const SECONDS_PER_DAY: i32 = 24 * 60 * 60;
 
 #[derive(Debug)]
 enum SQLParameter {
@@ -32,13 +32,13 @@ impl rusqlite::ToSql for SQLParameter {
 /// Rustic version of the "userid|time|kind|senderName|body" log format
 #[derive(Debug)]
 pub struct LogEntry {
-    time: i32,
+    pub time: i32,
     /// "chat" or "pm"
-    kind: String,
+    pub kind: String,
     /// A Pokémon Showdown ID. See the PS source code for what this means.
-    sender_id: String,
-    sender_name: String,
-    body: String,
+    pub sender_id: String,
+    pub sender_name: String,
+    pub body: String,
 }
 
 /// Gets the number of seconds since the UNIX epoch as an i64
@@ -164,7 +164,8 @@ pub fn search(
             "] </small>",
             &user,
             ": ",
-            &(row.get(6).unwrap_or_else(|_| String::from("")) as String)
+            &html_escape::encode_text(&(row.get(6).unwrap_or_else(|_| String::from("")) as String)),
+            "<br>"
         ].join(""));
 
         if current_day != mdy {
@@ -177,13 +178,56 @@ pub fn search(
     Ok(html)
 }
 
-pub fn get_linecount(conn: &Connection, user_id: &str, room_id: &str, days: Option<i32>) -> Result<i32, rusqlite::Error> {
-    let days = days.unwrap_or(30);
+/// Gets a user's linecount
+pub fn get_linecount(conn: &Connection, user_id: &str, room_id: &str, min_time: i32, max_time: i32) -> Result<i32, rusqlite::Error> {
 
-    let max_timestamp = unix_time() - (days * SECONDS_PER_DAY) as i64;
-    let mut statement = conn.prepare("SELECT count(log_id) FROM logs WHERE userid = ? AND roomid = ? AND timestamp > ?")?;
-    statement.query_row(params![user_id, room_id, max_timestamp], |row| row.get(0))
+    let mut statement = conn.prepare("SELECT count(log_id) FROM logs WHERE userid = ? AND roomid = ? AND timestamp > ? AND timestamp < ?")?;
+    statement.query_row(params![user_id, room_id, min_time, max_time], |row| row.get(0))
 }
+
+/// Gets a user's linecount and HTML formats each day
+pub fn get_linecount_html(
+    conn: &Connection, user_id: &str, room_id: &str, days: Option<i32>
+) -> Result<String, rusqlite::Error> {
+    let days = days.unwrap_or(30);
+    let mut html = String::with_capacity(100 + 40 * days as usize);
+
+    html.push_str(&[
+        "The user '",
+        user_id,
+        "' had ",
+        &get_linecount(conn, user_id, room_id, unix_time() as i32 - (days) * SECONDS_PER_DAY, unix_time() as i32)?.to_string(),
+        " lines in the room ",
+        room_id,
+        " in the past ",
+        &days.to_string(),
+        " days.<hr><details><summary>Linecounts per day</summary><ul>"
+    ].join(""));
+
+    let mut current_day = 0;
+    while current_day < days {
+        let min = unix_time() as i32 - (current_day + 1) * SECONDS_PER_DAY ;
+        let max = unix_time() as i32 - (current_day * SECONDS_PER_DAY) ;
+
+        current_day += 1;
+        let linecount_str = &get_linecount(conn, user_id, room_id, min, max)?.to_string();
+        if linecount_str == "0" {
+            continue;
+        }
+
+        let date = NaiveDateTime::from_timestamp(min as i64, 0);
+        html.push_str(&[
+            "<li><b>",
+            &html_escape::encode_text(&date.format("%v").to_string()),
+            "</b> — ",
+            linecount_str,
+            " lines</li>"
+        ].join(""));
+    }
+    html.push_str("</ul></details>");
+    Ok(html)
+}
+
 
 /// Gets the users with the highest linecount in a room
 /// Returns a Result<HashMap<user ID, linecount>>
@@ -225,6 +269,9 @@ pub fn get_topusers(
 pub fn get_topusers_html(
     conn: &Connection, room_id: &str, days: Option<i32>, num_users: Option<i32>
 ) -> Result<String, rusqlite::Error> {
+    let num_users = num_users.unwrap_or(30);
+    let days = days.unwrap_or(30);
+
     let mut statement = conn.prepare(&[
         // I love SQL
         "SELECT userid, count((SELECT body FROM logs WHERE roomid = ? AND userid = userid)) as count FROM logs",
@@ -234,13 +281,18 @@ pub fn get_topusers_html(
     let rows = statement.query(params!(
         room_id,
         room_id,
-        unix_time() as i32 - days.unwrap_or(30) * SECONDS_PER_DAY,
-        num_users.unwrap_or(30),
+        unix_time() as i32 - days * SECONDS_PER_DAY,
+        num_users,
     ))?;
 
     Ok([
-        "<details><summary>Top users in the room ",
+        "<details><summary>Top ",
+        &num_users.to_string(),
+        " users in the room ",
         room_id,
+        " in the past ",
+        &days.to_string(),
+        " days",
         "</summary><ul>",
         &rows.map(|row| {
             Ok([
@@ -352,11 +404,11 @@ mod tests {
         // Check that it can search by user ID and format regular users
         let mut results = search(&conn, "test", Some("heartofetheria"), None, None, None)?;
         // 19 Sep = 15 days ago as per add_test_data()
-        assert_eq!(results, "<details style=\"margin-left: 5px;\"><summary><b>19-Sep-2020</b></summary><div style=\"margin-left: 10px;\"><small>[10:25:40] </small><b>Heart of Etheria</b>: Test Message Four</div></details>");
+        assert_eq!(results, "<details style=\"margin-left: 5px;\"><summary><b>19-Sep-2020</b></summary><div style=\"margin-left: 10px;\"><small>[10:25:40] </small><b>Heart of Etheria</b>: Test Message Four<br></div></details>");
 
         // Check that it can format auth correctly
         results = search(&conn, "test", Some("annika"), Some(0), None, Some(1))?;
-        assert_eq!(results, "<details style=\"margin-left: 5px;\"><summary><b> 8-Oct-2020</b></summary><div style=\"margin-left: 10px;\"><small>[04:25:40] </small><small>@</small><b>Annika</b>: Test Message One</div></details>");
+        assert_eq!(results, "<details style=\"margin-left: 5px;\"><summary><b> 8-Oct-2020</b></summary><div style=\"margin-left: 10px;\"><small>[04:25:40] </small><small>@</small><b>Annika</b>: Test Message One<br></div></details>");
 
         // Check that it can search by time
         results = search(&conn, "test", None, Some(1602131140 - 100), None, Some(1000))?;
@@ -388,12 +440,25 @@ mod tests {
         add_test_data(&conn, unix_time() as i32)?;
 
         // Test that it works
-        assert_eq!(get_linecount(&conn, "annika", "test", None), Ok(3));
-        assert_eq!(get_linecount(&conn, "heartofetheria", "test", None), Ok(1));
+        assert_eq!(get_linecount(&conn, "annika", "test", 0, unix_time() as i32 + 1), Ok(3));
+        assert_eq!(get_linecount(&conn, "heartofetheria", "test", 0, unix_time() as i32 + 1), Ok(1));
 
         // Test that it limits the number of days
-        assert_eq!(get_linecount(&conn, "annika", "test", Some(10)), Ok(2));
-        assert_eq!(get_linecount(&conn, "heartofetheria", "test", Some(10)), Ok(0));
+        assert_eq!(get_linecount(&conn, "annika", "test", unix_time() as i32 - (5 * SECONDS_PER_DAY), unix_time() as i32 + 1), Ok(2));
+        assert_eq!(get_linecount(&conn, "heartofetheria", "test", unix_time() as i32 - (5 * SECONDS_PER_DAY), unix_time() as i32 + 1), Ok(0));
+
+        Ok(())
+    }
+
+    #[test]
+    fn linecount_html_test() -> Result<(), rusqlite::Error> {
+        let conn = get_connection();
+        add_test_data(&conn, 1602131140)?;
+
+        assert_eq!(
+            get_linecount_html(&conn, "annika", "test", None)?,
+            r#"The user 'annika' had 3 lines in the room test in the past 30 days.<hr><details><summary>Linecounts per day</summary><ul><li><b> 7-Oct-2020</b> — 2 lines</li><li><b>18-Sep-2020</b> — 1 lines</li></ul></details>"#
+        );
 
         Ok(())
     }
@@ -427,10 +492,9 @@ mod tests {
         add_test_data(&conn, unix_time() as i32)?;
 
         let html = get_topusers_html(&conn, "test", None, None)?;
-        println!("{}", html);
-        println!(r#"<details><summary>Top users in the room test</summary><ul><li><strong>annika</strong> — 3 lines</li><li><strong>heartofetheria</strong> — 1 lines</li></ul></details>"#);
-        assert_eq!(html, r#"<details><summary>Top users in the room test</summary><ul><li><strong>annika</strong> — 3 lines</li><li><strong>heartofetheria</strong> — 1 lines</li></ul></details>"#);
+        assert_eq!(html, r#"<details><summary>Top 30 users in the room test in the past 30 days</summary><ul><li><strong>annika</strong> — 3 lines</li><li><strong>heartofetheria</strong> — 1 lines</li></ul></details>"#);
 
         Ok(())
     }
+
 }

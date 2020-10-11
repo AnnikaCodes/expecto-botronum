@@ -14,7 +14,7 @@ from typing import Dict, Tuple, List, Any
 import psclient # type: ignore
 
 import config
-import chatlog
+import rust_chatlogger # type: ignore
 import data
 from translations import translate
 
@@ -200,11 +200,12 @@ class BotConnection(psclient.PSConnection):
             config.password,
             onParsedMessage=handleMessage,
             url=config.websocketURL,
-            chatlogger=chatlog.Chatlogger("logs.db") if config.logchat else None,
             loglevel=config.loglevel
         )
         self.commands: Dict[str, Any] = {}
         self.modules: set = set()
+        # We have our own chatlogger that takes its own arguments.
+        self.rustChatlogger = rust_chatlogger.Chatlogger("logs.db") if config.logchat else None
         self.this: BotUser = BotUser(self.this.name, self)
 
         for module in config.modules:
@@ -316,10 +317,20 @@ def handleMessage(connection: BotConnection, message: psclient.Message) -> None:
     if message.type == 'join':
         # Handle joinphrases
         message.room.runJoinphrase(message.sender.id)
-    elif message.type in ['chat', 'pm'] and message.body[0] == config.commandCharacter:
-        potentialCommand: str = message.body.split(' ')[0].strip(config.commandCharacter).lower()
-        if potentialCommand in connection.commands:
-            connection.commands[potentialCommand](BotMessage(message.raw, connection)) # Invoke the command
+    elif message.type in ['chat', 'pm']:
+        if connection.rustChatlogger:
+            connection.rustChatlogger.handle_message(
+                message.type, # `kind` in Rust
+                message.room.id if message.room else None, # `room_id` in Rust
+                int(message.time) if message.time else None, # `timestamp` in Rust
+                message.sender.id, # `sender_id` in Rust
+                message.senderName, # `sender_name` in Rust
+                message.body, # `body` in Rust
+            )
+        if message.body[0] == config.commandCharacter:
+            potentialCommand: str = message.body.split(' ')[0].strip(config.commandCharacter).lower()
+            if potentialCommand in connection.commands:
+                connection.commands[potentialCommand](BotMessage(message.raw, connection)) # Invoke the command
     elif message.type == 'pm' and message.sender.id != connection.this.id:
         BotMessage(message.raw, connection).respond(
             "Hi! I'm a computer program written by Annika, not a real person. " +
