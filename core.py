@@ -12,9 +12,9 @@ import threading
 from typing import Dict, Tuple, List, Any
 
 import psclient # type: ignore
+import rust_chatlogger # type: ignore
 
 import config
-import rust_chatlogger # type: ignore
 import data
 from translations import translate
 
