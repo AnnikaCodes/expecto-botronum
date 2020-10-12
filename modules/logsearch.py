@@ -7,7 +7,7 @@ import psclient # type: ignore
 import config
 import core
 
-MAX_MESSAGES = 5000
+MAX_MESSAGES = 800
 TOPUSERS = 50
 
 class Module:
