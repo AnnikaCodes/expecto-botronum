@@ -453,11 +453,11 @@ mod tests {
     #[test]
     fn linecount_html_test() -> Result<(), rusqlite::Error> {
         let conn = get_connection();
-        add_test_data(&conn, 1602131140)?;
+        add_test_data(&conn, 1602121000)?;
 
         assert_eq!(
             get_linecount_html(&conn, "annika", "test", None)?,
-            r#"The user 'annika' had 3 lines in the room test in the past 30 days.<hr><details><summary>Linecounts per day</summary><ul><li><b> 7-Oct-2020</b> — 2 lines</li><li><b>18-Sep-2020</b> — 1 lines</li></ul></details>"#
+            r#"The user 'annika' had 3 lines in the room test in the past 30 days.<hr><details><summary>Linecounts per day</summary><ul><li><b> 8-Oct-2020</b> — 2 lines</li><li><b>19-Sep-2020</b> — 1 lines</li></ul></details>"#
         );
 
         Ok(())
