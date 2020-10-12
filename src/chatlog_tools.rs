@@ -1,4 +1,4 @@
-/// src/chatlogger.rs
+/// src/chatlog_tools.rs
 /// Contains functions to manipulate Pokémon Showdown chatlogs stored in SQLite
 ///
 /// Written by Annika
@@ -308,9 +308,10 @@ pub fn get_topusers_html(
 }
 
 #[cfg(test)]
-mod tests {
+pub mod tests {
     use super::*;
-    fn get_connection() -> Connection {
+
+    pub fn get_connection() -> Connection {
         let connection = Connection::open_in_memory().unwrap();
         connection.execute(
             "CREATE TABLE IF NOT EXISTS logs (
@@ -453,7 +454,7 @@ mod tests {
     #[test]
     fn linecount_html_test() -> Result<(), rusqlite::Error> {
         let conn = get_connection();
-        add_test_data(&conn, 1602121000)?;
+        add_test_data(&conn, 1602123550)?;
 
         assert_eq!(
             get_linecount_html(&conn, "annika", "test", None)?,
@@ -496,5 +497,5 @@ mod tests {
 
         Ok(())
     }
-
 }
+

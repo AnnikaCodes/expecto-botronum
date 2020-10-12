@@ -8,7 +8,7 @@ use pyo3::prelude::*;
 use pyo3::create_exception;
 use rusqlite::*;
 
-mod chatlog_tools;
+pub mod chatlog_tools;
 
 create_exception!(rust_chatlog, RustError, pyo3::exceptions::Exception);
 
