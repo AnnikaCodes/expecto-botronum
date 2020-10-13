@@ -159,7 +159,7 @@ class Module:
 
         points = self.minigamePoints[roomid]
         # TODO: investigate mypy errors
-        sortedUsers = sorted(points, key=points.get, reverse=True)
+        sortedUsers = sorted(points, key=points.get, reverse=True) # type: ignore
         formattedPoints = ", ".join([f"{key} (**{points[key]}**)" for key in sortedUsers])
         return message.respond(f"**Scores**: {formattedPoints}" if formattedPoints else "There are no scores.")
 
