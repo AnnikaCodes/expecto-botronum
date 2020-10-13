@@ -30,7 +30,7 @@ then
 fi
 
 echo -e "\033[0;32mRunning Python tests...\033[0m"
-if ! pytest tests/;
+if ! py.test --cov-report=xml --cov=expecto-botronum tests/;
 then
     echo -e "\033[0;31mPython tests failed!\033[0m"
     exit 1
