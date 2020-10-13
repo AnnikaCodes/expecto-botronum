@@ -1,5 +1,5 @@
 # Expecto Botronum v3
-### ![tests](https://github.com/AnnikaCodes/expecto-botronum/workflows/tests/badge.svg)
+### ![tests](https://github.com/AnnikaCodes/expecto-botronum/workflows/tests/badge.svg) [![codecov](https://codecov.io/gh/AnnikaCodes/expecto-botronum/branch/master/graph/badge.svg)](https://codecov.io/gh/AnnikaCodes/expecto-botronum)
 Expecto Botronum is a Pokémon Showdown bot written by Annika for the [Magic & Mayhem room](psim.us/mm).
 
 ## Commands
@@ -61,7 +61,7 @@ To run Expecto Botronum:
  - copy `config-example.json` to `config.json` and edit it as needed
  - and run `core.py`
 
-If you're using Windows, you'll need to build the Rust code with `cargo build`, and then move `librust_chatlogger.dll` to the current directory and name it `string_sum.pyd`.
+If you're using Windows, you'll need to build the Rust code with `cargo build` (use the `--release` flag for a production build), and then move `librust_chatlogger.dll` to the current directory and name it `rust_chatlogger.pyd`.
 
 You can also run `scripts/test.sh` (on Linux and Mac) to run the linter and tests, if you're so inclined.
 

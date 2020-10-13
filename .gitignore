@@ -28,3 +28,4 @@ rust_chatlogger.so
 
 # Code coverage
 .coverage
+coverage.xml
