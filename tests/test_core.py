@@ -5,13 +5,14 @@
 # pylint: disable=line-too-long
 from typing import Any
 
-import psclient # type: ignore
-
 import sys
 import pathlib
-sys.path.append(str(pathlib.Path(__file__).joinpath("..").resolve()) + '/')
 
-from dummies import DummyConnection, DummyUser # pylint: disable=wrong-import-position
+import psclient # type: ignore
+
+from dummies import DummyConnection, DummyUser
+
+sys.path.append(str(pathlib.Path(__file__).joinpath("..").resolve()) + '/')
 import core # pylint: disable=wrong-import-position
 import config # pylint: disable=wrong-import-position
 

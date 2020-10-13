@@ -2,9 +2,14 @@
     helper classes for testing without a connection to Pokemon Showdown
     by Annika"""
 
+import sys
+import pathlib
 from typing import Optional, List
+
 import psclient # type: ignore
-import core
+
+sys.path.append(str(pathlib.Path(__file__).joinpath("../..").resolve()) + '/')
+import core # pylint: disable=wrong-import-position
 
 # pylint: disable=super-init-not-called
 

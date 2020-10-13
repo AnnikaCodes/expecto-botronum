@@ -457,10 +457,12 @@ pub mod tests {
         add_test_data(&conn, 1602123550)?;
 
         let html = get_linecount_html(&conn, "annika", "test", None)?;
+        println!("{}", html);
         assert!(
             // I hate timezones
             html == r#"The user 'annika' had 3 lines in the room test in the past 30 days.<hr><details><summary>Linecounts per day</summary><ul><li><b> 8-Oct-2020</b> — 2 lines</li><li><b>19-Sep-2020</b> — 1 lines</li></ul></details>"# ||
-            html == r#"The user 'annika' had 3 lines in the room test in the past 30 days.<hr><details><summary>Linecounts per day</summary><ul><li><b> 7-Oct-2020</b> — 2 lines</li><li><b>19-Sep-2020</b> — 1 lines</li></ul></details>"#
+            html == r#"The user 'annika' had 3 lines in the room test in the past 30 days.<hr><details><summary>Linecounts per day</summary><ul><li><b> 7-Oct-2020</b> — 2 lines</li><li><b>19-Sep-2020</b> — 1 lines</li></ul></details>"# ||
+            html == r#"The user 'annika' had 3 lines in the room test in the past 30 days.<hr><details><summary>Linecounts per day</summary><ul><li><b> 7-Oct-2020</b> — 2 lines</li><li><b>18-Sep-2020</b> — 1 lines</li></ul></details>"#
         );
 
         Ok(())
