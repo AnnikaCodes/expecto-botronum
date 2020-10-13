@@ -7,9 +7,13 @@ from typing import Any
 
 import psclient # type: ignore
 
-from dummies import DummyConnection, DummyUser
-import core
-import config
+import sys
+import pathlib
+sys.path.append(str(pathlib.Path(__file__).joinpath("..").resolve()) + '/')
+
+from dummies import DummyConnection, DummyUser # pylint: disable=wrong-import-position
+import core # pylint: disable=wrong-import-position
+import config # pylint: disable=wrong-import-position
 
 def testToID() -> None:
     """Tests the toID() function
