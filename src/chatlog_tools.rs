@@ -125,7 +125,7 @@ pub fn search(
     while let Some(row) = rows.next()? {
         // row.get(1) -> timestamp
         let date = NaiveDateTime::from_timestamp(row.get(1).unwrap_or_else(|_| unix_time()), 0);
-        let mdy = date.format("%v").to_string();
+        let mdy = date.format("%b %e, %Y").to_string();
         if current_day != mdy {
             html.push_str(&[
                 if !current_day.is_empty() {
@@ -218,7 +218,7 @@ pub fn get_linecount_html(
         let date = NaiveDateTime::from_timestamp(min as i64, 0);
         html.push_str(&[
             "<li><b>",
-            &html_escape::encode_text(&date.format("%v").to_string()),
+            &html_escape::encode_text(&date.format("%b %e, %Y").to_string()),
             "</b> — ",
             linecount_str,
             " lines</li>"
@@ -405,11 +405,11 @@ pub mod tests {
         // Check that it can search by user ID and format regular users
         let mut results = search(&conn, "test", Some("heartofetheria"), None, None, None)?;
         // 19 Sep = 15 days ago as per add_test_data()
-        assert_eq!(results, "<details style=\"margin-left: 5px;\"><summary><b>19-Sep-2020</b></summary><div style=\"margin-left: 10px;\"><small>[10:25:40] </small><b>Heart of Etheria</b>: Test Message Four<br></div></details>");
+        assert_eq!(results, "<details style=\"margin-left: 5px;\"><summary><b>Sep 19, 2020</b></summary><div style=\"margin-left: 10px;\"><small>[10:25:40] </small><b>Heart of Etheria</b>: Test Message Four<br></div></details>");
 
         // Check that it can format auth correctly
         results = search(&conn, "test", Some("annika"), Some(0), None, Some(1))?;
-        assert_eq!(results, "<details style=\"margin-left: 5px;\"><summary><b> 8-Oct-2020</b></summary><div style=\"margin-left: 10px;\"><small>[04:25:40] </small><small>@</small><b>Annika</b>: Test Message One<br></div></details>");
+        assert_eq!(results, "<details style=\"margin-left: 5px;\"><summary><b>Oct  8, 2020</b></summary><div style=\"margin-left: 10px;\"><small>[04:25:40] </small><small>@</small><b>Annika</b>: Test Message One<br></div></details>");
 
         // Check that it can search by time
         results = search(&conn, "test", None, Some(1602131140 - 100), None, Some(1000))?;
@@ -460,9 +460,9 @@ pub mod tests {
         println!("{}", html);
         assert!(
             // I hate timezones
-            html == r#"The user 'annika' had 3 lines in the room test in the past 30 days.<hr><details><summary>Linecounts per day</summary><ul><li><b> 8-Oct-2020</b> — 2 lines</li><li><b>19-Sep-2020</b> — 1 lines</li></ul></details>"# ||
-            html == r#"The user 'annika' had 3 lines in the room test in the past 30 days.<hr><details><summary>Linecounts per day</summary><ul><li><b> 7-Oct-2020</b> — 2 lines</li><li><b>19-Sep-2020</b> — 1 lines</li></ul></details>"# ||
-            html == r#"The user 'annika' had 3 lines in the room test in the past 30 days.<hr><details><summary>Linecounts per day</summary><ul><li><b> 7-Oct-2020</b> — 2 lines</li><li><b>18-Sep-2020</b> — 1 lines</li></ul></details>"#
+            html == r#"The user 'annika' had 3 lines in the room test in the past 30 days.<hr><details><summary>Linecounts per day</summary><ul><li><b>Oct  8, 2020</b> — 2 lines</li><li><b>Sep 19, 2020</b> — 1 lines</li></ul></details>"# ||
+            html == r#"The user 'annika' had 3 lines in the room test in the past 30 days.<hr><details><summary>Linecounts per day</summary><ul><li><b>Oct  7, 2020</b> — 2 lines</li><li><b>Sep 19, 2020</b> — 1 lines</li></ul></details>"# ||
+            html == r#"The user 'annika' had 3 lines in the room test in the past 30 days.<hr><details><summary>Linecounts per day</summary><ul><li><b>Oct  7, 2020</b> — 2 lines</li><li><b>Sep 18, 2020</b> — 1 lines</li></ul></details>"#
         );
 
         Ok(())
