@@ -184,7 +184,7 @@ class BotMessage(psclient.Message):
         Args:
             html (str): the HTML code
         """
-        if self.room and self.connection.this.can("html", self.room):
+        if self.room and self.sender.can("broadcast", self.roomself.connection.this.can("html", self.room):
             return self.room.say(f"/addhtmlbox {html}")
         return super().respondHTML(html)
 

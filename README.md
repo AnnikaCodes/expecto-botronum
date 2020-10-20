@@ -50,6 +50,7 @@ Expecto Botronum is a Pokémon Showdown bot written by Annika for the [Magic & M
 | `-removejoinphrase <user>` | Removes `<user>`'s joinphrase. Specify a room in PMs. |
 | `-joinhouse <house>` | Joins a house. |
 | `-checkhouse [user]` | Checks the house of a given user, or the sender if none is specified. |
+| `-samples [formats]` | Displays sample teams for a format. |
 
 ## Technical
 The majority Expecto Botronum is written in Python 3.x (specifically, Python 3.6), but its chatlogger is written in Rust. If you would like to contribute, feel free to work on one of the issues. To propose a feature, PM me on Discord (Annika#1562) or mention the feature in the channel for that purpose in the Magic & Mayhem discord.
