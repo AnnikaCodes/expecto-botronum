@@ -51,6 +51,13 @@ htmlboxes: Dict[str, List[Dict[str, Union[str, List[str]]]]] = {
             "pokepasteURL": "https://pokepast.es/33c1f022384b761d",
             "username": "vivalospride",
         },
+        {
+            "tier": "[Gen 7] UU",
+            "name": "Spikes Stall",
+            "pokemon": ["umbreon", "alomomola", "blissey", "klefki", "tentacruel", "quagsire"],
+            "pokepasteURL": "https://pokepast.es/6502caa9ade216a3",
+            "username": "pokeisfun",
+        },      
     ],
     "gen7ou": [
         {
