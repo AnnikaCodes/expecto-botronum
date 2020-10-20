@@ -110,7 +110,7 @@ def generateHTML(teams: List[dict]) -> str:
     html = ''.join(['<center>• Sample teams <strong>', teams[0]["tier"], '</strong> •</center>'])
     for info in teams:
         html += ''.join([
-            ''.join(['<img src="https://www.smogon.com/forums/media/minisprites/{pokemon}.png" alt="" width="40" height="30">' for pokemon in info["imageURLs"]]), # pylint: disable=line-too-long
+            ''.join([f'<img src="https://www.smogon.com/forums/media/minisprites/{pokemon}.png" alt="" width="40" height="30">' for pokemon in info["pokemon"]]), # pylint: disable=line-too-long
             ' - <a title="Pokepast" href=""', info["pokepasteURL"], '">',
             '<strong>', info["name"], '</strong></a> made by <strong>', info["username"], '</strong><br>'
         ])
