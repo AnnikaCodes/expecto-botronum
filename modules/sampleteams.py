@@ -103,6 +103,121 @@ htmlboxes: Dict[str, List[Dict[str, Union[str, List[str]]]]] = {
             "username": "Skiry",
         },
     ],
+    "gen8rps": [
+        {
+            "tier": "[Gen 8] Rock, Paper, Scissors",
+            "name": "Rock, Paper, Scissors",
+            "pokemon": ["golem", "leafeon", "swellow"],
+            "pokepasteURL": "https://pokepast.es/81714a0f5c3ad6c0",
+            "username": "MyPearl",
+        },
+    ],
+    "gen8shedinjamb": [
+        {
+            "tier": "[Gen 8] Shedinja Metronome Battle",
+            "name": "Shedinja Metronome Battle",
+            "pokemon": ["shedinja", "shedinja", "shedinja", "shedinja", "shedinja", "shedinja"],
+            "pokepasteURL": "https://pokepast.es/4d779bd467a94029",
+            "username": "MyPearl",
+        },
+    ],
+    "gen8birdpresentbattle": [
+        {
+            "tier": "[Gen 8] Delibird Hustle Present Battle",
+            "name": "Delibird Hustle Present Battle",
+            "pokemon": ["delibird", "delibird", "delibird", "delibird", "delibird", "delibird"],
+            "pokepasteURL": "https://pokepast.es/00a6873514d574e7",
+            "username": "MyPearl",
+        },
+    ],
+    "gen7monotype": [
+        {
+            "tier": "[Gen 7] Monotype",
+            "name": "Mega Pinsir Hyper Offense Bug",
+            "pokemon": ["volcarona", "pinsir-mega", "heracross", "scizor", "galvantula", "armaldo"],
+            "pokepasteURL": "https://pokepast.es/29ba0818f219c0f1",
+            "username": "GoldenTorkoal",
+        },
+        {
+            "tier": "[Gen 7] Monotype",
+            "name": "Mega Sharpedo Balance Water",
+            "pokemon": ["swampert", "toxapex", "rotom-wash", "keldeo", "greninja", "sharpedo-mega"],
+            "pokepasteURL": "https://pokepast.es/9f7f89a624d29937",
+            "username": "Tico 21",
+        },
+        {
+            "tier": "[Gen 7] Monotype",
+            "name": "Sticky Webs Fairy",
+            "pokemon": ["ribombee", "klefki", "diancie-mega", "tapu-koko", "azumarill", "tapu-bulu"],
+            "pokepasteURL": "https://pokepast.es/e80d35100f5cbf88",
+            "username": "Harpp",
+        },
+        {
+            "tier": "[Gen 7] Monotype",
+            "name": "Offensive Dragon",
+            "pokemon": ["dragonite", "latios", "kommo-o", "garchomp", "altaria-mega", "kyurem-black"],
+            "pokepasteURL": "https://pokepast.es/f950a52accdb3b92",
+            "username": "Eien",
+        },
+        {
+            "tier": "[Gen 7] Monotype",
+            "name": "Balance Flying",
+            "pokemon": ["landorus-therian", "charizard-mega-y", "skarmory", "zapdos", "mantine", "gliscor"],
+            "pokepasteURL": "https://pokepast.es/3ebf7571a55753d3",
+            "username": "Izaya",
+        },
+        {
+            "tier": "[Gen 7] Monotype",
+            "name": "Balance Ghost",
+            "pokemon": ["gengar", "jellicent", "gourgeist-super", "marowak-alola", "mimikyu", "sableye-mega"],
+            "pokepasteURL": "https://pokepast.es/f787ed43aafe4d37",
+            "username": "Decem",
+        },
+    ],
+    "gen7ubers": [
+        {
+            "tier": "[Gen 7] Ubers",
+            "name": "Dual Primal + Extremekiller Arceus HO",
+            "pokemon": ["salamence-mega", "kyogre-primal", "groudon-primal", "arceus", "xerneas", "necrozma-dusk-mane"],
+            "pokepasteURL": "https://pokepast.es/0adb04027d87a8d6",
+            "username": "Mysterious M & Zesty43",
+        },
+        {
+            "tier": "[Gen 7] Ubers",
+            "name": "Dual Primal Bulky Offense",
+            "pokemon": ["kyogre-primal", "groudon-primal", "arceus-fairy", "yveltal", "necrozma-dusk-mane", "salamence-mega"],
+            "pokepasteURL": "https://pokepast.es/1cc156c3bfed4d34",
+            "username": "obii",
+        },
+        {
+            "tier": "[Gen 7] Ubers",
+            "name": "Calm Mind Mega Mewtwo-Y Bulky Offense",
+            "pokemon": ["mewtwo-mega-y", "arceus-fairy", "yveltal", "groudon-primal", "necrozma-dusk-mane", "marshadow"],
+            "pokepasteURL": "https://pokepast.es/2e4b7e6cf3050984",
+            "username": "Garay oak",
+        },
+        {
+            "tier": "[Gen 7] Ubers",
+            "name": "U-turn Mega Scizor Bulky Offense",
+            "pokemon": ["scizor-mega", "groudon-primal", "giratina-origin", "kyogre-primal", "arceus-fairy", "yveltal"],
+            "pokepasteURL": "https://pokepast.es/66aaa33563ad4474",
+            "username": "The Dovahneer",
+        },
+        {
+            "tier": "[Gen 7] Ubers",
+            "name": "DD Zygarde Bulky Offense",
+            "pokemon": ["gengar-mega", "arceus-water", "yveltal", "zygarde-complete", "groudon-primal", "necrozma-dusk-mane"],
+            "pokepasteURL": "https://pokepast.es/7bd47ad6a6568011",
+            "username": "Ubers Council",
+        },
+        {
+            "tier": "[Gen 7] Ubers",
+            "name": "Mega Mewtwo Y + Ho-Oh Balance",
+            "pokemon": ["ho-oh", "mewtwo-mega-y", "arceus-dark", "groudon-primal", "ferrothorn", "zygarde-complete"],
+            "pokepasteURL": "https://pokepast.es/1ec4406061330e65",
+            "username": "PurpleGatorade",
+        },
+    ],
 }
 
 def generateHTML(teams: List[dict]) -> str:
