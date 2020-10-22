@@ -475,7 +475,7 @@ pub mod tests {
         let conn = get_connection();
         add_test_data(&conn, 1602123550)?;
 
-        let html = get_linecount_html(&conn, "annika", "test", Some(30), Some(160212355))?;
+        let html = get_linecount_html(&conn, "annika", "test", Some(30), Some(1602123551))?;
         assert!(
             // I hate timezones
             html == r#"The user 'annika' had 3 lines in the room test in the past 30 days.<hr><details><summary>Linecounts per day</summary><ul><li><b>Oct  8, 2020</b> — 2 lines</li><li><b>Sep 19, 2020</b> — 1 lines</li></ul></details>"# ||
