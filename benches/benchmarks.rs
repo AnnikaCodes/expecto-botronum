@@ -60,7 +60,7 @@ fn linecount_html_100k_messages_benchmark(b: &mut Bencher) {
     let conn = chatlog_tools::tests::get_connection();
     add_messages(&conn, 100000, false).unwrap(); // 100k messages
     b.iter(|| {
-        chatlog_tools::get_linecount_html(&conn, "benchmark", "heartofetheria", Some(30))
+        chatlog_tools::get_linecount_html(&conn, "benchmark", "heartofetheria", Some(30), None)
     });
 }
 
@@ -71,7 +71,6 @@ fn topusers_100k_messages_benchmark(b: &mut Bencher) {
         chatlog_tools::get_topusers(&conn, "benchmark", Some(30), Some(50))
     });
 }
-
 
 fn topusers_html_100k_messages_benchmark(b: &mut Bencher) {
     let conn = chatlog_tools::tests::get_connection();

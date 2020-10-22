@@ -4,7 +4,7 @@
 
 from typing import Dict, Any, Union, List
 
-import psclient
+import psclient # type: ignore
 import core
 
 htmlboxes: Dict[str, List[Dict[str, Union[str, List[str]]]]] = {

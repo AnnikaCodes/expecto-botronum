@@ -98,30 +98,47 @@ pub fn search(
     let mut args = Vec::<SQLParameter>::new();
     args.push(SQLParameter::Text(room_id.to_owned()));
 
+    // See https://github.com/hoodie/concatenation_benchmarks-rs for information on
+    // string concatenation performance in Rust.
+    // TL;DR .join()ing arrays or using push_str with a set-capacity String are best
+    let mut html = String::with_capacity(100000);
+    html.push_str(&[
+        "<details><summary>Messages in ",
+        room_id,
+        &match user_id {
+            Some(id) => [" sent by ", id].join(""),
+            None => String::from("")
+        },
+    ].join(""));
+
     if let Some(id) = user_id {
         query_str.push_str(" AND userid = ?");
         args.push(SQLParameter::Text(id.to_owned()));
     }
 
     if let Some(keywords) = keywords {
+        if !keywords.is_empty() {
+            html.push_str(&[
+                " containing the keywords ",
+                &keywords.join(", "),
+            ].join(""));
+        }
+
         for keyword in keywords {
             query_str.push_str(" AND lower(body) LIKE '%' || ? || '%'");
             args.push(SQLParameter::Text(String::from(keyword).to_lowercase()));
         }
     }
+    html.push_str("</summary>");
 
     query_str.push_str(" AND timestamp > ? ORDER BY timestamp DESC LIMIT ?");
     args.push(SQLParameter::Number(oldest.unwrap_or(0)));
     args.push(SQLParameter::Number(max_messages.unwrap_or(1000)));
 
     let mut statement = conn.prepare(&query_str)?;
-
-    // See https://github.com/hoodie/concatenation_benchmarks-rs for information on
-    // string concatenation performance in Rust.
-    // TL;DR .join()ing arrays or using push_str with a set-capacity String are best
-    let mut html = String::with_capacity(100000);
     let mut rows = statement.query(args)?;
     let mut current_day = String::from("");
+
     while let Some(row) = rows.next()? {
         // row.get(1) -> timestamp
         let date = NaiveDateTime::from_timestamp(row.get(1).unwrap_or_else(|_| unix_time()), 0);
@@ -175,6 +192,7 @@ pub fn search(
     if !current_day.is_empty() {
         html.push_str("</div></details>");
     }
+    html.push_str("</details>");
     Ok(html)
 }
 
@@ -187,16 +205,17 @@ pub fn get_linecount(conn: &Connection, user_id: &str, room_id: &str, min_time: 
 
 /// Gets a user's linecount and HTML formats each day
 pub fn get_linecount_html(
-    conn: &Connection, user_id: &str, room_id: &str, days: Option<i32>
+    conn: &Connection, user_id: &str, room_id: &str, days: Option<i32>, current_time_override: Option<i32>,
 ) -> Result<String, rusqlite::Error> {
     let days = days.unwrap_or(30);
+    let current_time = current_time_override.unwrap_or_else(|| unix_time() as i32);
     let mut html = String::with_capacity(100 + 40 * days as usize);
 
     html.push_str(&[
         "The user '",
         user_id,
         "' had ",
-        &get_linecount(conn, user_id, room_id, unix_time() as i32 - (days) * SECONDS_PER_DAY, unix_time() as i32)?.to_string(),
+        &get_linecount(conn, user_id, room_id, current_time - (days) * SECONDS_PER_DAY, current_time)?.to_string(),
         " lines in the room ",
         room_id,
         " in the past ",
@@ -206,8 +225,8 @@ pub fn get_linecount_html(
 
     let mut current_day = 0;
     while current_day < days {
-        let min = unix_time() as i32 - (current_day + 1) * SECONDS_PER_DAY ;
-        let max = unix_time() as i32 - (current_day * SECONDS_PER_DAY) ;
+        let min = current_time - (current_day + 1) * SECONDS_PER_DAY;
+        let max = current_time - (current_day * SECONDS_PER_DAY);
 
         current_day += 1;
         let linecount_str = &get_linecount(conn, user_id, room_id, min, max)?.to_string();
@@ -405,11 +424,11 @@ pub mod tests {
         // Check that it can search by user ID and format regular users
         let mut results = search(&conn, "test", Some("heartofetheria"), None, None, None)?;
         // 19 Sep = 15 days ago as per add_test_data()
-        assert_eq!(results, "<details style=\"margin-left: 5px;\"><summary><b>Sep 19, 2020</b></summary><div style=\"margin-left: 10px;\"><small>[10:25:40] </small><b>Heart of Etheria</b>: Test Message Four<br></div></details>");
+        assert_eq!(results, "<details><summary>Messages in test sent by heartofetheria</summary><details style=\"margin-left: 5px;\"><summary><b>Sep 19, 2020</b></summary><div style=\"margin-left: 10px;\"><small>[10:25:40] </small><b>Heart of Etheria</b>: Test Message Four<br></div></details></details>");
 
         // Check that it can format auth correctly
         results = search(&conn, "test", Some("annika"), Some(0), None, Some(1))?;
-        assert_eq!(results, "<details style=\"margin-left: 5px;\"><summary><b>Oct  8, 2020</b></summary><div style=\"margin-left: 10px;\"><small>[04:25:40] </small><small>@</small><b>Annika</b>: Test Message One<br></div></details>");
+        assert_eq!(results, "<details><summary>Messages in test sent by annika</summary><details style=\"margin-left: 5px;\"><summary><b>Oct  8, 2020</b></summary><div style=\"margin-left: 10px;\"><small>[04:25:40] </small><small>@</small><b>Annika</b>: Test Message One<br></div></details></details>");
 
         // Check that it can search by time
         results = search(&conn, "test", None, Some(1602131140 - 100), None, Some(1000))?;
@@ -456,8 +475,7 @@ pub mod tests {
         let conn = get_connection();
         add_test_data(&conn, 1602123550)?;
 
-        let html = get_linecount_html(&conn, "annika", "test", None)?;
-        println!("{}", html);
+        let html = get_linecount_html(&conn, "annika", "test", Some(30), Some(160212355))?;
         assert!(
             // I hate timezones
             html == r#"The user 'annika' had 3 lines in the room test in the past 30 days.<hr><details><summary>Linecounts per day</summary><ul><li><b>Oct  8, 2020</b> — 2 lines</li><li><b>Sep 19, 2020</b> — 1 lines</li></ul></details>"# ||

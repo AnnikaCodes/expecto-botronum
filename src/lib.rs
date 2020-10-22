@@ -96,7 +96,7 @@ impl Chatlogger {
             Err(e) => return Err(pythonize_exception(Box::new(e))),
         };
 
-        let result = match chatlog_tools::get_linecount_html(&conn, user_id, room_id, days) {
+        let result = match chatlog_tools::get_linecount_html(&conn, user_id, room_id, days, None) {
             Ok(h) => h,
             Err(e) => return Err(pythonize_exception(Box::new(e))),
         };
