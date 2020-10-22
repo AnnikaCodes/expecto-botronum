@@ -223,9 +223,8 @@ class BotConnection(psclient.PSConnection):
         super().login(challstr)
         self.send('|/avatar 50')
         for room in config.rooms:
-            t = threading.Timer(2000, BotRoom, args=[room, self])
-            t.daemon = True
-            t.start()
+            time.sleep(1)
+            BotRoom(room, self)
 
     def userJoinedRoom(self, user: psclient.User, room: psclient.Room) -> None:
         return super().userJoinedRoom(BotUser(user.name, self), room)
