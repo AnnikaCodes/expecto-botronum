@@ -57,7 +57,7 @@ htmlboxes: Dict[str, List[Dict[str, Union[str, List[str]]]]] = {
             "pokemon": ["umbreon", "alomomola", "blissey", "klefki", "tentacruel", "quagsire"],
             "pokepasteURL": "https://pokepast.es/6502caa9ade216a3",
             "username": "pokeisfun",
-        },      
+        },
     ],
     "gen7ou": [
         {
