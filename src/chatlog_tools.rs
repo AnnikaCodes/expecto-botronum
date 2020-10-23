@@ -458,14 +458,14 @@ pub mod tests {
         // 19 Sep = 15 days ago as per add_test_data()
         assert_eq!(
             results,
-            r#"<details><summary>Messages in test sent by heartofetheria</summary><details style="margin-left: 5px;"><summary><b>Sep 19, 2020</b></summary><div style="margin-left: 10px;"><small>[<a href="http://logs.psim.us:8080/test/2020-09/2020-09-19.html#10:25">10:25:40</a>] </small><b>Heart of Etheria</b>: Test Message Four<br></div></details></details>"#
+            r#"<details><summary>Messages in test sent by heartofetheria</summary><details style="margin-left: 5px;"><summary><b>Sep 19, 2020</b></summary><div style="margin-left: 10px;"><small>[<a href="http://logs.psim.us:8080/test/2020-09/2020-09-19.html#06:25">10:25:40</a>] </small><b>Heart of Etheria</b>: Test Message Four<br></div></details></details>"#
         );
 
         // Check that it can format auth correctly
         results = search(&conn, "test", Some("annika"), Some(0), None, Some(1))?;
         assert_eq!(
             results,
-            r#"<details><summary>Messages in test sent by annika</summary><details style="margin-left: 5px;"><summary><b>Oct  8, 2020</b></summary><div style="margin-left: 10px;"><small>[<a href="http://logs.psim.us:8080/test/2020-10/2020-10-08.html#04:25">04:25:40</a>] </small><small>@</small><b>Annika</b>: Test Message One<br></div></details></details>"#
+            r#"<details><summary>Messages in test sent by annika</summary><details style="margin-left: 5px;"><summary><b>Oct  8, 2020</b></summary><div style="margin-left: 10px;"><small>[<a href="http://logs.psim.us:8080/test/2020-10/2020-10-08.html#00:25">04:25:40</a>] </small><small>@</small><b>Annika</b>: Test Message One<br></div></details></details>"#
         );
 
         // Check that it can search by time
