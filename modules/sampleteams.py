@@ -229,13 +229,14 @@ def generateHTML(teams: List[dict]) -> str:
     Returns:
         str: [description]
     """
-    html = ''.join(['<center>• Sample teams <strong>', teams[0]["tier"], '</strong> •</center>'])
+    html = ''.join(['<center><details><summary>Sample teams <strong>', teams[0]["tier"], '</strong></summary>'])
     for info in teams:
         html += ''.join([
             ''.join([f'<img src="https://www.smogon.com/forums/media/minisprites/{pokemon}.png" alt="" width="40" height="30">' for pokemon in info["pokemon"]]), # pylint: disable=line-too-long
             ' - <a title="Pokepast" href="', info["pokepasteURL"], '">',
             '<strong>', info["name"], '</strong></a> made by <strong>', info["username"], '</strong><br>'
         ])
+    html += '</details></center>'
     return html
 
 class Module:
@@ -253,7 +254,6 @@ class Module:
         formatid = psclient.toID(','.join(message.arguments[1:]) if len(message.arguments) > 1 else '')
         if not formatid or formatid not in htmlboxes:
             return message.respond(f"You must specify a format that I have sample teams for: {', '.join(list(htmlboxes.keys()))}")
-
         return message.respondHTML(generateHTML(htmlboxes[formatid]))
 
     def __str__(self) -> str:
