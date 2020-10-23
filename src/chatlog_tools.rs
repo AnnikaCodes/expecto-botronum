@@ -155,7 +155,11 @@ pub fn search(
 
     while let Some(row) = rows.next()? {
         // row.get(1) -> timestamp
-        let date = NaiveDateTime::from_timestamp(row.get(1).unwrap_or_else(|_| unix_time()), 0);
+        let date = NaiveDateTime::from_timestamp(
+            // Hack to account for timezones
+            row.get(1).unwrap_or_else(|_| unix_time()) - 4 * 60 * 60,
+            0
+        );
         let mdy = date.format("%b %e, %Y").to_string();
         if current_day != mdy {
             html.push_str(&[
