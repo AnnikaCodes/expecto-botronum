@@ -6,7 +6,7 @@
 use std::time::{SystemTime, UNIX_EPOCH};
 use std::collections::HashMap;
 
-use chrono::prelude::NaiveDateTime;
+use chrono::prelude::{NaiveDate, NaiveDateTime};
 use fallible_iterator::FallibleIterator;
 use rusqlite::{Connection, params};
 
@@ -47,6 +47,20 @@ pub fn unix_time() -> i64 {
         .duration_since(UNIX_EPOCH)
         .unwrap_or_default()
         .as_secs() as i64
+}
+
+/// Generates a link to the Pokémon Showdown logserver based on a date.
+fn generate_log_link(room_id: &str, date: NaiveDateTime) -> String {
+    [
+        "http://logs.psim.us:8080/",
+        room_id,
+        "/",
+        &date.format("%Y-%m").to_string(),
+        "/",
+        &date.format("%Y-%m-%d").to_string(),
+        ".html#",
+        &date.format("%H:%M").to_string()
+    ].join("")
 }
 
 /// Logs a Pokémon Showdown chat message (or PM!) to a SQLite database.
@@ -176,9 +190,11 @@ pub fn search(
 
         // format: <small>[XX:YY:ZZ]</small> user: xyzzy
         html.push_str(&[
-            "<small>[",
+            r#"<small>[<a href=""#,
+            &generate_log_link(room_id, date),
+            r#"">"#,
             &html_escape::encode_text(&date.format("%T").to_string()),
-            "] </small>",
+            "</a>] </small>",
             &user,
             ": ",
             &html_escape::encode_text(&(row.get(6).unwrap_or_else(|_| String::from("")) as String)),
@@ -392,6 +408,18 @@ pub mod tests {
     }
 
     #[test]
+    fn log_link_test() {
+        assert_eq!(
+            generate_log_link("staff", NaiveDate::from_ymd(2020, 1, 1).and_hms(0, 0, 30)),
+            "http://logs.psim.us:8080/staff/2020-01/2020-01-01.html#00:00"
+        );
+        assert_eq!(
+            generate_log_link("staff", NaiveDate::from_ymd(2020, 10, 12).and_hms(14, 55, 39)),
+            "http://logs.psim.us:8080/staff/2020-10/2020-10-12.html#14:55"
+        );
+    }
+
+    #[test]
     fn insertion_test() -> Result<(), rusqlite::Error> {
         let conn = get_connection();
 
@@ -424,11 +452,17 @@ pub mod tests {
         // Check that it can search by user ID and format regular users
         let mut results = search(&conn, "test", Some("heartofetheria"), None, None, None)?;
         // 19 Sep = 15 days ago as per add_test_data()
-        assert_eq!(results, "<details><summary>Messages in test sent by heartofetheria</summary><details style=\"margin-left: 5px;\"><summary><b>Sep 19, 2020</b></summary><div style=\"margin-left: 10px;\"><small>[10:25:40] </small><b>Heart of Etheria</b>: Test Message Four<br></div></details></details>");
+        assert_eq!(
+            results,
+            r#"<details><summary>Messages in test sent by heartofetheria</summary><details style="margin-left: 5px;"><summary><b>Sep 19, 2020</b></summary><div style="margin-left: 10px;"><small>[<a href="http://logs.psim.us:8080/test/2020-09/2020-09-19.html#10:25">10:25:40</a>] </small><b>Heart of Etheria</b>: Test Message Four<br></div></details></details>"#
+        );
 
         // Check that it can format auth correctly
         results = search(&conn, "test", Some("annika"), Some(0), None, Some(1))?;
-        assert_eq!(results, "<details><summary>Messages in test sent by annika</summary><details style=\"margin-left: 5px;\"><summary><b>Oct  8, 2020</b></summary><div style=\"margin-left: 10px;\"><small>[04:25:40] </small><small>@</small><b>Annika</b>: Test Message One<br></div></details></details>");
+        assert_eq!(
+            results,
+            r#"<details><summary>Messages in test sent by annika</summary><details style="margin-left: 5px;"><summary><b>Oct  8, 2020</b></summary><div style="margin-left: 10px;"><small>[<a href="http://logs.psim.us:8080/test/2020-10/2020-10-08.html#04:25">04:25:40</a>] </small><small>@</small><b>Annika</b>: Test Message One<br></div></details></details>"#
+        );
 
         // Check that it can search by time
         results = search(&conn, "test", None, Some(1602131140 - 100), None, Some(1000))?;
