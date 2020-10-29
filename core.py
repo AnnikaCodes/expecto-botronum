@@ -21,7 +21,7 @@ from translations import translate
 JOINPHRASE_COOLDOWN = 60 * 60 * 60 # 60 minutes
 
 BOLD_REGEX = re.compile(r'(.*)(?!``)(\*\*)([^\s])(.*)(\*\*)(?!``)(.*)')
-CAPS_REGEX = re.compile(r'(.*)([A-Z]{7,})|([A-Z]{3,}(.{0,3})[A-Z]{3,})(.*)')
+CAPS_REGEX = re.compile(r'(.*)([A-Z]{6,})(.*)')
 
 VERBALWARN_THRESHOLD = 1
 WARN_THRESHOLD = 2
