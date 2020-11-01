@@ -441,13 +441,6 @@ htmlboxes: Dict[str, List[Dict[str, Union[str, List[str]]]]] = {
     "natdex": [
         {
             "tier": "National Dex",
-            "name": "Volcarona Stall",
-            "pokemon": ["alomomola", "chansey", "volcarona", "sableye-mega", "skarmory", "clefable"],
-            "pokepasteURL": "https://pokepast.es/8569663d73b3abff",
-            "username": "Funbot28",
-        },
-        {
-            "tier": "National Dex",
             "name": "Mega Lopunny BO",
             "pokemon": ["kyurem", "lopunny-mega", "zapdos", "magearna", "kartana", "seismitoad"],
             "pokepasteURL": "https://pokepast.es/fc324b0d09bdb691",
