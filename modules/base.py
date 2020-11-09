@@ -169,7 +169,9 @@ class Module:
             return message.respond(f"Usage: ``{ config.commandCharacter}audio <URL to audio file>``.")
 
         url = ','.join(message.arguments[1:]).strip()
-        if not re.match(r'^https?:\/\/(.*?)\.[a-z]{2,}/(.*?)\.(mp[34]|wav|ogg)$', url):
+        if (not re.match(r'^https?:\/\/(.*?)\.[a-z]{2,}\/', url)) or not (
+            url.endswith('.mp3') or url.endswith('.mp4') or url.endswith('.wav') or url.endswith('.ogg') or '.vocaroo.com/mp3/' in url
+        ):
             return message.respond(
                 "You must specify a valid URL beginning with ``http://`` or ``https://``; the URL must refer to an audio file."
             )
