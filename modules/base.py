@@ -10,6 +10,9 @@ import config
 import core
 import data
 
+def sanitize(text: str) -> str:
+    return re.sub(r'^([/!])', '\1\1', text)
+
 class Module:
     """Represents a module, which may contain several commands
     """
@@ -39,7 +42,7 @@ class Module:
         text = config.separator.join(message.arguments[1:])
         for vowel in list("AaEeIiOoUuYy"):
             text = text.replace(vowel, f"{vowel}w{vowel}")
-        message.respond(text)
+        message.respond(sanitize(text))
 
 
     def uwu(self, message: core.BotMessage) -> None:
@@ -52,7 +55,7 @@ class Module:
         uwuRules = {'r': 'w', 'l': 'w', 'R': 'W', 'L': 'W'}
         for key in uwuRules:
             text = text.replace(key, uwuRules[key])
-        message.respond(text)
+        message.respond(sanitize(text))
 
     def timer(self, message: core.BotMessage) -> None:
         """timer: evaluates the given Python expression
