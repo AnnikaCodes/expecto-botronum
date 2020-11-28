@@ -11,7 +11,7 @@ import core
 import data
 
 def sanitize(text: str) -> str:
-    return re.sub(r'^([/!])', '\0\0', text)
+    return re.sub(r'^([/!-\.%~])', '\0\0', text)
 
 class Module:
     """Represents a module, which may contain several commands
