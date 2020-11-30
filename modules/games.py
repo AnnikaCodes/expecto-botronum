@@ -131,16 +131,20 @@ class Module:
         if not message.sender.can("hostgame", message.room): return message.respond("Permission denied.")
 
         if len(message.arguments) < 2:
-            return message.respond(f"Usage: ``{config.commandCharacter}addpoints [user], [optional number of points]``.")
-        userid = psclient.toID(message.arguments[1])
+            return message.respond(
+                f"Usage: ``{config.commandCharacter}addpoints [comma-separated list of users], [optional number of points]``."
+            )
+        userids = [psclient.toID(x) for x in message.arguments[1:]]
         points = 1
-        if len(message.arguments) > 2 and isInt(message.arguments[2].strip()): points = int(message.arguments[2].strip())
+        if len(userids) > 1 and isInt(userids[len(userids) - 1]):
+            points = int(userids[len(userids) - 1])
 
         if message.room.id not in self.minigamePoints.keys(): self.minigamePoints[message.room.id] = {}
-        if userid not in self.minigamePoints[message.room.id].keys():
-            self.minigamePoints[message.room.id][userid] = points
-        else:
-            self.minigamePoints[message.room.id][userid] += points
+        for userid in userids:
+            if userid not in self.minigamePoints[message.room.id].keys():
+                self.minigamePoints[message.room.id][userid] = points
+            else:
+                self.minigamePoints[message.room.id][userid] += points
 
         return message.respond("Points added!")
 
