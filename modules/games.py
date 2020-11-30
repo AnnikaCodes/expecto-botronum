@@ -134,13 +134,14 @@ class Module:
             return message.respond(
                 f"Usage: ``{config.commandCharacter}addpoints [comma-separated list of users], [optional number of points]``."
             )
-        userids = [psclient.toID(x) for x in message.arguments[1:]]
+        usernames = message.arguments[1:]
         points = 1
-        if len(userids) > 1 and isInt(userids[len(userids) - 1]):
-            points = int(userids[len(userids) - 1])
+        if len(usernames) > 1 and isInt(usernames[len(usernames) - 1].strip()):
+            points = int(usernames.pop())
 
         if message.room.id not in self.minigamePoints.keys(): self.minigamePoints[message.room.id] = {}
-        for userid in userids:
+        for name in usernames:
+            userid = psclient.toID((name))
             if userid not in self.minigamePoints[message.room.id].keys():
                 self.minigamePoints[message.room.id][userid] = points
             else:
