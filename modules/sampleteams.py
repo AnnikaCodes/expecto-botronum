@@ -519,6 +519,36 @@ htmlboxes: Dict[str, List[Dict[str, Union[str, List[str]]]]] = {
             "username": "Givrix",
         },
     ],
+    "gen8metronomebattle": [
+        {
+            "tier": "[Gen 8] Metronome Battle",
+            "name": "Extreme Strength",
+            "pokemon": ["heracross-mega", "heracross-mega"],
+            "pokepasteURL": "https://pokepast.es/050cf831db6da72b",
+            "username": "Ivy",
+        },
+        {
+            "tier": "[Gen 8] Metronome Battle",
+            "name": "Bonk Stall",
+            "pokemon": ["type-null", "dusclops"],
+            "pokepasteURL": "https://pokepast.es/d3ecf52b738a103a",
+            "username": "Bonk",
+        },
+        {
+            "tier": "[Gen 8] Metronome Battle",
+            "name": "Imposter Blisseys",
+            "pokemon": ["blissey", "blissey"],
+            "pokepasteURL": "https://pokepast.es/a92bb32e96d695c3",
+            "username": "Ivy",
+        },
+        {
+            "tier": "[Gen 8] Metronome Battle",
+            "name": "Balanced Flower Veil",
+            "pokemon": ["venusaur-mega", "necturna"],
+            "pokepasteURL": "https://pokepast.es/66411402d3abf217",
+            "username": "Ivy",
+        },
+    ],
 }
 
 def generateHTML(teams: List[dict]) -> str:
