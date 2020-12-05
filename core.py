@@ -211,7 +211,12 @@ class BotConnection(psclient.PSConnection):
         for module in config.modules:
             # Note: if multiple modules have the same command then the later module will overwrite the earlier.
             try:
-                self.commands.update(importlib.import_module(module).Module().commands) # type: ignore
+                mod = importlib.import_module(module)
+                try:
+                    self.hook = mod.hook # type: ignore
+                except Exception as err:
+                    pass
+                self.commands.update(mod.Module().commands) # type: ignore
                 self.modules.add(module)
             except Exception as err:
                 log(f"E: core.BotConnection(): error loading module {module}: {str(err)}")
@@ -227,6 +232,7 @@ class BotConnection(psclient.PSConnection):
             BotRoom(room, self)
 
     def userJoinedRoom(self, user: psclient.User, room: psclient.Room) -> None:
+        """hush"""
         return super().userJoinedRoom(BotUser(user.name, self), room)
 
     def __str__(self) -> str:
@@ -339,6 +345,10 @@ def handleMessage(connection: BotConnection, message: psclient.Message) -> None:
             "type ``/helpticket`` to get assistance from global staff. " +
             f"To see my commands, type ``{config.commandCharacter}help``!"
         )
+    try:
+        connection.hook(message)
+    except Exception:
+        pass
 
 if __name__ == "__main__":
     conn: BotConnection = BotConnection()
