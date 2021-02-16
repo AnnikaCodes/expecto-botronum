@@ -183,7 +183,7 @@ class Module:
             htmlBuf += f"<li>Repeated every {list(repeat.values())[0]} minutes: \"{list(repeat.keys())[0]}\"</li>"
         htmlBuf += "</ul></details>"
         print(htmlBuf)
-        return message.respondHTML(htmlBuf)
+        return message.respondHTMLPatched(htmlBuf)
 
     def audio(self, message: core.BotMessage) -> None:
         """audio: displays audio in the room
@@ -200,7 +200,7 @@ class Module:
                 "You must specify a valid URL beginning with ``http://`` or ``https://``; the URL must refer to an audio file."
             )
 
-        return message.respondHTML(f'<audio controls src="{url}"></audio>')
+        return message.respondHTMLPatched(f'<audio controls src="{url}"></audio>')
 
     def help(self, message: core.BotMessage) -> None:
         """Help

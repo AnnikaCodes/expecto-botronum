@@ -178,7 +178,7 @@ class BotMessage(psclient.Message):
         elif self.sender and not self.room:
             self.sender.PM(response)
 
-    def respondHTML(self, html: str) -> None:
+    def respondHTMLPatched(self, html: str) -> None:
         """Responds with HTML
 
         Args:

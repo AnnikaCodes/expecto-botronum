@@ -77,7 +77,7 @@ class Module:
             </details></details>
         """
 
-        return message.respondHTML(html)
+        return message.respondHTMLPatched(html)
 
     def __str__(self) -> str:
         """String representation of the Module

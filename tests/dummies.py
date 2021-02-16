@@ -56,7 +56,7 @@ class DummyMessage(core.BotMessage):
         """
         self.response = response
 
-    def respondHTML(self, html: str) -> None:
+    def respondHTMLPatched(self, html: str) -> None:
         """Captures the HTML response to a message
 
         Args:

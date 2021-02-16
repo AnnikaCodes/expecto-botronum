@@ -43,7 +43,7 @@ class Module:
             "."
         )
 
-        return message.respondHTML(message.connection.rustChatlogger.html_search(
+        return message.respondHTMLPatched(message.connection.rustChatlogger.html_search(
             roomID,
             userID or None,
             None, # `oldest` param in Rust
@@ -72,7 +72,7 @@ class Module:
         if not room: return message.respond(f"Invalid room: {roomID}")
         if not message.sender.can("searchlog", room): return message.respond("Permission denied.")
 
-        message.respondHTML(message.connection.rustChatlogger.linecount_html(roomID, userID, days))
+        message.respondHTMLPatched(message.connection.rustChatlogger.linecount_html(roomID, userID, days))
 
     def topusers(self, message: core.BotMessage) -> None:
         """Gets the top users of a room
@@ -95,7 +95,7 @@ class Module:
         if not message.sender.can("searchlog", room): return message.respond("Permission denied.")
         message.respond("Please wait; fetching userstats...")
 
-        return message.respondHTML(message.connection.rustChatlogger.topusers_html(
+        return message.respondHTMLPatched(message.connection.rustChatlogger.topusers_html(
             roomID,
             days,
             30
