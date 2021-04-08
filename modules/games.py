@@ -198,13 +198,15 @@ class Module:
         if not message.sender.can("hostgame", message.room): return message.respond("Permission denied.")
         isTournament = message.arguments[0].strip(config.commandCharacter) in ['tour', 'tournament']
         if isTournament and len(message.arguments) < 2: return message.respond(
-            f"Usage: ``{config.commandCharacter}tournament [format]``."
+            f"Usage: ``{config.commandCharacter}tournament [format], [comma-separated custom rules]``."
         )
 
         if isTournament:
             commands = TOUR_SETUP_COMMANDS
-            tourFormat = " ".join(message.arguments[1:])
+            tourFormat = " ".join(message.arguments[1])
+            rules = ', '.join(message.arguments[2:])
             message.room.say(f"/tour new {tourFormat},elim")
+            message.room.say(f"/tour rules {rules}")
         else:
             commands = UNO_COMMANDS
         for command in commands:
