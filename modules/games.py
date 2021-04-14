@@ -203,7 +203,7 @@ class Module:
 
         if isTournament:
             commands = TOUR_SETUP_COMMANDS
-            tourFormat = " ".join(message.arguments[1])
+            tourFormat = message.arguments[1]
             rules = ', '.join(message.arguments[2:])
             message.room.say(f"/tour new {tourFormat},elim")
             message.room.say(f"/tour rules {rules}")
