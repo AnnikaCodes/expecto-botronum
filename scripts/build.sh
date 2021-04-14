@@ -16,7 +16,7 @@ then
 fi
 
 # Windows
-if [ -f target/release/librust_chatlogger.dylib ]
+if [ -f target/release/librust_chatlogger.dll ]
 then
     mv target/release/librust_chatlogger.dll ./rust_chatlogger.pyd
 fi
