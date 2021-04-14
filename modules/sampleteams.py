@@ -686,6 +686,7 @@ class Module:
         Arguments:
             message {Message} -- the Message object that invoked the command
         """
+        if message.room and not message.sender.can('broadcast', message.room): return
         formatid = psclient.toID(','.join(message.arguments[1:]) if len(message.arguments) > 1 else '')
         if not formatid or formatid not in htmlboxes:
             return message.respond(f"You must specify a format that I have sample teams for: {', '.join(list(htmlboxes.keys()))}")

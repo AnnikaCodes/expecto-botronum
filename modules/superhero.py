@@ -22,6 +22,7 @@ class Module:
         Arguments:
             message {Message} -- the Message object that invoked the command
         """
+        if message.room and not message.sender.can('broadcast', message.room): return
         superheroIDDictionary = data.get("superheroIDDictionary") or _initializeData()
         superhero = psclient.toID(config.separator.join(message.arguments[1:]))
         if superhero not in superheroIDDictionary:

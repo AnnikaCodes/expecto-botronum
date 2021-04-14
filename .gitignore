@@ -29,3 +29,5 @@ rust_chatlogger.so
 # Code coverage
 .coverage
 coverage.xml
+
+.DS_Store
