@@ -33,9 +33,9 @@ jobs:
       run: |
         cp config-example.json config.json
         bash scripts/test.sh
-    - name: Upload Rust code coverage
-      uses: actions-rs/tarpaulin@v0.1
-      with:
-        args: --no-default-features
+#     - name: Upload Rust code coverage
+#       uses: actions-rs/tarpaulin@v0.1
+#       with:
+#         args: --no-default-features
     - name: Upload to codecov.io
       uses: codecov/codecov-action@v1
