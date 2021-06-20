@@ -24,7 +24,7 @@ def isAudioURL(url: str) -> bool:
         # not a URL (probably)
         return False
 
-    return '.vocaroo.com/mp3/' in url or bool(re.match(r'\.(mp[34]|wav|ogg)$', url))
+    return '.vocaroo.com/mp3/' in url or bool(re.match(r'.*\.(mp[34]|wav|ogg)$', url))
 
 def sanitize(text: str) -> str:
     """Sanitizes text, removing command characters
