@@ -30,7 +30,8 @@ class Module:
         self.commands = {
             "reverse": self.reverse, "wallrev": self.reverse, "addreversioword": self.addReversioWord,
             "removereversioword": self.removeReversioWord, "rmreversioword": self.removeReversioWord,
-            "addpoint": self.addPoints, "addpoints": self.addPoints, "deletereversioword": self.removeReversioWord,
+            "addpoint": self.addPoints, "addpoints": self.addPoints, "removeplayers": self.removePlayers, 
+            "removeplayer": self.removePlayers, "deletereversioword": self.removeReversioWord,
             "showpoints": self.showLB, "lb": self.showLB, "showlb": self.showLB,
             "resetlb": self.resetLB, "lbreset": self.resetLB, "clearlb": self.resetLB, "lbclear": self.resetLB,
             "tour": self.startGame, "tournament": self.startGame, "uno": self.startGame
@@ -148,6 +149,38 @@ class Module:
                 self.minigamePoints[message.room.id][userid] += points
 
         return message.respond("Points added!")
+
+    def removePlayers(self, message: core.BotMessage) -> None:
+        """Remove users from the minigame leaderboard
+
+        Arguments:
+            message {Message} -- the Message object that invoked the command
+        """
+        if not message.room: return message.respond("You can only remove players in a room.")
+        if not message.sender.can("hostgame", message.room): return message.respond("Permission denied.")
+
+        if len(message.arguments) < 2:
+            return message.respond(
+                f"Usage: ``{config.commandCharacter}removeplayers [comma-separated list of users]``."
+            )
+        usernames = message.arguments[1:]
+        usersOnLB = []
+        usersNotOnLB = []
+
+        for name in usernames:
+            userid = psclient.toID((name))
+            if userid in self.minigamePoints[message.room.id].keys():
+                del self.minigamePoints[message.room.id][userid]
+                usersOnLB.append(userid)
+            else:
+                usersNotOnLB.append(userid)
+
+        if len(usersOnLB) == 0:
+            return message.respond("No player specified is on the leaderboard.")
+        elif len(usersNotOnLB) > 0 and len(usersOnLB) > 0:
+            return message.respond(f"{', '.join(usersOnLB)} have been removed from the leaderboard.\n {', '.join(usersNotOnLB)} isn't on the leaderboard.")
+
+        return message.respond(f"{', '.join(usersOnLB)} have been removed from the leaderboard.")
 
     def showLB(self, message: core.BotMessage) -> None:
         """Displays the minigame leaderboard
