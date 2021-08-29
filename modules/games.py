@@ -168,7 +168,7 @@ class Module:
         usersNotOnLB = []
 
         for name in usernames:
-            userid = psclient.toID((name))
+            userid = psclient.toID(name)
             if userid in self.minigamePoints[message.room.id].keys():
                 del self.minigamePoints[message.room.id][userid]
                 usersOnLB.append(userid)
