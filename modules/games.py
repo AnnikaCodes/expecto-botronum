@@ -166,7 +166,7 @@ class Module:
         usernames = message.arguments[1:]
         usersOnLB = []
         usersNotOnLB = []
-
+if message.room.id not in self.minigamePoints.keys(): return message.respond("There are no scores.")
         for name in usernames:
             userid = psclient.toID(name)
             if userid in self.minigamePoints[message.room.id].keys():
