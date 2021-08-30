@@ -182,7 +182,7 @@ class Module:
                 return message.respond(f"{name} isn't on the leaderboard.")
         for user in usersOnLB:
             del self.minigamePoints[room.id][user]
-        return message.respond(f"Users removed!")
+        return message.respond("Users removed!")
 
     def showLB(self, message: core.BotMessage) -> None:
         """Displays the minigame leaderboard
