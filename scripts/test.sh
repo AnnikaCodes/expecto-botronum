@@ -6,7 +6,8 @@ set -o errtrace
 set -o pipefail
 
 echo -e "\033[0;32mLinting Python code...\033[0m"
-if ! pylint ./*.py ./*/*.py ./*/*/*.py --disable=R,fixme --extension-pkg-whitelist=rust_chatlogger || pylint-exit -wfail -efail -cfail $?;
+repo_path=$(git rev-parse --show-toplevel)
+if ! pylint ././*.py ./*/*.py ./*/*/*.py --rcfile="${repo_path}/.pylintrc" --disable=R,fixme --extension-pkg-whitelist=rust_chatlogger || pylint-exit -wfail -efail -cfail $?;
 then
     echo -e "\033[0;31mPython linting failed!\033[0m"
     exit 1

@@ -214,7 +214,7 @@ class BotConnection(psclient.PSConnection):
                 mod = importlib.import_module(module)
                 try:
                     self.hook = mod.hook # type: ignore
-                except Exception as err:
+                except Exception:
                     pass
                 self.commands.update(mod.Module().commands) # type: ignore
                 self.modules.add(module)

@@ -16,7 +16,7 @@ def loadConfig() -> list:
     Returns:
         [list] -- the CONFIG_VARS as loaded from CONFIG_PATH
     """
-    configData = json.load(open(CONFIG_PATH, 'r'))
+    configData = json.load(open(CONFIG_PATH, 'r', encoding='utf-8'))
     returnValue = []
     # make sure we're not missing anything
     for configItem in CONFIG_VARS:

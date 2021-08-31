@@ -30,7 +30,7 @@ class Module:
         self.commands = {
             "reverse": self.reverse, "wallrev": self.reverse, "addreversioword": self.addReversioWord,
             "removereversioword": self.removeReversioWord, "rmreversioword": self.removeReversioWord,
-            "addpoint": self.addPoints, "addpoints": self.addPoints, "removeplayers": self.removePlayers, 
+            "addpoint": self.addPoints, "addpoints": self.addPoints, "removeplayers": self.removePlayers,
             "removeplayer": self.removePlayers, "deletereversioword": self.removeReversioWord,
             "showpoints": self.showLB, "lb": self.showLB, "showlb": self.showLB,
             "resetlb": self.resetLB, "lbreset": self.resetLB, "clearlb": self.resetLB, "lbclear": self.resetLB,

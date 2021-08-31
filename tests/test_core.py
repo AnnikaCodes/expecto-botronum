@@ -204,7 +204,7 @@ def testMessageQueryResponse() -> None:
     assert "testroom" in connection.userList[connection.getUser('user1')]
     assert "testroom" in connection.userList[connection.getUser('user2')]
 
-    allUserIDs = [user.id for user in connection.userList.keys()]
+    allUserIDs = [user.id for user in connection.userList]
     assert 'user1' in allUserIDs
     assert 'user2' in allUserIDs
 

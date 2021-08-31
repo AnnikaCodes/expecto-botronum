@@ -18,7 +18,9 @@ jobs:
         # Python 3.8.5 is used on the server hosting the production bot
         python-version: 3.8.5
     - name: Set up Rust
-      uses: hecrj/setup-rust-action@v1
+      uses: actions-rs/toolchain@v1
+      with:
+        toolchain: stable
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip

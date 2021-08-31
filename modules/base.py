@@ -76,8 +76,8 @@ class Module:
         """
         text = config.separator.join(message.arguments[1:])
         uwuRules = {'r': 'w', 'l': 'w', 'R': 'W', 'L': 'W'}
-        for key in uwuRules:
-            text = text.replace(key, uwuRules[key])
+        for (letter, replacement) in uwuRules.items():
+            text = text.replace(letter, replacement)
         message.respond(sanitize(text))
 
     def timer(self, message: core.BotMessage) -> None:

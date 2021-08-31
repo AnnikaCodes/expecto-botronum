@@ -127,7 +127,7 @@ class Module:
 
         meminfoPath = pathlib.Path("/proc/meminfo")
         if meminfoPath.is_file():
-            for line in open('/proc/meminfo', 'r').readlines():
+            for line in open('/proc/meminfo', 'r', encoding='utf-8').readlines():
                 if 'MemAvailable' in line: buf.append(f"{round(int(line.split(':')[1].split('kB')[0]) / 1024, 2)} MB available")
                 if 'MemFree' in line: buf.append(f"{round(int(line.split(':')[1].split('kB')[0]) / 1024, 2)} MB free")
                 if 'MemTotal' in line: buf.append(f"{round(int(line.split(':')[1].split('kB')[0]) / 1024, 2)} MB total")
