@@ -30,7 +30,8 @@ class Module:
         self.commands = {
             "reverse": self.reverse, "wallrev": self.reverse, "addreversioword": self.addReversioWord,
             "removereversioword": self.removeReversioWord, "rmreversioword": self.removeReversioWord,
-            "addpoint": self.addPoints, "addpoints": self.addPoints, "deletereversioword": self.removeReversioWord,
+            "addpoint": self.addPoints, "addpoints": self.addPoints, "removeplayers": self.removePlayers, 
+            "removeplayer": self.removePlayers, "deletereversioword": self.removeReversioWord,
             "showpoints": self.showLB, "lb": self.showLB, "showlb": self.showLB,
             "resetlb": self.resetLB, "lbreset": self.resetLB, "clearlb": self.resetLB, "lbclear": self.resetLB,
             "tour": self.startGame, "tournament": self.startGame, "uno": self.startGame
@@ -148,6 +149,40 @@ class Module:
                 self.minigamePoints[message.room.id][userid] += points
 
         return message.respond("Points added!")
+
+    def removePlayers(self, message: core.BotMessage) -> None:
+        """Remove users from the minigame leaderboard
+
+        Arguments:
+            message {Message} -- the Message object that invoked the command
+        """
+        PM = False
+        room = message.room
+        if not room:
+            if len(message.arguments) < 3: return message.respond("You must specify a room and at least one user.")
+            room = message.connection.getRoom(psclient.toID(message.arguments[1]))
+            PM = True
+        if not room: return message.respond("You must specify a room.")
+        if not message.sender.can("hostgame", room): return message.respond("Permission denied.")
+
+        if len(message.arguments) < 2:
+            return message.respond(
+                f"Usage: ``{config.commandCharacter}removeplayers [comma-separated list of users]``."
+            )
+
+        usernames = message.arguments[1:]
+        usersOnLB = []
+        if PM: usernames = message.arguments[2:]
+        if room.id not in self.minigamePoints.keys(): return message.respond("There are no scores.")
+        for name in usernames:
+            userid = psclient.toID(name)
+            if userid in self.minigamePoints[room.id].keys():
+                usersOnLB.append(userid)
+            else:
+                return message.respond(f"{name} isn't on the leaderboard.")
+        for user in usersOnLB:
+            del self.minigamePoints[room.id][user]
+        return message.respond("Users removed!")
 
     def showLB(self, message: core.BotMessage) -> None:
         """Displays the minigame leaderboard
