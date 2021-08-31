@@ -159,7 +159,7 @@ class Module:
         PM = False
         room = message.room
         if not room:
-            if len(message.arguments) < 3: return message.respond("You must specify a room and at least an user.")
+            if len(message.arguments) < 3: return message.respond("You must specify a room and at least one user.")
             room = message.connection.getRoom(psclient.toID(message.arguments[1]))
             PM = True
         if not room: return message.respond("You must specify a room.")
