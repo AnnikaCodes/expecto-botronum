@@ -215,7 +215,7 @@ class Module:
             room = message.connection.getRoom(message.arguments[1])
         if not room: return message.respond("You must specify a room.")
 
-        if not message.sender.can("hostgame", message.room): return message.respond("Permission denied.")
+        if not message.sender.can("hostgame", room): return message.respond("Permission denied.")
         if room.id not in self.minigamePoints.keys():
             return message.respond(f"There are no scores in the leaderboard for the room '{room.id}'.")
 
