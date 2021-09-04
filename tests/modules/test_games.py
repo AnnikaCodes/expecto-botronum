@@ -57,6 +57,14 @@ class TestGames():
         self.module.addPoints(message)
         assert self.module.minigamePoints["testroom"]["testuser"] == -1
 
+        message = dummies.DummyMessage(
+            arguments=["-removeplayer", "testuser"],
+            sender=dummies.DummyUser(isAdmin=True),
+            room=self.connection.getRoom("testroom")
+        )
+        self.module.removePlayers(message)
+        assert "testuser" not in self.module.minigamePoints["testroom"]
+
     def testIsInt(self) -> None:
         """Tests the isInt() helper function provided by the games module
         """
