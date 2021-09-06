@@ -30,7 +30,7 @@ jobs:
         choco install sqlite
         cd C:\ProgramData\chocolatey\lib\SQLite\tools
         Start-Process -Wait -FilePath "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" -ArgumentList "x86_amd64"
-        Start-Process -Wait -FilePath "C:\Windows\System32\cmd.exe" -ArgumentList "lib /MACHINE:x64 /def:sqlite3.def /out:sqlite3.lib"
+        Start-Process -Wait -FilePath "C:\Windows\System32\cmd.exe" -ArgumentList "/c lib /MACHINE:x64 /def:sqlite3.def /out:sqlite3.lib"
         Copy-Item C:\ProgramData\chocolatey\lib\SQLite\tools\sqlite3.lib -Destination C:\Users\%USERNAME%\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\x86_64-pc-windows-msvc\lib\sqlite3.lib
     - name: Build Rust code
       run: |
