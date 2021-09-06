@@ -29,7 +29,7 @@ jobs:
       run: |
         choco install sqlite
         cd C:\ProgramData\chocolatey\lib\SQLite\tools
-        call "C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\VC\Auxiliary\Build\vcvarsall.bat" x86_amd64
+        Start-Process "C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\VC\Auxiliary\Build\vcvarsall.bat" x86_amd64
         lib /MACHINE:x64 /def:sqlite3.def /out:sqlite3.lib
         copy C:\ProgramData\chocolatey\lib\SQLite\tools\sqlite3.lib C:\Users\%USERNAME%\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\x86_64-pc-windows-msvc\lib\sqlite3.lib
     - name: Build Rust code
