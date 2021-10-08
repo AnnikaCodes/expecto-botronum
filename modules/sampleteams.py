@@ -154,6 +154,13 @@ htmlboxes: Dict[str, List[Dict[str, Union[str, List[str]]]]] = {
         },
         {
             "tier": "[Gen 7] Monotype",
+            "name": "Offensive Dragon",
+            "pokemon": ["dragonite", "latios", "kommo-o", "garchomp", "altaria-mega", "kyurem-black"],
+            "pokepasteURL": "https://pokepast.es/f950a52accdb3b92",
+            "username": "Eien",
+        },
+        {
+             "tier": "[Gen 7] Monotype",
             "name": "Sticky Webs HO Rock",
             "pokemon": ["shuckle", "golem-alola", "terrakion", "nihilego", "diancie-mega", "tyranitar"],
             "pokepasteURL": "https://pokepast.es/e0e764ccf08f0b8c",
