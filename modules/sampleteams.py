@@ -160,7 +160,7 @@ htmlboxes: Dict[str, List[Dict[str, Union[str, List[str]]]]] = {
             "username": "Eien",
         },
         {
-             "tier": "[Gen 7] Monotype",
+            "tier": "[Gen 7] Monotype",
             "name": "Sticky Webs HO Rock",
             "pokemon": ["shuckle", "golem-alola", "terrakion", "nihilego", "diancie-mega", "tyranitar"],
             "pokepasteURL": "https://pokepast.es/e0e764ccf08f0b8c",
