@@ -1,0 +1,41 @@
+# Run tests + build on Windows
+
+name: Windows tests
+
+on: [push, pull_request]
+
+jobs:
+  test:
+
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python 3
+      uses: actions/setup-python@v2
+      with:
+        # Python 3.8.5 is used on the server hosting the production bot
+        python-version: 3.8.5
+    - name: Set up Rust
+      uses: actions-rs/toolchain@v1
+      with:
+        toolchain: stable
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+    - name: Install SQLite libraries
+      # source: https://docs.joinplu.me/installation/with/source-code/
+      run: |
+        choco install sqlite
+        cd C:\ProgramData\chocolatey\lib\SQLite\tools
+        Start-Process -FilePath "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" -ArgumentList "x86_amd64" -Wait
+        Start-Process -FilePath "C:\Windows\System32\cmd.exe" -ArgumentList "/c 'lib /MACHINE:x64 /def:C:\ProgramData\chocolatey\lib\SQLite\tools\sqlite.def /out:C:\ProgramData\chocolatey\lib\SQLite\tools\sqlite3.lib'" -Wait
+        Copy-Item C:\ProgramData\chocolatey\lib\SQLite\tools\sqlite.lib -Destination C:\Users\%USERNAME%\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\x86_64-pc-windows-msvc\lib\sqlite3.lib
+    - name: Build Rust code
+      run: |
+        bash scripts/build.sh
+    - name: Run test script
+      run: |
+        copy config-example.json config.json
+        bash scripts/test.sh
